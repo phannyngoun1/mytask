@@ -11,6 +11,10 @@ import com.dream.mytask.shared.Api
 
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 
+case class FetchAccAction(potResult: Pot[String] = Empty) extends PotAction[String, FetchAccAction] {
+  override def next(newResult: Pot[String]): FetchAccAction = FetchAccAction(newResult)
+}
+
 case class MessageAction(potResult: Pot[String] = Empty) extends PotAction[String, MessageAction] {
   override def next(newResult: Pot[String]): MessageAction = MessageAction(newResult)
 }
@@ -22,6 +26,9 @@ class MessageHandler[M](modelRW: ModelRW[M, Pot[String]]) extends ActionHandler(
   override protected def handle = {
     case action: MessageAction =>
       val updateF = action.effect(AjaxClient[Api].welcomeMessage("User X").call())(identity _)
+      action.handleWith(this, updateF)(PotAction.handler())
+
+    case action: FetchAccAction =>   val updateF = action.effect(AjaxClient[Api].getUser("8dbd6bf8-2f60-4e6e-8e3f-b374e060a940").call())(identity _)
       action.handleWith(this, updateF)(PotAction.handler())
   }
 }

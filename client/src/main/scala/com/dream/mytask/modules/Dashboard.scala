@@ -1,7 +1,7 @@
 package com.dream.mytask.modules
 
 import com.dream.mytask.AppClient.Loc
-import com.dream.mytask.services.MessageAction
+import com.dream.mytask.services.{FetchAccAction, MessageAction}
 import diode.data.Pot
 import diode.react._
 import diode.react.ReactPot._
@@ -21,8 +21,10 @@ object Dashboard {
         <.div(
           p.proxy().renderPending(_ > 500, _ => <.p("Loading...")),
           p.proxy().renderFailed(ex => <.p("Failed to load")),
-          p.proxy().render(m => <.p(m)),
-        )
+          p.proxy().render(m => <.p(m))
+        ),
+        <.button(^.onClick --> p.proxy.dispatchCB(MessageAction()), "Update_----- 1"),
+        <.button(^.onClick --> p.proxy.dispatchCB(FetchAccAction()), "Fetch Account")
       )
     }
   }

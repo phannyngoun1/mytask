@@ -28,7 +28,6 @@ class Application @Inject()(cc: ControllerComponents)(implicit ec: ExecutionCont
     implicit request =>
 
       val apiService: ApiService = new ApiService()
-
       // get the request body as ByteString
       val b = request.body.asBytes(parse.UNLIMITED).get
 
