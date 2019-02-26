@@ -1,33 +1,44 @@
 package com.dream.mytask.controllers
 
 import java.nio.ByteBuffer
+import java.util.UUID
 
+import akka.actor.ActorSystem
 import boopickle.Default._
 import com.dream.mytask.shared.Api
+import com.dream.workflow.adaptor.aggregate._
+import com.dream.workflow.usecase.AccountAggregateUseCase.Protocol.{CreateAccountCmdReq, CreateAccountCmdSuccess, GetAccountCmdReq, GetAccountCmdSuccess}
+import com.dream.workflow.usecase._
 import javax.inject._
 import play.api.mvc._
 
 import scala.concurrent.ExecutionContext
 
+
 object Router extends autowire.Server[ByteBuffer, Pickler, Pickler] {
   override def read[R: Pickler](p: ByteBuffer) = Unpickle[R].fromBytes(p)
 
   override def write[R: Pickler](r: R) = Pickle.intoBytes(r)
+
 }
 
 
 @Singleton
-class Application @Inject()(cc: ControllerComponents)(implicit ec: ExecutionContext) extends AbstractController(cc) {
+class Application @Inject()(
+  cc: ControllerComponents,
+
+
+)(implicit ec: ExecutionContext) extends AbstractController(cc) {
+
+  val apiService = new ApiService()
 
   def index = Action {
     Ok(views.html.index(""))
   }
 
-
   def autoWireApi(path: String) = Action.async(parse.raw) {
     implicit request =>
 
-      val apiService: ApiService = new ApiService()
       // get the request body as ByteString
       val b = request.body.asBytes(parse.UNLIMITED).get
 

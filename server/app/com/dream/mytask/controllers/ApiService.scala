@@ -5,15 +5,13 @@ import java.util.UUID
 import akka.actor.ActorSystem
 import com.dream.mytask.shared.Api
 import com.dream.workflow.adaptor.aggregate._
-import com.dream.workflow.usecase.AccountAggregateUseCase.Protocol.{GetAccountCmdReq, GetAccountCmdSuccess}
 import com.dream.workflow.usecase._
-import javax.inject.{Inject, Singleton}
+import com.dream.workflow.usecase.AccountAggregateUseCase.Protocol.{GetAccountCmdReq, GetAccountCmdSuccess}
 
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 
 
-@Singleton
-class ApiService @Inject()(implicit ec: ExecutionContext) extends Api {
+class ApiService()(implicit ec: ExecutionContext) extends Api {
 
   implicit val system: ActorSystem = ActorSystem("ticket-system")
 
@@ -29,18 +27,16 @@ class ApiService @Inject()(implicit ec: ExecutionContext) extends Api {
   val accountUseCase = new AccountAggregateUseCase(accountFlow)
   val participantUseCase = new ParticipantAggregateUseCase(participantFlow)
 
-  override def welcomeMessage(smg: String): String =  {
-    s"welcome $smg - ${UUID.randomUUID()}"
+
+  override def welcomeMessage(smg: String): Future[String] = {
+    Future.successful(s"welcome $smg - ${UUID.randomUUID()}")
   }
 
-  override def getUser(id: String): String = {
-
+  override def getUser(id: String): Future[String] = {
     accountUseCase.getAccount(GetAccountCmdReq(UUID.fromString(id))).map {
-      case res: GetAccountCmdSuccess => s"${res.curParticipantId}"
+      case res: GetAccountCmdSuccess => s"id: ${res.id}, name: ${res.name}, full name: ${res.fullName}, participant id: ${res.curParticipantId} "
       case _ => "Failed"
     }
-
-    ""
 
   }
 }
