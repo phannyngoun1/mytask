@@ -3,7 +3,7 @@ package com.dream.workflow.domain
 import java.util.UUID
 
 import com.dream.common.domain.ErrorMessage
-import com.dream.workflow.domain.ProcessInstance.Task
+import com.dream.workflow.domain.ProcessInstance.AssignedTask
 
 
 object ProcessInstance {
@@ -18,7 +18,7 @@ object ProcessInstance {
   }
 
 
-  case class Task(
+  case class AssignedTask(
     description: String,
     participants: List[UUID],
     //Priority
@@ -58,7 +58,7 @@ case class ProcessInstance(
   folio: String,
   contentType: String,
   submitter: UUID,
-  task: Task,
+  task: AssignedTask,
   activityHis: Seq[ActivityHis] = Seq.empty,
   isActive: Boolean = true
 )

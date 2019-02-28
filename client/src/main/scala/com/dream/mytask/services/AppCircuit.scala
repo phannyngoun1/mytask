@@ -6,6 +6,7 @@ import diode.data._
 import diode.react.ReactConnector
 import diode.util._
 import boopickle.Default._
+import com.dream.mytask.modules.task.TaskActionListHandler
 import com.dream.mytask.services.DataModel.RootModel
 import com.dream.mytask.shared.Api
 
@@ -25,6 +26,8 @@ class MessageHandler[M](modelRW: ModelRW[M, Pot[String]]) extends ActionHandler(
 
   override protected def handle = {
     case action: MessageAction =>
+
+
       val updateF = action.effect(AjaxClient[Api].welcomeMessage("User X").call())(identity _)
       action.handleWith(this, updateF)(PotAction.handler())
 
@@ -41,6 +44,7 @@ object AppCircuit extends Circuit[RootModel] with ReactConnector[RootModel] {
 
   override protected def actionHandler: AppCircuit.HandlerFunction = composeHandlers(
     new MessageHandler(zoomRW(_.message)((m, v) => m.copy(message = v))),
+    new TaskActionListHandler(zoomRW(_.taskModel.taskList)((m, v) => m.copy(taskModel = m.taskModel.copy(taskList = v))))
   )
 
 }

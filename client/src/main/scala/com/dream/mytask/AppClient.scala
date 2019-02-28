@@ -1,5 +1,6 @@
 package com.dream.mytask
 
+import com.dream.mytask.modules.task.TaskListComp
 import com.dream.mytask.modules.{Dashboard, Main}
 import com.dream.mytask.services.AppCircuit
 import japgolly.scalajs.react.extra.router._
@@ -9,8 +10,12 @@ object AppClient {
 
   val routerConfig = RouterConfigDsl[Loc].buildConfig { dsl =>
     import dsl._
+
+    val taskListRoute = staticRoute("#tasks", TaskListLoc) ~> renderR( c=> AppCircuit.wrap(_.taskModel.taskList)(proxy => TaskListComp(proxy, c)))
+
     (
       staticRoute(root, DashboardLoc) ~> renderR(c => AppCircuit.wrap(_.message)(proxy => Dashboard(proxy, c)))
+      | taskListRoute
       ).notFound(redirectToPage(DashboardLoc)(Redirect.Replace))
 
   }.renderWith(layout)
@@ -35,4 +40,6 @@ object AppClient {
   sealed trait Loc
 
   case object DashboardLoc extends Loc
+
+  case object TaskListLoc extends Loc
 }

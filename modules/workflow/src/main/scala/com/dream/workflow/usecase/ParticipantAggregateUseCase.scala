@@ -8,6 +8,7 @@ import akka.stream.scaladsl.{Keep, Source, SourceQueueWithComplete}
 import com.dream.common.UseCaseSupport
 import com.dream.common.domain.ResponseError
 import com.dream.workflow.domain.Participant
+import com.dream.workflow.domain.ProcessInstance.AssignedTask
 import com.dream.workflow.usecase.port.ParticipantAggregateFlows
 
 import scala.concurrent.{ExecutionContext, Future, Promise}

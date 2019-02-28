@@ -6,7 +6,7 @@ import akka.actor.{ActorLogging, Props}
 import akka.persistence._
 import cats.implicits._
 import com.dream.common.EntityState
-import com.dream.workflow.domain.ProcessInstance.{InstError, InvalidInstStateError, ProcessInstanceCreated, Task}
+import com.dream.workflow.domain.ProcessInstance.{InstError, InvalidInstStateError, ProcessInstanceCreated, AssignedTask}
 import com.dream.workflow.domain._
 import com.dream.workflow.entity.processinstance.ProcessInstanceProtocol._
 
@@ -90,7 +90,7 @@ class ProcessInstanceEntity extends PersistentActor
         folio = event.folio,
         contentType = event.contentType,
         submitter = event.by,
-        task = Task(event.todo, participants = event.destinations, activity = event.nextActivity),
+        task = AssignedTask(event.todo, participants = event.destinations, activity = event.nextActivity),
         activityHis = Seq(ActivityHis(
           event.activityId,
           event.activity,

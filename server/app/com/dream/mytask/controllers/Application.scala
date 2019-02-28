@@ -30,7 +30,8 @@ class Application @Inject()(
 
 )(implicit ec: ExecutionContext) extends AbstractController(cc) {
 
-  val apiService = new ApiService()
+  val id = UUID.fromString("8dbd6bf8-2f60-4e6e-8e3f-b374e060a940")
+  val apiService = new ApiService(id)
 
   def index = Action {
     Ok(views.html.index(""))

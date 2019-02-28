@@ -7,7 +7,9 @@ import akka.stream.scaladsl.{Keep, Source, SourceQueueWithComplete}
 import akka.stream.{ActorMaterializer, Materializer, OverflowStrategy}
 import com.dream.common.UseCaseSupport
 import com.dream.common.domain.ResponseError
-import com.dream.workflow.usecase.port.AccountAggregateFlows
+import com.dream.workflow.domain.ProcessInstance.AssignedTask
+import com.dream.workflow.domain.Task
+import com.dream.workflow.usecase.port.{AccountAggregateFlows, ParticipantAggregateFlows}
 
 import scala.concurrent.{ExecutionContext, Future, Promise}
 
@@ -58,8 +60,13 @@ object AccountAggregateUseCase {
 
     case class AssignParticipantCmdFailed(responseError: ResponseError) extends AssignParticipantCmdRes
 
-  }
+    case class GetTaskLisCmdReq(id: UUID) extends  AccountCmdRequest
 
+    trait GetTaskListCmdRes extends  AccountCmdResponse
+    case class GetTaskListCmdSuccess(taskList: List[Task]) extends GetTaskListCmdRes
+    case class GetTaskListCmdFailed(responseError: ResponseError) extends AccountCmdResponse
+
+  }
 }
 
 class AccountAggregateUseCase(flow: AccountAggregateFlows)(implicit system: ActorSystem) extends UseCaseSupport {
@@ -89,6 +96,8 @@ class AccountAggregateUseCase(flow: AccountAggregateFlows)(implicit system: Acto
       .toMat(completePromiseSink)(Keep.left)
       .run()
 
+
+
   def createAccount(req: CreateAccountCmdReq)(implicit ec: ExecutionContext): Future[CreateAccountCmdRes] =
     offerToQueue(createAccountQueue)(req, Promise())
 
@@ -97,6 +106,5 @@ class AccountAggregateUseCase(flow: AccountAggregateFlows)(implicit system: Acto
 
   def assignParticipant(req: AssignParticipantCmdReq)(implicit ec: ExecutionContext): Future[AssignParticipantCmdRes] =
     offerToQueue(assignParticipantQueue)(req, Promise())
-
 
 }
