@@ -112,18 +112,20 @@ class ProcessInstanceAggregateUseCase(
       case GetWorkflowCmdSuccess(workflow) => workflow
     } ~> createInstZip.in0
 
+
     broadcast.out(1) ~> createInstZip.in1
+
 
     val createPrepareB = b.add(Broadcast[CreateInst](3))
     val convertToTaskCmdRequestFlow = Flow[CreateInst].map(p => PerformTaskCmdReq(p.id, p.activityId))
 
     //TODO: adding real tasks
 
-    val assignTaskCmdFlow = Flow[CreateInst].map(p => p.destinations.map(dest => TaskToDest(UUID.randomUUID(), p.id, dest)))
+    val assignTaskCmdFlow = Flow[CreateInst].map(p => p.destinations.map(dest =>   TaskToDest(UUID.randomUUID(), p.id, dest)))
 
     val out = createInstZip.out ~> convertToCreatePInstCmdReq ~> createPrepareB ~> processInstanceAggregateFlows.createInst
     createPrepareB ~> convertToTaskCmdRequestFlow ~> processInstanceAggregateFlows.performTask ~> Sink.ignore
-    createPrepareB ~> assignTaskCmdFlow ~> Sink.foreach(println)
+    createPrepareB ~> assignTaskCmdFlow ~> Sink.ignore
 
     FlowShape(broadcast.in, out.outlet)
   })

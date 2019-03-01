@@ -14,4 +14,6 @@ trait ProcessInstanceAggregateFlows {
 
   def performTask: Flow[PerformTaskCmdReq, PerformTaskCmdRes, NotUsed]
 
+  def assignNextTask: Flow[PerformTaskCmdReq, PerformTaskCmdRes, NotUsed]
+
 }
