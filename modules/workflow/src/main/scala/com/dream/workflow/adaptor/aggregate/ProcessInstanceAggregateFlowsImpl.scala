@@ -27,11 +27,11 @@ class ProcessInstanceAggregateFlowsImpl(aggregateRef: ActorRef) extends ProcessI
         case  CmdResponseFailed(message) => Protocol.CreatePInstCmdFailed(ResponseError(message))
       }
 
-  override def performTask: Flow[PerformTaskCmdReq, PerformTaskCmdRes, NotUsed] =
-    Flow[PerformTaskCmdReq].mapAsync(1) {
+  override def performTask: Flow[Protocol.PerformTaskCmdReq, Protocol.PerformTaskCmdRes, NotUsed] =
+    Flow[Protocol.PerformTaskCmdReq].mapAsync(1) {
       case _ =>
         println("performTask")
-        Future.successful(PerformTaskSuccess())
+        Future.successful(Protocol.PerformTaskSuccess())
     }
 
   override def getPInst: Flow[Protocol.GetPInstCmdRequest, Protocol.GetPInstCmdResponse, NotUsed] =
@@ -42,4 +42,14 @@ class ProcessInstanceAggregateFlowsImpl(aggregateRef: ActorRef) extends ProcessI
       case GetPInstCmdSuccess(pInst) => Protocol.GetPInstCmdSuccess(pInst.id, pInst.folio)
       case  CmdResponseFailed(message) => Protocol.GetPInstCmdFailed(ResponseError(message))
     }
+
+  override def getTask: Flow[Protocol.GetTaskCmdReq, Protocol.GetTaskCmdRes, NotUsed] =
+    Flow[Protocol.GetTaskCmdReq]
+    .map( req => GetTaskCmdReq(req.assignedTask.pInstId, req.assignedTask.taskId))
+      .mapAsync(1)(aggregateRef ? _)
+    .map {
+      case GetTaskCmdRes(task) => Protocol.GetTaskCmdSuccess(task)
+      case CmdResponseFailed(message) => Protocol.GetTaskCmdFailed(ResponseError(message))
+    }
+
 }

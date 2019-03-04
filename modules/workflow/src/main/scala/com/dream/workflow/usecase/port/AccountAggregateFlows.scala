@@ -13,4 +13,7 @@ trait AccountAggregateFlows {
   def get: Flow[GetAccountCmdReq, GetAccountCmdRes, NotUsed]
 
   def assignParticipant: Flow[AssignParticipantCmdReq, AssignParticipantCmdRes, NotUsed]
+
+  def getParticipant: Flow[GetParticipantCmdReq, GetParticipantCmdRes, NotUsed]
+
 }

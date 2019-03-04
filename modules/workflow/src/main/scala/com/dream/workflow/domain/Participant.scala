@@ -76,15 +76,14 @@ case class Participant(
   propertyId: UUID,
   isActive: Boolean = true,
   isDeleted: Boolean = false,
-  tasks: List[ParticipantTask] = List.empty,
-  taskHist: List[ParticipantTask] = List.empty
+  tasks: List[AssignedTask] = List.empty
 ) {
 
   def assignTask(taskId: UUID, pInstId: UUID) : Either[ParticipantError, Participant] =
 
     if(!tasks.exists(_.taskId.equals(taskId)))
       Right(copy(
-        tasks = ParticipantTask(
+        tasks = AssignedTask(
           taskId = taskId,
           pInstId = pInstId
         ) :: tasks

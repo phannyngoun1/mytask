@@ -56,5 +56,6 @@ class ParticipantAggregateFlowsImpl(aggregateRef: ActorRef) extends ParticipantA
         case CmdResponseFailed(message) => Protocol.AssignTaskCmdFailed(ResponseError(message))
       }
 
+  override def getAssignedTasks: Flow[Protocol.GetAssignedTaskCmdReq, Protocol.GetAssignedTaskCmdRes, NotUsed] = ???
 }
 

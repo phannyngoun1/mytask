@@ -3,7 +3,6 @@ package com.dream.workflow.domain
 import java.util.UUID
 
 import com.dream.common.domain.ErrorMessage
-import com.dream.workflow.domain.ProcessInstance.AssignedTask
 
 
 object ProcessInstance {
@@ -17,13 +16,14 @@ object ProcessInstance {
     override val message: String = s"Invalid state${id.fold("")(id => s":id = ${id.toString}")}"
   }
 
-
-  case class AssignedTask(
-    description: String,
-    participants: List[UUID],
-    //Priority
-    activity: BaseActivity
-  )
+//
+//  case class AssignedTask(
+//    id: UUID,
+//    description: String,
+//    participants: List[UUID],
+//    //Priority
+//    activity: BaseActivity
+//  )
 
   case class InstanceType(
     id: UUID,
@@ -37,28 +37,23 @@ object ProcessInstance {
   case class ProcessInstanceCreated(
 
     id: UUID,
-    activityId: UUID,
+    createdBy: UUID,
     flowId: UUID,
     folio: String,
     contentType: String,
-    activity: BaseActivity,
-    action: BaseAction,
-    by: UUID,
     description: String,
-    destinations: List[UUID],
-    nextActivity: BaseActivity,
-    todo: String
+    task: Task,
   ) extends ProcessInstanceEvent
 
 }
 
 case class ProcessInstance(
   id: UUID,
+  createdBy: UUID,
   flowId: UUID,
   folio: String,
   contentType: String,
-  submitter: UUID,
-  task: AssignedTask,
-  activityHis: Seq[ActivityHis] = Seq.empty,
+  description: String,
+  tasks: List[Task],
   isActive: Boolean = true
 )

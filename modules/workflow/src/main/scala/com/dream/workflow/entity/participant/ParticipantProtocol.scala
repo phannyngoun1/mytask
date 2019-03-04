@@ -3,7 +3,7 @@ package com.dream.workflow.entity.participant
 import java.util.UUID
 
 import com.dream.common.Protocol.{CmdRequest, CmdResponse}
-import com.dream.workflow.domain.Participant
+import com.dream.workflow.domain.{AssignedTask, Participant}
 
 object ParticipantProtocol {
 
@@ -43,5 +43,10 @@ object ParticipantProtocol {
   case class AssignTaskCmdSuccess(
     id: UUID
   ) extends ParticipantCmdResponse
+
+
+  case class GetAssignedTaskCmdReq(id: UUID) extends ParticipantCmdRequest
+
+  case class GetAssignedTaskCmdSuccess(assignedTasks: List[AssignedTask]) extends ParticipantCmdResponse
 
 }

@@ -6,7 +6,7 @@ import akka.actor.{ActorLogging, Props}
 import akka.persistence._
 import cats.implicits._
 import com.dream.common.EntityState
-import com.dream.workflow.domain.ProcessInstance.{InstError, InvalidInstStateError, ProcessInstanceCreated, AssignedTask}
+import com.dream.workflow.domain.ProcessInstance.{InstError, InvalidInstStateError, ProcessInstanceCreated}
 import com.dream.workflow.domain._
 import com.dream.workflow.entity.processinstance.ProcessInstanceProtocol._
 
@@ -55,17 +55,12 @@ class ProcessInstanceEntity extends PersistentActor
 
     case cmd: CreatePInstCmdRequest => persist(ProcessInstanceCreated(
       id = cmd.id,
-      activityId = cmd.activityId,
       flowId = cmd.flowId,
       folio = cmd.folio,
       contentType = cmd.contentType,
-      activity = cmd.activity,
-      action = cmd.action,
-      by = cmd.by,
+      createdBy = cmd.createdBy,
       description = cmd.description,
-      destinations = cmd.destinations,
-      nextActivity = cmd.nextActivity,
-      todo = cmd.todo
+      task = cmd.task
     )) { event =>
       state = applyState(event).toSomeOrThrow
       sender() ! CreatePInstCmdSuccess(event.id)
@@ -75,6 +70,7 @@ class ProcessInstanceEntity extends PersistentActor
       foreachState { state =>
         sender() ! GetPInstCmdSuccess(state)
       }
+    case
     case SaveSnapshotSuccess(metadata) =>
       log.debug(s"receiveCommand: SaveSnapshotSuccess succeeded: $metadata")
   }
@@ -86,17 +82,12 @@ class ProcessInstanceEntity extends PersistentActor
     Either.right(
       ProcessInstance(
         id = event.id,
+        createdBy = event.createdBy,
         flowId = event.flowId,
         folio = event.folio,
         contentType = event.contentType,
-        submitter = event.by,
-        task = AssignedTask(event.todo, participants = event.destinations, activity = event.nextActivity),
-        activityHis = Seq(ActivityHis(
-          event.activityId,
-          event.activity,
-          actionHis = Seq(ActionHis(event.by, event.action)),
-          description = event.description
-        ))
+        description = event.description,
+        tasks = List(event.task)
       )
     )
 

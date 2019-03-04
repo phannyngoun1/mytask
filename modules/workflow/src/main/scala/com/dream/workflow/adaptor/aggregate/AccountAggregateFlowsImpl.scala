@@ -29,7 +29,7 @@ class AccountAggregateFlowsImpl(aggregateRef: ActorRef) extends AccountAggregate
 
   override def get: Flow[Protocol.GetAccountCmdReq, Protocol.GetAccountCmdRes, NotUsed] =
     Flow[Protocol.GetAccountCmdReq]
-      .map(res => GetAccountCmdRequest(res.id))
+      .map(req => GetAccountCmdRequest(req.id))
       .mapAsync(1)(aggregateRef ? _)
 
       .map {
@@ -40,10 +40,20 @@ class AccountAggregateFlowsImpl(aggregateRef: ActorRef) extends AccountAggregate
 
   override def assignParticipant: Flow[Protocol.AssignParticipantCmdReq, Protocol.AssignParticipantCmdRes, NotUsed] =
     Flow[Protocol.AssignParticipantCmdReq]
-      .map(res => AssignParticipantCmdRequest(res.id, res.participantId))
+      .map(req => AssignParticipantCmdRequest(req.id, req.participantId))
       .mapAsync(1)(aggregateRef ? _)
       .map {
         case AssignParticipantCmdSuccess(id) => Protocol.AssignParticipantCmdSuccess(id)
         case CmdResponseFailed(message) => Protocol.AssignParticipantCmdFailed(ResponseError(message))
       }
+
+  override def getParticipant: Flow[Protocol.GetParticipantCmdReq, Protocol.GetParticipantCmdRes, NotUsed] = {
+    Flow[Protocol.GetParticipantCmdReq]
+      .map(req => GetParticipantCmdReq(req.accId))
+      .mapAsync(1)(aggregateRef ? _)
+      .map {
+        case GetParticipantCmdSuccess(ids) => Protocol.GetParticipantCmdSuccess(ids)
+        case CmdResponseFailed(message) => Protocol.GetParticipantCmdFailed(ResponseError(message))
+      }
+  }
 }

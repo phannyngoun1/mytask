@@ -7,10 +7,10 @@ import akka.stream._
 import akka.stream.scaladsl._
 import com.dream.common.UseCaseSupport
 import com.dream.common.domain.ResponseError
-import com.dream.workflow.domain.{Params, ParticipantAccess, StartAction, StartActivity, Flow => WFlow}
-import com.dream.workflow.entity.processinstance.ProcessInstanceProtocol.{PerformTaskCmdReq, CreatePInstCmdRequest => CreateInst}
+import com.dream.workflow.domain.{AssignedTask, BaseAction, BaseActivity, Params, ParticipantAccess, StartAction, StartActivity, Task, Flow => WFlow}
+import com.dream.workflow.entity.processinstance.ProcessInstanceProtocol.{ CreatePInstCmdRequest => CreateInst}
 import com.dream.workflow.usecase.ItemAggregateUseCase.Protocol.{GetItemCmdRequest, GetItemCmdSuccess}
-import com.dream.workflow.usecase.ProcessInstanceAggregateUseCase.TaskToDest
+import com.dream.workflow.usecase.ParticipantAggregateUseCase.Protocol.AssignTaskCmdReq
 import com.dream.workflow.usecase.WorkflowAggregateUseCase.Protocol.{GetWorkflowCmdRequest, GetWorkflowCmdSuccess}
 import com.dream.workflow.usecase.port.{ItemAggregateFlows, ParticipantAggregateFlows, ProcessInstanceAggregateFlows, WorkflowAggregateFlows}
 
@@ -18,12 +18,6 @@ import scala.concurrent.{ExecutionContext, Future, Promise}
 
 
 object ProcessInstanceAggregateUseCase {
-
-  case class TaskToDest(
-    taskId: UUID,
-    pInst: UUID,
-    participantId: UUID
-  )
 
   object Protocol {
 
@@ -49,11 +43,29 @@ object ProcessInstanceAggregateUseCase {
 
     case class GetPInstCmdRequest(id: UUID) extends ProcessInstanceCmdRequest
 
-    sealed trait GetPInstCmdResponse extends ProcessInstanceCmdRequest
+    sealed trait GetPInstCmdResponse extends ProcessInstanceCmdResponse
 
     case class GetPInstCmdSuccess(id: UUID, folio: String) extends GetPInstCmdResponse
 
     case class GetPInstCmdFailed(error: ResponseError) extends GetPInstCmdResponse
+
+    case class GetTaskCmdReq(assignedTask: AssignedTask) extends ProcessInstanceCmdRequest
+
+    sealed trait GetTaskCmdRes extends ProcessInstanceCmdResponse
+
+    case class GetTaskCmdSuccess(task: Task) extends GetTaskCmdRes
+
+    case class GetTaskCmdFailed(error: ResponseError) extends GetTaskCmdRes
+
+
+    case class PerformTaskCmdReq(
+      pInstId: UUID,
+      activity: BaseActivity,
+    ) extends ProcessInstanceCmdRequest
+
+    sealed trait PerformTaskCmdRes extends ProcessInstanceCmdResponse
+
+    case class PerformTaskSuccess() extends PerformTaskCmdRes
 
   }
 
@@ -90,18 +102,17 @@ class ProcessInstanceAggregateUseCase(
 
         CreateInst(
           id = UUID.randomUUID(),
-          activityId = UUID.randomUUID(),
+          createdBy = req.by,
           flowId = flow.id,
           folio = "test",
           contentType = "ticket",
-          activity = StartActivity(),
-          action = StartAction(),
-          by = req.by,
           description = "Test",
-          destinations = nextFlow.participants,
-          nextActivity =  nextFlow.activity,
-          nextActions = nextFlow.actionFlows.map(_.action),
-          todo = "todo"
+          task =  Task(
+            id =  UUID.randomUUID(),
+            destIds = nextFlow.participants ,
+            activityName =  nextFlow.activity,
+            actions = nextFlow.actionFlows.map(_.action)
+          )
         )
       }
     )
@@ -112,20 +123,18 @@ class ProcessInstanceAggregateUseCase(
       case GetWorkflowCmdSuccess(workflow) => workflow
     } ~> createInstZip.in0
 
-
     broadcast.out(1) ~> createInstZip.in1
 
-
     val createPrepareB = b.add(Broadcast[CreateInst](3))
-    val convertToTaskCmdRequestFlow = Flow[CreateInst].map(p => PerformTaskCmdReq(p.id, p.activityId))
+    val convertToTaskCmdRequestFlow = Flow[CreateInst].map(p => PerformTaskCmdReq(p.id, p.task.activityName))
 
     //TODO: adding real tasks
 
-    val assignTaskCmdFlow = Flow[CreateInst].map(p => p.destinations.map(dest =>   TaskToDest(UUID.randomUUID(), p.id, dest)))
+    val assignTaskCmdFlow = Flow[CreateInst].flatMapConcat(p => Source(p.task.destIds.map(dest =>  AssignTaskCmdReq(dest ,p.task.id, p.id))))
 
     val out = createInstZip.out ~> convertToCreatePInstCmdReq ~> createPrepareB ~> processInstanceAggregateFlows.createInst
     createPrepareB ~> convertToTaskCmdRequestFlow ~> processInstanceAggregateFlows.performTask ~> Sink.ignore
-    createPrepareB ~> assignTaskCmdFlow ~> Sink.ignore
+    createPrepareB ~> assignTaskCmdFlow ~> participantAggregateFlows.assignTask ~> Sink.ignore
 
     FlowShape(broadcast.in, out.outlet)
   })

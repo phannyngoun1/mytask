@@ -9,5 +9,6 @@ trait ParticipantAggregateFlows {
   def create:  Flow[Protocol.CreateParticipantCmdReq, Protocol.CreateParticipantCmdRes, NotUsed]
   def get: Flow[Protocol.GetParticipantCmdReq, Protocol.GetParticipantCmdRes, NotUsed]
   def assignTask: Flow[Protocol.AssignTaskCmdReq, Protocol.AssignTaskCmdRes, NotUsed]
+  def getAssignedTasks: Flow[Protocol.GetAssignedTaskCmdReq, Protocol.GetAssignedTaskCmdRes, NotUsed]
 
 }

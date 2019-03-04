@@ -9,4 +9,6 @@ trait Api {
   def getUser(id: String): Future[String]
 
   def getTasks(accId: String): Future[List[Task]]
+
+  def createProcessInstance(): Future[String]
 }

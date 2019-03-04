@@ -7,7 +7,7 @@ import akka.stream._
 import akka.stream.scaladsl.{Keep, Source, SourceQueueWithComplete}
 import com.dream.common.UseCaseSupport
 import com.dream.common.domain.ResponseError
-import com.dream.workflow.domain.Participant
+import com.dream.workflow.domain.{AssignedTask, Participant}
 import com.dream.workflow.domain.ProcessInstance.AssignedTask
 import com.dream.workflow.usecase.port.ParticipantAggregateFlows
 
@@ -57,12 +57,21 @@ object ParticipantAggregateUseCase {
       pInstId: UUID,
     ) extends ParticipantCmdRequest
 
-    trait AssignTaskCmdRes extends ParticipantCmdResponse
+    sealed trait AssignTaskCmdRes extends ParticipantCmdResponse
 
     case class AssignTaskCmdSuccess(id: UUID) extends AssignTaskCmdRes
 
     case class AssignTaskCmdFailed(error: ResponseError) extends AssignTaskCmdRes
 
+    case class GetAssignedTaskCmdReq(
+      id: UUID
+    ) extends ParticipantCmdRequest
+
+    sealed trait GetAssignedTaskCmdRes  extends ParticipantCmdResponse
+
+    case class GetAssignedTaskCmdSuccess(assignedTasks: List[AssignedTask]) extends GetAssignedTaskCmdRes
+
+    case class GetAssignedTaskCmdFailed(error: ResponseError) extends GetAssignedTaskCmdRes
   }
 
 }

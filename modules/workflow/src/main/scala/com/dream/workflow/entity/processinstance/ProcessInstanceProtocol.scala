@@ -23,18 +23,12 @@ object ProcessInstanceProtocol {
 
   case class CreatePInstCmdRequest(
     id: UUID,
-    activityId: UUID,
+    createdBy: UUID,
     flowId: UUID,
     folio: String,
     contentType: String,
-    activity: BaseActivity,
-    action: BaseAction,
-    by: UUID,
     description: String,
-    destinations: List[UUID],
-    nextActivity: BaseActivity,
-    nextActions: List[BaseAction],
-    todo: String
+    task: Task
   ) extends ProcessInstanceCmdRequest
 
   case class CreatePInstCmdSuccess(id: UUID) extends CreatePInstCmdResponse
@@ -49,11 +43,17 @@ object ProcessInstanceProtocol {
 
   case class PerformTaskCmdReq(
     pInstId: UUID,
-    activityId: UUID,
+    activity: BaseActivity,
   ) extends TaskCmdRequest
 
   case class PerformTaskSuccess() extends PerformTaskCmdRes
 
+  case class GetTaskCmdReq(
+    id: UUID,
+    taskId: UUID
+  ) extends ProcessInstanceCmdRequest
+
+  case class GetTaskCmdRes(task: Task) extends PerformTaskCmdRes
 
 
 }

@@ -40,4 +40,15 @@ object AccountProtocol {
 
   case class AssignParticipantCmdSuccess(id: UUID) extends AccountCmdResponse
 
+  case class GetParticipantCmdReq(id: UUID) extends AccountCmdRequest
+
+  case class GetParticipantCmdSuccess(
+    participantIds: List[UUID]
+  ) extends AccountCmdResponse
+
+  case class GetParticipantCmdFailed(
+    id: UUID,
+    error: AccountError
+  ) extends AccountCmdResponse
+
 }

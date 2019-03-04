@@ -8,6 +8,7 @@ import com.dream.mytask.shared.data.Task
 import com.dream.workflow.adaptor.aggregate._
 import com.dream.workflow.usecase._
 import com.dream.workflow.usecase.AccountAggregateUseCase.Protocol.{GetAccountCmdReq, GetAccountCmdSuccess}
+import com.dream.workflow.usecase.ProcessInstanceAggregateUseCase.Protocol.{CreatePInstCmdRequest, CreatePInstCmdSuccess}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -45,5 +46,16 @@ class ApiService(login: UUID)(implicit ec: ExecutionContext) extends Api {
     Future.successful(
       List(Task(UUID.randomUUID(), UUID.randomUUID()))
     )
+  }
+
+  override def createProcessInstance(): Future[String] = {
+
+    processInstance.createPInst(CreatePInstCmdRequest(
+      itemID = UUID.fromString("8c557884-0d50-4ba1-aa82-26b49b5be368"),
+      by = UUID.fromString("8dbd6bf8-2f60-4e6e-8e3f-b374e060a940")
+    )) map {
+      case res: CreatePInstCmdSuccess => s"Process instance ${res.folio} created"
+      case _ => "Failed"
+    }
   }
 }

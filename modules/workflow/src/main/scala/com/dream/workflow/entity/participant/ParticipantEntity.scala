@@ -103,6 +103,11 @@ class ParticipantEntity extends PersistentActor with ActorLogging with EntitySta
         }
       }
 
+    case GetAssignedTaskCmdReq(id) if equalsId(id)(state, _.id.equals(id)) =>
+    foreachState{ state =>
+      sender() ! GetAssignedTaskCmdSuccess(state.tasks)
+    }
+
     case SaveSnapshotSuccess(metadata) =>
       log.debug(s"receiveCommand: SaveSnapshotSuccess succeeded: $metadata")
   }

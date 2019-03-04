@@ -74,7 +74,6 @@ class AccountEntity extends PersistentActor with ActorLogging with EntityState[A
       foreachState{ state =>
 
         println(s"retrive: ${state}")
-
         sender() ! GetAccountCmdSuccess(state)
       }
 
@@ -87,6 +86,11 @@ class AccountEntity extends PersistentActor with ActorLogging with EntityState[A
           tryToSaveSnapshot()
         }
     }
+
+    case GetParticipantCmdReq(id) if equalsId(id)(state, _.id.equals(id)) =>
+      foreachState { state =>
+        sender() ! GetParticipantCmdSuccess(state.currParticipantId.map(List(_)).getOrElse(List.empty))
+      }
 
     case SaveSnapshotSuccess(metadata) =>
       log.debug(s"receiveCommand: SaveSnapshotSuccess succeeded: $metadata")
@@ -103,8 +107,6 @@ class AccountEntity extends PersistentActor with ActorLogging with EntityState[A
       state    <- Either.fromOption(state, InvalidAccountStateError())
       newState <- f(state)
     } yield newState
-
-
 
   private def tryToSaveSnapshot(): Unit =
     if (lastSequenceNr % numOfEventsToSnapshot == 0) {
