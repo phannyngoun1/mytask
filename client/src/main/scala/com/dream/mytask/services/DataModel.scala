@@ -1,5 +1,7 @@
 package com.dream.mytask.services
 
+import com.dream.mytask.shared.data.AccountData.AccountItem
+import com.dream.mytask.shared.data.ItemData.Item
 import com.dream.mytask.shared.data.TaskItem
 import diode.data.Pot
 
@@ -11,7 +13,11 @@ object DataModel {
 
     taskModel: TaskModel = TaskModel(),
 
-    processInst: ProcessInstanceModel = ProcessInstanceModel()
+    processInst: ProcessInstanceModel = ProcessInstanceModel(),
+
+    accountModel: AccountModel = AccountModel(),
+
+    itemModel: ItemModel = ItemModel()
 
   )
 
@@ -20,16 +26,11 @@ object DataModel {
   )
 
   case class AccountModel(
-
+    accountList: Pot[List[AccountItem]] = Pot.empty
   )
 
   case class ItemModel(
-    itemList: Pot[List[Item]]
-  )
-
-  case class Item(
-    id: String,
-    name: String
+    itemList: Pot[List[Item]]  = Pot.empty
   )
 
   case class ProcessInstanceModel(

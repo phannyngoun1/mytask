@@ -4,9 +4,8 @@ import com.dream.mytask.AppClient.Loc
 import com.dream.mytask.modules.task.TaskActionListHandler.TaskListActions.FetchTaskListAction
 import com.dream.mytask.shared.data.TaskItem
 import diode.data.Pot
-import diode.react.{ModelProxy, ReactConnectProxy}
-import japgolly.scalajs.react.BackendScope
 import diode.react._
+import japgolly.scalajs.react.BackendScope
 import diode.react.ReactPot._
 import japgolly.scalajs.react.extra.router.RouterCtl
 import japgolly.scalajs.react.vdom.html_<^._
@@ -28,7 +27,7 @@ object TaskListComp {
           <.div(
             proxy().renderPending(_ > 500, _ => <.p("Loading...")),
             proxy().renderFailed(ex => <.p("Failed to load")),
-            proxy().render(m => <.p(m.map(d => s"id = ${d.id}, process instance ID = ${d.pInstId}").mkString(",")))
+            proxy().render(m => <.p(m.map(d => s"id = ${d.id}, process instance ID = ${d.id}").mkString(",")))
           )
         )
       })
