@@ -75,7 +75,11 @@ object AccountAggregateUseCase {
   }
 }
 
-class AccountAggregateUseCase(flow: AccountAggregateFlows, partFlow: ParticipantAggregateFlows, pInstFlow: ProcessInstanceAggregateFlows)(implicit system: ActorSystem) extends UseCaseSupport {
+class AccountAggregateUseCase(
+  flow: AccountAggregateFlows,
+  partFlow: ParticipantAggregateFlows,
+  pInstFlow: ProcessInstanceAggregateFlows)
+  (implicit system: ActorSystem) extends UseCaseSupport {
 
   import AccountAggregateUseCase.Protocol._
   import UseCaseSupport._

@@ -4,11 +4,12 @@ import java.util.UUID
 
 import akka.actor.ActorSystem
 import com.dream.mytask.shared.Api
-import com.dream.mytask.shared.data.Task
+import com.dream.mytask.shared.data.{ActionItem, TaskItem}
 import com.dream.workflow.adaptor.aggregate._
 import com.dream.workflow.usecase._
 import com.dream.workflow.usecase.AccountAggregateUseCase.Protocol.{GetAccountCmdReq, GetAccountCmdSuccess}
-import com.dream.workflow.usecase.ProcessInstanceAggregateUseCase.Protocol.{CreatePInstCmdRequest, CreatePInstCmdSuccess}
+import com.dream.workflow.usecase.ProcessInstanceAggregateUseCase.Protocol.{CreatePInstCmdRequest, CreatePInstCmdSuccess, GetPInstCmdRequest, GetPInstCmdSuccess}
+import com.dream.workflow.usecase.AccountAggregateUseCase.Protocol._
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -26,7 +27,7 @@ class ApiService(login: UUID)(implicit ec: ExecutionContext) extends Api {
   val itemAggregateUseCase = new ItemAggregateUseCase(itemFlow)
   val workflowAggregateUseCase = new WorkflowAggregateUseCase(workFlow)
   val processInstance = new ProcessInstanceAggregateUseCase(pInstFlow, workFlow, itemFlow, participantFlow)
-  val accountUseCase = new AccountAggregateUseCase(accountFlow)
+  val accountUseCase = new AccountAggregateUseCase(accountFlow,participantFlow, pInstFlow )
   val participantUseCase = new ParticipantAggregateUseCase(participantFlow)
 
 
@@ -42,10 +43,14 @@ class ApiService(login: UUID)(implicit ec: ExecutionContext) extends Api {
 
   }
 
-  override def getTasks(accId: String): Future[List[Task]] = {
-    Future.successful(
-      List(Task(UUID.randomUUID(), UUID.randomUUID()))
-    )
+  override def getTasks(accId: String): Future[List[TaskItem]] = {
+
+    val uuId = UUID.fromString(accId)
+
+    accountUseCase.getTasks(GetTaskLisCmdReq(uuId)) map {
+      case res: GetTaskListCmdSuccess => res.taskList.map( f => TaskItem(f.id, f.activity.name, f.actions.map(a => ActionItem(a.name))) )
+      case _ => List.empty[TaskItem]
+    }
   }
 
   override def createProcessInstance(): Future[String] = {
@@ -57,5 +62,15 @@ class ApiService(login: UUID)(implicit ec: ExecutionContext) extends Api {
       case res: CreatePInstCmdSuccess => s"Process instance ${res.folio} created"
       case _ => "Failed"
     }
+  }
+
+  override def getProcessInstance(id: String): Future[String] = {
+    val uuId = UUID.fromString(id)
+
+    processInstance.getPInst(GetPInstCmdRequest(uuId))  map {
+      case res: GetPInstCmdSuccess => res.folio
+      case _ => s"Failed to fetch ${id}"
+    }
+
   }
 }

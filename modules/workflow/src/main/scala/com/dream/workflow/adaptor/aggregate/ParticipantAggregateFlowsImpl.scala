@@ -56,6 +56,13 @@ class ParticipantAggregateFlowsImpl(aggregateRef: ActorRef) extends ParticipantA
         case CmdResponseFailed(message) => Protocol.AssignTaskCmdFailed(ResponseError(message))
       }
 
-  override def getAssignedTasks: Flow[Protocol.GetAssignedTaskCmdReq, Protocol.GetAssignedTaskCmdRes, NotUsed] = ???
+  override def getAssignedTasks: Flow[Protocol.GetAssignedTaskCmdReq, Protocol.GetAssignedTaskCmdRes, NotUsed] =
+    Flow[Protocol.GetAssignedTaskCmdReq]
+    .map(req => GetAssignedTaskCmdReq(req.id))
+    .mapAsync(1)(aggregateRef ? _)
+    .map {
+      case GetAssignedTaskCmdSuccess(tasks) => Protocol.GetAssignedTaskCmdSuccess(tasks)
+      case CmdResponseFailed(message) => Protocol.GetAssignedTaskCmdFailed(ResponseError(message))
+    }
 }
 

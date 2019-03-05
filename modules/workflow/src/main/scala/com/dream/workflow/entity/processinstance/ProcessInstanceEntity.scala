@@ -6,6 +6,8 @@ import akka.actor.{ActorLogging, Props}
 import akka.persistence._
 import cats.implicits._
 import com.dream.common.EntityState
+import com.dream.common.Protocol.CmdResponseFailed
+import com.dream.common.domain.ResponseError
 import com.dream.workflow.domain.ProcessInstance.{InstError, InvalidInstStateError, ProcessInstanceCreated}
 import com.dream.workflow.domain._
 import com.dream.workflow.entity.processinstance.ProcessInstanceProtocol._
@@ -70,7 +72,13 @@ class ProcessInstanceEntity extends PersistentActor
       foreachState { state =>
         sender() ! GetPInstCmdSuccess(state)
       }
-    case
+    case GetTaskCmdReq(id, taskId) if equalsId(id)(state, _.id.equals(id)) =>
+      foreachState { state =>
+        state.tasks.find(_.id.equals(taskId)) match {
+          case Some(task) => sender() ! GetTaskCmdRes(task)
+          case None => sender() ! CmdResponseFailed(ResponseError(Some(id), s"Task id: ${taskId} not found"))
+        }
+      }
     case SaveSnapshotSuccess(metadata) =>
       log.debug(s"receiveCommand: SaveSnapshotSuccess succeeded: $metadata")
   }

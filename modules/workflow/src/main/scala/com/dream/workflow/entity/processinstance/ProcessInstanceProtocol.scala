@@ -28,6 +28,7 @@ object ProcessInstanceProtocol {
     folio: String,
     contentType: String,
     description: String,
+    destIds: List[UUID],
     task: Task
   ) extends ProcessInstanceCmdRequest
 

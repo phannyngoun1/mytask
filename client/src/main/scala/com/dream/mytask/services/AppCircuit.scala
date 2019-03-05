@@ -6,7 +6,7 @@ import diode.data._
 import diode.react.ReactConnector
 import diode.util._
 import boopickle.Default._
-import com.dream.mytask.modules.processinst.ProcessInstActionHandler
+import com.dream.mytask.modules.processinst.{FetchPInstActionHandler, NewPInstActonHandler, ProcessInstActionHandler}
 import com.dream.mytask.modules.task.TaskActionListHandler
 import com.dream.mytask.services.DataModel.RootModel
 import com.dream.mytask.shared.Api
@@ -46,7 +46,9 @@ object AppCircuit extends Circuit[RootModel] with ReactConnector[RootModel] {
   override protected def actionHandler: AppCircuit.HandlerFunction = composeHandlers(
     new MessageHandler(zoomRW(_.message)((m, v) => m.copy(message = v))),
     new TaskActionListHandler(zoomRW(_.taskModel.taskList)((m, v) => m.copy(taskModel = m.taskModel.copy(taskList = v)))),
-    new ProcessInstActionHandler(zoomRW(_.message)((m, v) => m.copy(message = v)))
+    new ProcessInstActionHandler(zoomRW(_.processInst)((m, v) => m.copy(processInst = v))),
+    new NewPInstActonHandler(zoomRW(_.message)((m, v) => m.copy(message = v))),
+    new FetchPInstActionHandler(zoomRW(_.processInst.data)((m, v) => m.copy(processInst = m.processInst.copy(data = v))))
   )
 
 }

@@ -2,7 +2,7 @@ package com.dream.mytask.modules.task
 
 import com.dream.mytask.AppClient.Loc
 import com.dream.mytask.modules.task.TaskActionListHandler.TaskListActions.FetchTaskListAction
-import com.dream.mytask.shared.data.Task
+import com.dream.mytask.shared.data.TaskItem
 import diode.data.Pot
 import diode.react.{ModelProxy, ReactConnectProxy}
 import japgolly.scalajs.react.BackendScope
@@ -14,7 +14,7 @@ import japgolly.scalajs.react._
 
 object TaskListComp {
 
-  case class Props(proxy: ModelProxy[Pot[List[Task]]], c: RouterCtl[Loc])
+  case class Props(proxy: ModelProxy[Pot[List[TaskItem]]], c: RouterCtl[Loc])
 
   case class State(searchVal: Option[String] = None)
 
@@ -34,6 +34,7 @@ object TaskListComp {
       })
     }
   }
+
   private val component = ScalaComponent.builder[Props]("DashboardModule")
     .initialStateFromProps(p => State())
     .renderBackend[Backend]
@@ -42,6 +43,6 @@ object TaskListComp {
     )
     .build
 
+  def apply(proxy: ModelProxy[Pot[List[TaskItem]]], c: RouterCtl[Loc]) = component(Props(proxy, c))
 
-  def apply(proxy: ModelProxy[Pot[List[Task]]], c: RouterCtl[Loc]) = component(Props(proxy, c))
 }

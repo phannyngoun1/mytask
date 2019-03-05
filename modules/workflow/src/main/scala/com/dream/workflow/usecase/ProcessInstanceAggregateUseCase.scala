@@ -7,7 +7,7 @@ import akka.stream._
 import akka.stream.scaladsl._
 import com.dream.common.UseCaseSupport
 import com.dream.common.domain.ResponseError
-import com.dream.workflow.domain.{AssignedTask, BaseAction, BaseActivity, Params, ParticipantAccess, StartAction, StartActivity, Task, Flow => WFlow}
+import com.dream.workflow.domain.{ Flow => WFlow, _}
 import com.dream.workflow.entity.processinstance.ProcessInstanceProtocol.{ CreatePInstCmdRequest => CreateInst}
 import com.dream.workflow.usecase.ItemAggregateUseCase.Protocol.{GetItemCmdRequest, GetItemCmdSuccess}
 import com.dream.workflow.usecase.ParticipantAggregateUseCase.Protocol.AssignTaskCmdReq
@@ -107,10 +107,10 @@ class ProcessInstanceAggregateUseCase(
           folio = "test",
           contentType = "ticket",
           description = "Test",
+          destIds = nextFlow.participants,
           task =  Task(
             id =  UUID.randomUUID(),
-            destIds = nextFlow.participants ,
-            activityName =  nextFlow.activity,
+            activity =  nextFlow.activity,
             actions = nextFlow.actionFlows.map(_.action)
           )
         )
@@ -126,11 +126,11 @@ class ProcessInstanceAggregateUseCase(
     broadcast.out(1) ~> createInstZip.in1
 
     val createPrepareB = b.add(Broadcast[CreateInst](3))
-    val convertToTaskCmdRequestFlow = Flow[CreateInst].map(p => PerformTaskCmdReq(p.id, p.task.activityName))
+    val convertToTaskCmdRequestFlow = Flow[CreateInst].map(p => PerformTaskCmdReq(p.id, p.task.activity))
 
     //TODO: adding real tasks
 
-    val assignTaskCmdFlow = Flow[CreateInst].flatMapConcat(p => Source(p.task.destIds.map(dest =>  AssignTaskCmdReq(dest ,p.task.id, p.id))))
+    val assignTaskCmdFlow = Flow[CreateInst].flatMapConcat(p => Source(p.destIds.map(dest =>  AssignTaskCmdReq(dest ,p.task.id, p.id))))
 
     val out = createInstZip.out ~> convertToCreatePInstCmdReq ~> createPrepareB ~> processInstanceAggregateFlows.createInst
     createPrepareB ~> convertToTaskCmdRequestFlow ~> processInstanceAggregateFlows.performTask ~> Sink.ignore
@@ -140,8 +140,7 @@ class ProcessInstanceAggregateUseCase(
   })
 
 
-  private val createInstanceFlow
-  : SourceQueueWithComplete[(CreatePInstCmdRequest, Promise[CreatePInstCmdResponse])] = Source
+  private val createInstanceFlow: SourceQueueWithComplete[(CreatePInstCmdRequest, Promise[CreatePInstCmdResponse])] = Source
     .queue[(CreatePInstCmdRequest, Promise[CreatePInstCmdResponse])](10, OverflowStrategy.dropNew)
     .via(prepareCreateInst.zipPromise)
     .toMat(completePromiseSink)(Keep.left)

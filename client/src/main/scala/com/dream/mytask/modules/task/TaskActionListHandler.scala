@@ -1,6 +1,6 @@
 package com.dream.mytask.modules.task
 
-import com.dream.mytask.shared.data.Task
+import com.dream.mytask.shared.data.TaskItem
 import diode._
 import diode.data._
 import autowire._
@@ -37,8 +37,8 @@ object TaskActionListHandler {
 
   object TaskListActions {
 
-    case class FetchTaskListAction(potResult: Pot[List[Task]] = Empty) extends PotAction[List[Task], FetchTaskListAction] {
-      override def next(newResult: Pot[List[Task]]): FetchTaskListAction = FetchTaskListAction(newResult)
+    case class FetchTaskListAction(potResult: Pot[List[TaskItem]] = Empty) extends PotAction[List[TaskItem], FetchTaskListAction] {
+      override def next(newResult: Pot[List[TaskItem]]): FetchTaskListAction = FetchTaskListAction(newResult)
     }
   }
 }
@@ -58,7 +58,7 @@ object TaskActionListHandler {
 //}
 
 
-class TaskActionListHandler[M](modelRW: ModelRW[M, Pot[List[Task]]]) extends ActionHandler(modelRW) {
+class TaskActionListHandler[M](modelRW: ModelRW[M, Pot[List[TaskItem]]]) extends ActionHandler(modelRW) {
   implicit val runner = new RunAfterJS
   import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 

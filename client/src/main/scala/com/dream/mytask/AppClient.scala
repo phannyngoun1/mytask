@@ -15,7 +15,7 @@ object AppClient {
 
 
     val taskListRoute = staticRoute("#tasks", TaskListLoc) ~> renderR( c=> AppCircuit.wrap(_.taskModel.taskList)(proxy => TaskListComp(proxy, c)))
-    val processInstRoute = staticRoute("#pinst", ProcessInstLoc) ~> renderR( c=> AppCircuit.wrap(_.message)(proxy => ProcessInstComp(proxy, c)))
+    val processInstRoute = staticRoute("#pinst", ProcessInstLoc) ~> renderR( c=> AppCircuit.wrap(_.processInst)(proxy => ProcessInstComp(proxy, c)))
     (
       staticRoute(root, DashboardLoc) ~> renderR(c => AppCircuit.wrap(_.message)(proxy => Dashboard(proxy, c)))
       | taskListRoute
