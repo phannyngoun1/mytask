@@ -2,7 +2,7 @@ package com.dream.mytask.modules.processinst
 
 import com.dream.mytask.AppClient.Loc
 import com.dream.mytask.modules.processinst.ProcessInstActionHandler._
-import com.dream.mytask.services.DataModel.ProcessInstanceData
+import com.dream.mytask.services.DataModel.ProcessInstanceModel
 import diode.react._
 import japgolly.scalajs.react.BackendScope
 import diode.react.ReactPot._
@@ -13,7 +13,7 @@ import japgolly.scalajs.react._
 
 object ProcessInstComp {
 
-  case class Props(proxy: ModelProxy[ProcessInstanceData], c: RouterCtl[Loc])
+  case class Props(proxy: ModelProxy[ProcessInstanceModel], c: RouterCtl[Loc])
   case class State(pInstId: Option[String] = None, accId: Option[String])
 
   class Backend($: BackendScope[Props, State]) {
@@ -62,5 +62,5 @@ object ProcessInstComp {
     .renderBackend[Backend]
     .build
 
-  def apply(proxy: ModelProxy[ProcessInstanceData], c: RouterCtl[Loc]) = component(Props(proxy, c))
+  def apply(proxy: ModelProxy[ProcessInstanceModel], c: RouterCtl[Loc]) = component(Props(proxy, c))
 }

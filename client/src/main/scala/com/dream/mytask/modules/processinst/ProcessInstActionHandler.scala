@@ -2,7 +2,7 @@ package com.dream.mytask.modules.processinst
 
 import autowire._
 import com.dream.mytask.services.AjaxClient
-import com.dream.mytask.services.DataModel.{ProcessInstanceCriteria, ProcessInstanceData, ProcessInstanceResult}
+import com.dream.mytask.services.DataModel.{ProcessInstanceCriteria, ProcessInstanceModel, ProcessInstanceResult}
 import com.dream.mytask.shared.Api
 import diode.data.{Pot, _}
 import diode.util._
@@ -47,7 +47,7 @@ class NewPInstActonHandler[M](modelRW: ModelRW[M, Pot[String]]) extends ActionHa
   }
 }
 
-class ProcessInstActionHandler[M](modelRW: ModelRW[M, ProcessInstanceData]) extends ActionHandler(modelRW) {
+class ProcessInstActionHandler[M](modelRW: ModelRW[M, ProcessInstanceModel]) extends ActionHandler(modelRW) {
 
   implicit val runner = new RunAfterJS
   import com.dream.mytask.modules.processinst.ProcessInstActionHandler._

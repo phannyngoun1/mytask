@@ -11,7 +11,7 @@ object DataModel {
 
     taskModel: TaskModel = TaskModel(),
 
-    processInst: ProcessInstanceData = ProcessInstanceData()
+    processInst: ProcessInstanceModel = ProcessInstanceModel()
 
   )
 
@@ -19,7 +19,20 @@ object DataModel {
     taskList: Pot[List[TaskItem]] = Pot.empty
   )
 
-  case class ProcessInstanceData(
+  case class AccountModel(
+
+  )
+
+  case class ItemModel(
+    itemList: Pot[List[Item]]
+  )
+
+  case class Item(
+    id: String,
+    name: String
+  )
+
+  case class ProcessInstanceModel(
     criteria: Option[ProcessInstanceCriteria] = None,
     data: Pot[ProcessInstanceResult] = Pot.empty
   )
