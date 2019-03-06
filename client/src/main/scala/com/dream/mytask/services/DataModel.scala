@@ -30,7 +30,9 @@ object DataModel {
   )
 
   case class ItemModel(
-    itemList: Pot[List[Item]]  = Pot.empty
+    itemList: Pot[List[Item]]  = Pot.empty,
+    item: Pot[Item] = Pot.empty,
+    message: Pot[String] = Pot.empty
   )
 
   case class ProcessInstanceModel(

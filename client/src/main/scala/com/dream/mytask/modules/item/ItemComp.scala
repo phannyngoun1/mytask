@@ -1,8 +1,9 @@
 package com.dream.mytask.modules.item
 
 import com.dream.mytask.AppClient.Loc
+import com.dream.mytask.modules.item.ItemActionHandler._
+import com.dream.mytask.services.DataModel.ItemModel
 import com.dream.mytask.shared.data.ItemData.Item
-import diode.data.Pot
 import diode.react._
 import japgolly.scalajs.react.BackendScope
 import diode.react.ReactPot._
@@ -12,16 +13,63 @@ import japgolly.scalajs.react._
 
 object ItemComp {
 
-  case class Props(proxy: ModelProxy[Pot[List[Item]]], c: RouterCtl[Loc])
+  case class Props(proxy: ModelProxy[ItemModel], c: RouterCtl[Loc])
 
-  case class State()
+  case class State(id: Option[String] = None)
 
   class Backend($: BackendScope[Props, State]) {
+
+    implicit  def renderItem(item: Item) = {
+      <.li(s"id: ${item.id}, name: ${item.name}")
+    }
     def render(p: Props, s: State) = {
-      <.div(
+      val wrapper = p.proxy.connect(_.item)
+      val message = p.proxy.connect(m=> m.message)
+      val list = p.proxy.connect(_.itemList)
+      <.div( "Item List:",
+        <.div(
+          list(px => {
+            <.div(
+              px().renderPending(_ > 500, _ => <.p("Loading...")),
+              px().renderFailed(ex => <.p("Failed to load")),
+              px().render(m => <.ul(
+               m toTagMod
+              ))
+            )
+          })
+        ),
+        <.div(
+          <.input(^.`type` := "text", ^.value := s.id.getOrElse(""), ^.onChange ==> { e: ReactEventFromInput =>
+            val id = if (e.target.value.trim.isEmpty) None else Some(e.target.value)
+            $.modState(_.copy(id = id))
+          })
+        ),
+          <.button("Fetch Item", ^.onClick --> p.proxy.dispatchCB(FetchItemAction(s.id))),
+        <.div( "Result",
+          <.div(
+            wrapper(px => {
+              <.div(
+                px().renderPending(_ > 500, _ => <.p("Loading...")),
+                px().renderFailed(ex => <.p("Failed to load")),
+                px().render(m => <.p( s"id: ${m.id}, name: ${m.name}"))
+              )
+            })
+        )),
+        <.div(
+          <.button("Create Item", ^.onClick --> p.proxy.dispatchCB(NewItemAction())),
+          <.div( "new item:",
+            <.div(
+              message(px => {
+                <.div(
+                  px().renderPending(_ > 500, _ => <.p("Loading...")),
+                  px().renderFailed(ex => <.p("Failed to load")),
+                  px().render(m => <.p(s"hello ${m}"))
+                )
+              })
+            )
 
-
-
+          )
+        )
       )
     }
   }
@@ -29,8 +77,9 @@ object ItemComp {
   private val component = ScalaComponent.builder[Props]("ItemComp")
     .initialStateFromProps(p => State())
     .renderBackend[Backend]
+    .componentDidMount(_.props.proxy.dispatchCB(FetchItemListAction()))
     .build
 
-  def apply(proxy: ModelProxy[Pot[List[Item]]], c: RouterCtl[Loc]) = component(Props(proxy, c))
+  def apply(proxy: ModelProxy[ItemModel], c: RouterCtl[Loc]) = component(Props(proxy, c))
 
 }

@@ -14,7 +14,7 @@ import japgolly.scalajs.react._
 object ProcessInstComp {
 
   case class Props(proxy: ModelProxy[ProcessInstanceModel], c: RouterCtl[Loc])
-  case class State(pInstId: Option[String] = None, accId: Option[String])
+  case class State(pInstId: Option[String] = None, accId: Option[String] = None)
 
   class Backend($: BackendScope[Props, State]) {
 

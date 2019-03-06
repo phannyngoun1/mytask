@@ -1,5 +1,7 @@
 package com.dream.mytask
 
+import com.dream.mytask.modules.account.AccountComp
+import com.dream.mytask.modules.item.ItemComp
 import com.dream.mytask.modules.processinst.ProcessInstComp
 import com.dream.mytask.modules.task.TaskListComp
 import com.dream.mytask.modules.{Dashboard, Main}
@@ -12,14 +14,16 @@ object AppClient {
   val routerConfig = RouterConfigDsl[Loc].buildConfig { dsl =>
     import dsl._
 
-
-
     val taskListRoute = staticRoute("#tasks", TaskListLoc) ~> renderR( c=> AppCircuit.wrap(_.taskModel.taskList)(proxy => TaskListComp(proxy, c)))
     val processInstRoute = staticRoute("#pinst", ProcessInstLoc) ~> renderR( c=> AppCircuit.wrap(_.processInst)(proxy => ProcessInstComp(proxy, c)))
+    val itemRoute = staticRoute("#item", ItemLoc) ~> renderR( c=> AppCircuit.wrap(_.itemModel)(proxy => ItemComp(proxy, c)))
+    val accComp = staticRoute("#acc", AccLoc) ~> renderR( c=> AppCircuit.wrap(_.accountModel)(proxy => AccountComp(proxy, c)))
     (
       staticRoute(root, DashboardLoc) ~> renderR(c => AppCircuit.wrap(_.message)(proxy => Dashboard(proxy, c)))
       | taskListRoute
       | processInstRoute
+      | itemRoute
+      | accComp
       ).notFound(redirectToPage(DashboardLoc)(Redirect.Replace))
 
   }.renderWith(layout)
@@ -48,4 +52,8 @@ object AppClient {
   case object TaskListLoc extends Loc
 
   case object ProcessInstLoc extends Loc
+
+  case object ItemLoc extends Loc
+
+  case object AccLoc  extends Loc
 }

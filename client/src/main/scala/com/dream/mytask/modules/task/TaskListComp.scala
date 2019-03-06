@@ -20,6 +20,9 @@ object TaskListComp {
   class Backend($: BackendScope[Props, State]) {
     def render(p: Props, s: State) = {
 
+
+
+
       val wrapper = p.proxy.connect(m => m)
       wrapper(proxy => {
 

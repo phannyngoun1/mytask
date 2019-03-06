@@ -4,7 +4,7 @@ import java.util.UUID
 
 import akka.actor.ActorSystem
 import com.dream.mytask.shared.Api
-import com.dream.mytask.shared.data.{ActionItem, TaskItem}
+import com.dream.mytask.shared.data.{ActionItem, ItemData, TaskItem}
 import com.dream.workflow.adaptor.aggregate._
 import com.dream.workflow.usecase._
 import com.dream.workflow.usecase.AccountAggregateUseCase.Protocol.{GetAccountCmdReq, GetAccountCmdSuccess}
@@ -14,7 +14,7 @@ import com.dream.workflow.usecase.AccountAggregateUseCase.Protocol._
 import scala.concurrent.{ExecutionContext, Future}
 
 
-class ApiService(login: UUID)(implicit ec: ExecutionContext) extends Api {
+class ApiService(login: UUID)(implicit ec: ExecutionContext) extends Api with ItemService {
 
   implicit val system: ActorSystem = ActorSystem("ticket-system")
 
