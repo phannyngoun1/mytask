@@ -5,6 +5,7 @@ import java.util.UUID
 
 import akka.actor.ActorSystem
 import boopickle.Default._
+import com.dream.mytask.services.ApiService
 import com.dream.mytask.shared.Api
 import com.dream.workflow.adaptor.aggregate._
 import com.dream.workflow.usecase.AccountAggregateUseCase.Protocol.{CreateAccountCmdReq, CreateAccountCmdSuccess, GetAccountCmdReq, GetAccountCmdSuccess}
@@ -27,8 +28,9 @@ object Router extends autowire.Server[ByteBuffer, Pickler, Pickler] {
 class Application @Inject()(
   cc: ControllerComponents,
 
-
 )(implicit ec: ExecutionContext) extends AbstractController(cc) {
+
+  implicit val system: ActorSystem = ActorSystem("ticket-system")
 
   val id = UUID.fromString("8dbd6bf8-2f60-4e6e-8e3f-b374e060a940")
   val apiService = new ApiService(id)

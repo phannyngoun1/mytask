@@ -1,6 +1,6 @@
 package com.dream.mytask.modules.item
 
-import com.dream.mytask.services.{AjaxClient, MessageHandler}
+import com.dream.mytask.services._
 import com.dream.mytask.shared.Api
 import com.dream.mytask.shared.data.ItemData.Item
 import diode._
@@ -9,7 +9,7 @@ import diode.util.RunAfterJS
 import boopickle.Default._
 import autowire._
 import com.dream.mytask.services.AppCircuit.zoomRW
-import com.dream.mytask.services.DataModel.{ItemModel, RootModel}
+import com.dream.mytask.services.DataModel._
 
 object ItemActionHandler {
 
