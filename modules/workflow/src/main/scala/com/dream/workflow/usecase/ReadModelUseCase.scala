@@ -5,11 +5,11 @@ import akka.stream.ActorMaterializer
 import akka.{Done, NotUsed}
 import akka.stream.scaladsl.{Flow, Keep, Sink, Source}
 import com.dream.workflow.domain.{ItemCreated, ItemEvent}
-import com.dream.workflow.usecase.port.{JournalReader, ReadModelFlow}
+import com.dream.workflow.usecase.port.{JournalReader, ItemReadModelFlow}
 
 import scala.concurrent.{ExecutionContextExecutor, Future}
 
-class ReadModelUseCase(readModelFlow: ReadModelFlow, journalReader: JournalReader)
+class ReadModelUseCase(readModelFlow: ItemReadModelFlow, journalReader: JournalReader)
   (implicit val system: ActorSystem) {
 
   private implicit val mat: ActorMaterializer = ActorMaterializer()

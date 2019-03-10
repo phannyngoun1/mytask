@@ -7,7 +7,7 @@ import akka.stream.scaladsl.{Flow, Source}
 
 import scala.concurrent.ExecutionContext
 
-trait ReadModelFlow {
+trait ItemReadModelFlow {
 
   def resolveLastSeqNrSource(implicit ec: ExecutionContext): Source[Long, NotUsed]
 

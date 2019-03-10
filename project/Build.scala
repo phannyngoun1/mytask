@@ -40,6 +40,7 @@ object Common {
       "com.beachape" %% "enumeratum" % "1.5.13",
       "com.beachape" %% "enumeratum-play-json" % "1.5.14",
       "com.github.mpilquist" %% "simulacrum" % "0.14.0",
+      "org.sisioh" %% "baseunits-scala" % "0.1.21",
 
       "com.github.pureconfig" %% "pureconfig" % pureConfig
 

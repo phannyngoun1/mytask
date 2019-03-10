@@ -10,6 +10,8 @@ import diode.react.ReactPot._
 import japgolly.scalajs.react.extra.router.RouterCtl
 import japgolly.scalajs.react.vdom.html_<^._
 import japgolly.scalajs.react._
+import scala.language.postfixOps
+import scala.language.implicitConversions
 
 object ItemComp {
 
