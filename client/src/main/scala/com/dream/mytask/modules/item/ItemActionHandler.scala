@@ -2,7 +2,7 @@ package com.dream.mytask.modules.item
 
 import com.dream.mytask.services._
 import com.dream.mytask.shared.Api
-import com.dream.mytask.shared.data.ItemData.Item
+import com.dream.mytask.shared.data.ItemData.ItemJson
 import diode._
 import diode.data.{Empty, Pot, PotAction}
 import diode.util.RunAfterJS
@@ -13,12 +13,12 @@ import com.dream.mytask.services.DataModel._
 
 object ItemActionHandler {
 
-  case class FetchItemListAction(potResult: Pot[List[Item]] = Empty) extends PotAction[List[Item], FetchItemListAction] {
-    override def next(newResult: Pot[List[Item]]): FetchItemListAction = FetchItemListAction(newResult)
+  case class FetchItemListAction(potResult: Pot[List[ItemJson]] = Empty) extends PotAction[List[ItemJson], FetchItemListAction] {
+    override def next(newResult: Pot[List[ItemJson]]): FetchItemListAction = FetchItemListAction(newResult)
   }
 
-  case class FetchItemAction( id: Option[String], potResult: Pot[Item] = Empty) extends PotAction[Item, FetchItemAction] {
-    override def next(newResult: Pot[Item]): FetchItemAction = FetchItemAction(None, newResult)
+  case class FetchItemAction( id: Option[String], potResult: Pot[ItemJson] = Empty) extends PotAction[ItemJson, FetchItemAction] {
+    override def next(newResult: Pot[ItemJson]): FetchItemAction = FetchItemAction(None, newResult)
   }
 
   case class NewItemAction( potResult: Pot[String] = Empty) extends PotAction[String, NewItemAction] {
@@ -33,7 +33,7 @@ object ItemActionHandler {
   )
 }
 
-class FetchItemActionHandler[M](modelRW: ModelRW[M, Pot[Item]]) extends ActionHandler(modelRW) {
+class FetchItemActionHandler[M](modelRW: ModelRW[M, Pot[ItemJson]]) extends ActionHandler(modelRW) {
 
   import ItemActionHandler._
   implicit val runner = new RunAfterJS
@@ -46,7 +46,7 @@ class FetchItemActionHandler[M](modelRW: ModelRW[M, Pot[Item]]) extends ActionHa
   }
 }
 
-class FetchItemListActionHandler[M](modelRW: ModelRW[M, Pot[List[Item]]]) extends ActionHandler(modelRW) {
+class FetchItemListActionHandler[M](modelRW: ModelRW[M, Pot[List[ItemJson]]]) extends ActionHandler(modelRW) {
   import ItemActionHandler._
   implicit val runner = new RunAfterJS
   import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue

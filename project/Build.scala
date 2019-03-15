@@ -42,7 +42,13 @@ object Common {
       "com.github.mpilquist" %% "simulacrum" % "0.14.0",
       "org.sisioh" %% "baseunits-scala" % "0.1.21",
 
-      "com.github.pureconfig" %% "pureconfig" % pureConfig
+      "com.github.pureconfig" %% "pureconfig" % pureConfig,
+
+      "de.heikoseeberger" %% "akka-log4j" % "1.6.1",
+
+      "org.slf4j" % "slf4j-api" % "1.7.25"
+
+
 
     ),
     scalacOptions in Test ++= Seq("-Yrangepos")

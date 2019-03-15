@@ -5,7 +5,6 @@ import java.util.UUID
 import akka.actor.ActorSystem
 import akka.stream.scaladsl.{Keep, Source, SourceQueueWithComplete}
 import akka.stream.{ActorMaterializer, Materializer, OverflowStrategy}
-import com.dream.common.UseCaseSupport
 import com.dream.common.domain.ResponseError
 import com.dream.workflow.domain.{BaseActivity, BaseActivityFlow, Flow}
 import com.dream.workflow.usecase.port.WorkflowAggregateFlows

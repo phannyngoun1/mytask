@@ -1,8 +1,10 @@
 package com.dream.workflow.domain
 
+import java.time.Instant
 import java.util.UUID
 
 import com.dream.common.domain.ErrorMessage
+import org.sisioh.baseunits.scala.time.TimePoint
 import play.api.libs.json.{Format, Json}
 
 object Item {
@@ -30,9 +32,6 @@ case class ItemCreated(
   id: UUID,
   name: String,
   desc: String,
-  workflowId: UUID
+  workflowId: UUID,
+  createdAt: TimePoint = TimePoint.from(Instant.now())
 ) extends ItemEvent
-
-object ItemCreated {
-  implicit val format: Format[ItemCreated] = Json.format
-}

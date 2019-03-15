@@ -6,9 +6,13 @@ import akka.actor.ActorSystem
 import com.dream.mytask.shared.Api
 import com.dream.mytask.shared.data.{ActionItem, TaskItem}
 import com.dream.workflow.adaptor.aggregate._
+import com.dream.workflow.adaptor.dao.item.ItemReadModelFlowImpl
 import com.dream.workflow.usecase.AccountAggregateUseCase.Protocol.{GetAccountCmdReq, GetAccountCmdSuccess, _}
 import com.dream.workflow.usecase.ProcessInstanceAggregateUseCase.Protocol.{CreatePInstCmdRequest, CreatePInstCmdSuccess, GetPInstCmdRequest, GetPInstCmdSuccess}
 import com.dream.workflow.usecase._
+import com.typesafe.config.ConfigFactory
+import slick.basic.DatabaseConfig
+import slick.jdbc.JdbcProfile
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -16,6 +20,9 @@ import scala.concurrent.{ExecutionContext, Future}
 class ApiService(login: UUID)(implicit val ec: ExecutionContext, implicit val  system: ActorSystem) extends Api with ItemService with  ReadSideService {
 
 
+  val rootConfig = ConfigFactory.load()
+  val dbConfig = DatabaseConfig.forConfig[JdbcProfile](path = "slickR", rootConfig)
+  val readSideFlow = new ItemReadModelFlowImpl(dbConfig.profile, dbConfig.db)
   val localEntityAggregates = system.actorOf(LocalEntityAggregates.props, LocalEntityAggregates.name)
 
   val itemFlow = new ItemAggregateFlowsImpl(localEntityAggregates)
@@ -23,11 +30,13 @@ class ApiService(login: UUID)(implicit val ec: ExecutionContext, implicit val  s
   val pInstFlow = new ProcessInstanceAggregateFlowsImpl(localEntityAggregates)
   val accountFlow = new AccountAggregateFlowsImpl(localEntityAggregates)
   val participantFlow = new ParticipantAggregateFlowsImpl(localEntityAggregates)
-  val itemAggregateUseCase = new ItemAggregateUseCase(itemFlow)
+  val itemAggregateUseCase = new ItemAggregateUseCase(itemFlow,readSideFlow )
   val workflowAggregateUseCase = new WorkflowAggregateUseCase(workFlow)
   val processInstance = new ProcessInstanceAggregateUseCase(pInstFlow, workFlow, itemFlow, participantFlow)
   val accountUseCase = new AccountAggregateUseCase(accountFlow,participantFlow, pInstFlow )
   val participantUseCase = new ParticipantAggregateUseCase(participantFlow)
+
+
 
 
   override def welcomeMessage(smg: String): Future[String] = {

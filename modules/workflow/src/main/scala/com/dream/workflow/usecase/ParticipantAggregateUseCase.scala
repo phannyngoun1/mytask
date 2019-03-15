@@ -5,7 +5,6 @@ import java.util.UUID
 import akka.actor.ActorSystem
 import akka.stream._
 import akka.stream.scaladsl.{Keep, Source, SourceQueueWithComplete}
-import com.dream.common.UseCaseSupport
 import com.dream.common.domain.ResponseError
 import com.dream.workflow.domain.{AssignedTask, Participant}
 import com.dream.workflow.usecase.port.ParticipantAggregateFlows

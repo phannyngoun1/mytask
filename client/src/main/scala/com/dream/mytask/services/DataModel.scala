@@ -1,7 +1,7 @@
 package com.dream.mytask.services
 
 import com.dream.mytask.shared.data.AccountData.AccountItem
-import com.dream.mytask.shared.data.ItemData.Item
+import com.dream.mytask.shared.data.ItemData.ItemJson
 import com.dream.mytask.shared.data.TaskItem
 import diode.data.Pot
 
@@ -30,8 +30,8 @@ object DataModel {
   )
 
   case class ItemModel(
-    itemList: Pot[List[Item]]  = Pot.empty,
-    item: Pot[Item] = Pot.empty,
+    itemList: Pot[List[ItemJson]]  = Pot.empty,
+    item: Pot[ItemJson] = Pot.empty,
     message: Pot[String] = Pot.empty
   )
 

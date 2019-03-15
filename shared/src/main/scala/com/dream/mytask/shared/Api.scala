@@ -1,6 +1,6 @@
 package com.dream.mytask.shared
 
-import com.dream.mytask.shared.data.ItemData.Item
+import com.dream.mytask.shared.data.ItemData.ItemJson
 import com.dream.mytask.shared.data.TaskItem
 
 import scala.concurrent.Future
@@ -13,9 +13,9 @@ trait Api {
 
   def newItem(): Future[String]
 
-  def getItem(id: String) : Future[Item]
+  def getItem(id: String) : Future[ItemJson]
 
-  def getItemList(): Future[List[Item]]
+  def getItemList(): Future[List[ItemJson]]
 
   def getTasks(accId: String): Future[List[TaskItem]]
 

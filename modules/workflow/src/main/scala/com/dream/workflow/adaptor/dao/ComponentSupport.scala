@@ -1,7 +1,6 @@
 package com.dream.workflow.adaptor.dao
 
 import java.time.{Instant, ZoneId, ZonedDateTime}
-import java.util.UUID
 
 trait ComponentSupport {
 

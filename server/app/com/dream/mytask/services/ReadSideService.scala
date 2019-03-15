@@ -12,7 +12,7 @@ trait ReadSideService {
   {
 
     val rootConfig = ConfigFactory.load()
-    val dbConfig = DatabaseConfig.forConfig[JdbcProfile](path = "slick", rootConfig)
+    val dbConfig = DatabaseConfig.forConfig[JdbcProfile](path = "slickR", rootConfig)
 
     print("db config")
     println(dbConfig)
@@ -20,6 +20,7 @@ trait ReadSideService {
     val readModelFlow = new ItemReadModelFlowImpl(dbConfig.profile, dbConfig.db)
 
     new ReadModelUseCase(readModelFlow, new JournalReaderImpl(system )).execute()
+
     sys.addShutdownHook {
       system.terminate()
     }

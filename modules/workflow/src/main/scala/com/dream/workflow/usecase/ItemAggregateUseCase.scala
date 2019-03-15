@@ -3,13 +3,13 @@ package com.dream.workflow.usecase
 import java.util.UUID
 
 import akka.actor.ActorSystem
-import akka.stream.scaladsl.{Keep, Source, SourceQueueWithComplete}
+import akka.stream.scaladsl.{Keep, Sink, Source, SourceQueueWithComplete}
 import akka.stream.{ActorMaterializer, Materializer, OverflowStrategy}
-import com.dream.common.UseCaseSupport
 import com.dream.common.domain.ResponseError
-import com.dream.workflow.usecase.port.ItemAggregateFlows
+import com.dream.workflow.domain.Item
+import com.dream.workflow.usecase.port.{ItemAggregateFlows, ItemReadModelFlow}
 
-import scala.concurrent.{ExecutionContext, Future, Promise}
+import scala.concurrent.{ExecutionContext, ExecutionContextExecutor, Future, Promise}
 
 object ItemAggregateUseCase {
 
@@ -52,12 +52,13 @@ object ItemAggregateUseCase {
 }
 
 
-class ItemAggregateUseCase(itemAggregateFlows: ItemAggregateFlows)(implicit system: ActorSystem) extends UseCaseSupport {
+class ItemAggregateUseCase(itemAggregateFlows: ItemAggregateFlows,itemReadModelFlow: ItemReadModelFlow)(implicit system: ActorSystem) extends UseCaseSupport {
 
   import ItemAggregateUseCase.Protocol._
   import UseCaseSupport._
 
   implicit val mat: Materializer = ActorMaterializer()
+  private implicit val ec: ExecutionContextExecutor = system.dispatcher
 
   private val bufferSize: Int = 10
 
@@ -67,6 +68,14 @@ class ItemAggregateUseCase(itemAggregateFlows: ItemAggregateFlows)(implicit syst
 
   def getItem(request: GetItemCmdRequest)(implicit ec: ExecutionContext): Future[GetItemCmdResponse] = {
     offerToQueue(getItemQueue)(request, Promise())
+  }
+
+
+  def list: Future[List[Item]] = {
+
+    val sumSink =  Sink.fold[List[Item], Item](List.empty[Item])( (m ,e) =>  e :: m )
+    Source.fromPublisher(itemReadModelFlow.list).toMat(sumSink)(Keep.right).run()
+
   }
 
   private val createItemQueue: SourceQueueWithComplete[(CreateItemCmdRequest, Promise[CreateItemCmdResponse])] =
@@ -80,5 +89,8 @@ class ItemAggregateUseCase(itemAggregateFlows: ItemAggregateFlows)(implicit syst
       .via(itemAggregateFlows.getItem.zipPromise)
       .toMat(completePromiseSink)(Keep.left)
       .run()
+
+
+
 
 }

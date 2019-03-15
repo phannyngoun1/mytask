@@ -3,7 +3,7 @@ package com.dream.mytask.modules.item
 import com.dream.mytask.AppClient.Loc
 import com.dream.mytask.modules.item.ItemActionHandler._
 import com.dream.mytask.services.DataModel.ItemModel
-import com.dream.mytask.shared.data.ItemData.Item
+import com.dream.mytask.shared.data.ItemData.ItemJson
 import diode.react._
 import japgolly.scalajs.react.BackendScope
 import diode.react.ReactPot._
@@ -21,7 +21,7 @@ object ItemComp {
 
   class Backend($: BackendScope[Props, State]) {
 
-    implicit  def renderItem(item: Item) = {
+    implicit  def renderItem(item: ItemJson) = {
       <.li(s"id: ${item.id}, name: ${item.name}")
     }
     def render(p: Props, s: State) = {

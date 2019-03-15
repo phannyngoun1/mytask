@@ -14,7 +14,7 @@ trait ItemComponent extends ComponentSupport  with ItemComponentSupport {
     updatedAt: java.time.ZonedDateTime
   ) extends Record
 
-  case class BankAccounts(tag: Tag) extends TableBase[ItemRecord](tag, "item") {
+  case class Items(tag: Tag) extends TableBase[ItemRecord](tag, "item") {
     // def id = column[Long]("id", O.PrimaryKey)
     def name       = column[String]("name")
     def description           = column[String]("description")
@@ -26,7 +26,7 @@ trait ItemComponent extends ComponentSupport  with ItemComponentSupport {
   }
 
   object ItemDao
-    extends TableQuery(BankAccounts)
+    extends TableQuery(Items)
       with DaoSupport[String, ItemRecord]
       with ItemDaoSupport
 

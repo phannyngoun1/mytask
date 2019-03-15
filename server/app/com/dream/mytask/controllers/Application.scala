@@ -7,14 +7,10 @@ import akka.actor.ActorSystem
 import boopickle.Default._
 import com.dream.mytask.services.ApiService
 import com.dream.mytask.shared.Api
-import com.dream.workflow.adaptor.aggregate._
-import com.dream.workflow.usecase.AccountAggregateUseCase.Protocol.{CreateAccountCmdReq, CreateAccountCmdSuccess, GetAccountCmdReq, GetAccountCmdSuccess}
-import com.dream.workflow.usecase._
 import javax.inject._
 import play.api.mvc._
 
 import scala.concurrent.ExecutionContext
-
 
 object Router extends autowire.Server[ByteBuffer, Pickler, Pickler] {
   override def read[R: Pickler](p: ByteBuffer) = Unpickle[R].fromBytes(p)
@@ -22,7 +18,6 @@ object Router extends autowire.Server[ByteBuffer, Pickler, Pickler] {
   override def write[R: Pickler](r: R) = Pickle.intoBytes(r)
 
 }
-
 
 @Singleton
 class Application @Inject()(
