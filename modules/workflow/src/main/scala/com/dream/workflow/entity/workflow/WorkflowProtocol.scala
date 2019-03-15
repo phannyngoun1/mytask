@@ -15,6 +15,7 @@ object WorkflowProtocol {
 
   case class CreateWorkflowCmdRequest(
     id: UUID,
+    name: String,
     initialActivity: BaseActivity,
     flowList: Seq[BaseActivityFlow]
   ) extends WorkFlowCmdRequest

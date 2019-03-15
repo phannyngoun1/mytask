@@ -17,22 +17,21 @@ object WorkflowHandler {
     override def next(newResult: Pot[FlowJson]): FetchFlowAction = FetchFlowAction(None, newResult)
   }
 
-  class FetchFlowActionHandler[M](modelRW: ModelRW[M, Pot[FlowJson]]) extends ActionHandler(modelRW) {
-
-    import WorkflowHandler._
-    implicit val runner = new RunAfterJS
-    import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
-
-    override protected def handle = {
-      case action: FetchFlowAction =>
-        val updateF = action.effect(AjaxClient[Api].getFlow(action.id.getOrElse("None")).call())(identity _ )
-        action.handleWith(this, updateF)(PotAction.handler())
-    }
-  }
-
   def apply(circuit: Circuit[RootModel]) = circuit.composeHandlers(
     new FetchFlowActionHandler(zoomRW(_.flowModel.flow)((m, v) => m.copy(flowModel = m.flowModel.copy(flow= v)))),
 
   )
+}
 
+class FetchFlowActionHandler[M](modelRW: ModelRW[M, Pot[FlowJson]]) extends ActionHandler(modelRW) {
+
+  import WorkflowHandler._
+  implicit val runner = new RunAfterJS
+  import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
+
+  override protected def handle = {
+    case action: FetchFlowAction =>
+      val updateF = action.effect(AjaxClient[Api].getFlow(action.id.getOrElse("None")).call())(identity _ )
+      action.handleWith(this, updateF)(PotAction.handler())
+  }
 }

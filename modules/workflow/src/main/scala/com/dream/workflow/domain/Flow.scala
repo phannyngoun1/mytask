@@ -203,6 +203,7 @@ case class DoAction(
 
 case class Flow(
   id: UUID,
+  name: String,
   initialActivity: BaseActivity,
   workflowList: Seq[BaseActivityFlow],
   isActive: Boolean = true

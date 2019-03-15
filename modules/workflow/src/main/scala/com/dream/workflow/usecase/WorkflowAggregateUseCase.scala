@@ -22,6 +22,7 @@ object WorkflowAggregateUseCase {
 
     case class CreateWorkflowCmdRequest(
       id: UUID,
+      name: String,
       initialActivity: BaseActivity,
       workflowList: Seq[BaseActivityFlow],
     ) extends WorkflowCmdRequest

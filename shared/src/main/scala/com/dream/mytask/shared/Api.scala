@@ -26,4 +26,6 @@ trait Api {
 
   def getFlow(id: String): Future[FlowJson]
 
+  def newFlow(name: String): Future[String]
+
 }
