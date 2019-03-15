@@ -56,6 +56,6 @@ class ItemReadModelFlowImpl(val profile: JdbcProfile, val db: JdbcProfile#Backen
   }
 
   def list =
-    db.stream(ItemDao.result).mapResult(item => Item(UUID.fromString(item.id), item.name, "", UUID.randomUUID()))
+    db.stream(ItemDao.sortBy(_.createdAt).result).mapResult(item => Item(UUID.fromString(item.id), item.name, "", UUID.randomUUID()))
 
 }

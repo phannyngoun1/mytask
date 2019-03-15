@@ -18,13 +18,13 @@ trait ItemService { this: ApiService =>
    }
   }
 
-  override def newItem(): Future[String] = {
+  override def newItem(name: String, desc: String): Future[String] = {
     val flowId = UUID.fromString("ad1ccc6e-b805-49d2-b2bc-ecb37333f25e")
 
     itemAggregateUseCase.createItem(CreateItemCmdRequest(
       id = UUID.randomUUID(),
-      name = "test",
-      desc = "test",
+      name = name,
+      desc = desc,
       flowId
     )) map {
       case res: CreateItemCmdSuccess => s"id: ${res.id}"

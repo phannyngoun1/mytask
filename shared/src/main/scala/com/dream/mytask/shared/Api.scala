@@ -11,7 +11,7 @@ trait Api {
 
   def getUser(id: String): Future[String]
 
-  def newItem(): Future[String]
+  def newItem(name: String, desc: String): Future[String]
 
   def getItem(id: String) : Future[ItemJson]
 

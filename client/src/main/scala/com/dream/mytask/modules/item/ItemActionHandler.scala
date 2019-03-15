@@ -21,8 +21,8 @@ object ItemActionHandler {
     override def next(newResult: Pot[ItemJson]): FetchItemAction = FetchItemAction(None, newResult)
   }
 
-  case class NewItemAction( potResult: Pot[String] = Empty) extends PotAction[String, NewItemAction] {
-    override def next(newResult: Pot[String]): NewItemAction = NewItemAction(newResult)
+  case class NewItemAction(name: Option[String], desc: Option[String], potResult: Pot[String] = Empty) extends PotAction[String, NewItemAction] {
+    override def next(newResult: Pot[String]): NewItemAction = NewItemAction(None, None, newResult)
   }
 
   def apply(circuit: Circuit[RootModel]) = circuit.composeHandlers(
@@ -66,7 +66,7 @@ class ItemActionHandler[M](modelRW: ModelRW[M, Pot[String]]) extends ActionHandl
 
   override protected def handle = {
     case action: NewItemAction =>
-      val updateF = action.effect(AjaxClient[Api].newItem().call())(identity _ )
+      val updateF = action.effect(AjaxClient[Api].newItem(action.name.get, action.desc.get).call())(identity _ )
       action.handleWith(this, updateF)(PotAction.handler())
 
   }
