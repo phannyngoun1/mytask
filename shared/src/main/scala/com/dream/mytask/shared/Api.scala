@@ -2,6 +2,7 @@ package com.dream.mytask.shared
 
 import com.dream.mytask.shared.data.ItemData.ItemJson
 import com.dream.mytask.shared.data.TaskItem
+import com.dream.mytask.shared.data.WorkflowData.FlowJson
 
 import scala.concurrent.Future
 
@@ -22,4 +23,7 @@ trait Api {
   def createProcessInstance(): Future[String]
 
   def getProcessInstance(id: String): Future[String]
+
+  def getFlow(id: String): Future[FlowJson]
+
 }

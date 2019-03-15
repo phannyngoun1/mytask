@@ -3,6 +3,7 @@ package com.dream.mytask.services
 import com.dream.mytask.shared.data.AccountData.AccountItem
 import com.dream.mytask.shared.data.ItemData.ItemJson
 import com.dream.mytask.shared.data.TaskItem
+import com.dream.mytask.shared.data.WorkflowData.FlowJson
 import diode.data.Pot
 
 object DataModel {
@@ -13,12 +14,20 @@ object DataModel {
 
     taskModel: TaskModel = TaskModel(),
 
+    flowModel: FlowModel = FlowModel(),
+
     processInst: ProcessInstanceModel = ProcessInstanceModel(),
 
     accountModel: AccountModel = AccountModel(),
 
     itemModel: ItemModel = ItemModel()
 
+  )
+
+  case class FlowModel(
+    flowList: Pot[List[FlowJson]] = Pot.empty,
+    flow: Pot[FlowJson] = Pot.empty,
+    message: Pot[String] = Pot.empty
   )
 
   case class TaskModel(

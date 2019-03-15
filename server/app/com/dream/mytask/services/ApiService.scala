@@ -4,7 +4,7 @@ import java.util.UUID
 
 import akka.actor.ActorSystem
 import com.dream.mytask.shared.Api
-import com.dream.mytask.shared.data.{ActionItem, TaskItem}
+import com.dream.mytask.shared.data.{ActionItem, TaskItem, WorkflowData}
 import com.dream.workflow.adaptor.aggregate._
 import com.dream.workflow.adaptor.dao.item.ItemReadModelFlowImpl
 import com.dream.workflow.usecase.AccountAggregateUseCase.Protocol.{GetAccountCmdReq, GetAccountCmdSuccess, _}
@@ -17,7 +17,11 @@ import slick.jdbc.JdbcProfile
 import scala.concurrent.{ExecutionContext, Future}
 
 
-class ApiService(login: UUID)(implicit val ec: ExecutionContext, implicit val  system: ActorSystem) extends Api with ItemService with  ReadSideService {
+class ApiService(login: UUID)(implicit val ec: ExecutionContext, implicit val  system: ActorSystem)
+  extends Api
+    with ItemService
+    with FlowService
+    with  ReadSideService {
 
 
   val rootConfig = ConfigFactory.load()
@@ -79,6 +83,6 @@ class ApiService(login: UUID)(implicit val ec: ExecutionContext, implicit val  s
       case res: GetPInstCmdSuccess => res.folio
       case _ => s"Failed to fetch ${id}"
     }
-
   }
+
 }
