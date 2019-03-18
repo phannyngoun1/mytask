@@ -24,19 +24,6 @@ class ItemReadModelFlowImpl(val profile: JdbcProfile, val db: JdbcProfile#Backen
         .map(_.getOrElse(0L))
     }
 
-  def addNew = {
-    db.run(
-      ItemDao.forceInsert(
-        ItemRecord(
-          UUID.randomUUID().toString,
-          "test",
-          1,
-          TimePoint.from(Instant.now()).asJavaZonedDateTime(),
-          TimePoint.from(Instant.now()).asJavaZonedDateTime()
-        )
-      )
-    )
-  }
 
   override def newItemFlow(implicit ec: ExecutionContext): Flow[(UUID, String,  Long, TimePoint), Int, NotUsed] = {
     Flow[(UUID, String, Long, TimePoint)].mapAsync(1) {

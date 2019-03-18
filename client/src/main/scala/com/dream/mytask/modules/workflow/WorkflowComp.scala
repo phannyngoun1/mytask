@@ -3,6 +3,7 @@ package com.dream.mytask.modules.workflow
 import com.dream.mytask.AppClient.Loc
 import com.dream.mytask.modules.item.ItemActionHandler._
 import com.dream.mytask.modules.item.ItemComp.{Props, State}
+import com.dream.mytask.modules.workflow.WorkflowHandler.{FetchFlowAction, NewFlowAction}
 import com.dream.mytask.services.DataModel.FlowModel
 import com.dream.mytask.shared.data.ItemData.ItemJson
 import diode.react._
@@ -19,11 +20,68 @@ object WorkflowComp {
 
   case class Props(proxy: ModelProxy[FlowModel], c: RouterCtl[Loc])
 
-  case class State()
+  case class State(id: Option[String]= None, name: Option[String] = None)
 
   class Backend($: BackendScope[Props, State]) {
     def render(p: Props, s: State) = {
-      <.div("work flow")
+
+      val wrapper = p.proxy.connect(_.message)
+      val fetchWrapper = p.proxy.connect(_.flow)
+
+      <.div("work flow",
+
+        <.div( "Creation",
+          <.div(
+            <.label("Name")
+          ),
+          <.div(<.input(^.`type` := "text", ^.value := s.name.getOrElse(""), ^.onChange ==> { e: ReactEventFromInput =>
+            val value = if (e.target.value.trim.isEmpty) None else Some(e.target.value)
+            $.modState(_.copy(name = value))
+          })),
+          <.div(
+            <.button("New", ^.onClick --> Callback.when(s.name.isDefined)(p.proxy.dispatchCB(NewFlowAction(s.name))) )
+          ),
+          <.div( "New Flow: ",
+
+            <.div(
+              wrapper(px => {
+                <.div(
+                  px().renderPending(_ > 500, _ => <.p("Loading...")),
+                  px().renderFailed(ex => <.p("Failed to load")),
+                  px().render(m => <.p(s"hello ${m}"))
+                )
+              })
+            )
+
+          )
+        ),
+
+        <.div("Fetch Flow",
+          <.div(
+            <.label("Id"),
+            <.input(^.`type` := "text", ^.value := s.id.getOrElse(""),^.onChange ==> { e: ReactEventFromInput =>
+              val value = if (e.target.value.trim.isEmpty) None else Some(e.target.value)
+              $.modState(_.copy(id = value))
+            })
+          ),
+          <.div(
+            <.button("Fetch", ^.onClick --> Callback.when(s.id.isDefined)(p.proxy.dispatchCB(FetchFlowAction(s.id))) )
+          ),
+          <.div("Result:"),
+          <.div(
+            fetchWrapper(px => {
+              <.div(
+                px().renderPending(_ > 500, _ => <.p("Loading...")),
+                px().renderFailed(ex => <.p("Failed to load")),
+                px().render(m => <.p(s"id: ${m.id}, name: ${m.name}"))
+              )
+            })
+          )
+
+        )
+
+      )
+
     }
   }
 

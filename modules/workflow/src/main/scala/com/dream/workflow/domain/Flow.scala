@@ -5,6 +5,7 @@ import java.util.UUID
 
 import com.dream.common.domain.ErrorMessage
 import julienrf.json._
+import org.sisioh.baseunits.scala.time.TimePoint
 import play.api.libs.json._
 
 sealed trait WorkflowError extends ErrorMessage
@@ -201,6 +202,14 @@ case class DoAction(
 //  implicit val format: Format[Flow] = Json.format
 //}
 
+case class FlowDto(
+  id: UUID,
+  name: String,
+  createdAt: TimePoint,
+  updatedAt: TimePoint,
+  isActive: Boolean = true
+)
+
 case class Flow(
   id: UUID,
   name: String,
@@ -209,7 +218,6 @@ case class Flow(
   isActive: Boolean = true
 
 ) {
-
 
 
   /**based one current activity + action + authorized participant => Next Activity flow

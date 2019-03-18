@@ -5,7 +5,6 @@ import java.util.UUID
 
 import com.dream.common.domain.ErrorMessage
 import org.sisioh.baseunits.scala.time.TimePoint
-import play.api.libs.json.{Format, Json}
 
 object Item {
 

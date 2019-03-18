@@ -19,7 +19,7 @@ trait ReadSideService {
 
     val readModelFlow = new ItemReadModelFlowImpl(dbConfig.profile, dbConfig.db)
 
-    new ReadModelUseCase(readModelFlow, new JournalReaderImpl(system )).execute()
+    new ReadModelUseCase(readModelFlow, new JournalReaderImpl(system )).executeItem()
 
     sys.addShutdownHook {
       system.terminate()
