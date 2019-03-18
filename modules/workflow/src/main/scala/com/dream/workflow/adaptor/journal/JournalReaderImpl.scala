@@ -20,7 +20,7 @@ class JournalReaderImpl(system: ActorSystem) extends JournalReader {
 
     readJournal.eventsByTag(tag, Offset.sequence(seqNr)).map { ee =>
       //    readJournal.eventsByTag(tag, NoOffset).map { ee =>
-      println(s"offset ${ee.persistenceId}  -- ${ee.offset}")
+      println(s"event ${ee.event}, offset ${ee.persistenceId}  -- ${ee.offset}")
 
       val seq = ee.offset match {
         case Sequence(nr) => nr

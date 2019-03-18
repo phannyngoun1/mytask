@@ -3,11 +3,11 @@ package com.dream.workflow.usecase
 import java.util.UUID
 
 import akka.actor.ActorSystem
-import akka.stream.scaladsl.{Keep, Source, SourceQueueWithComplete}
+import akka.stream.scaladsl.{Keep, Sink, Source, SourceQueueWithComplete}
 import akka.stream.{ActorMaterializer, Materializer, OverflowStrategy}
 import com.dream.common.domain.ResponseError
-import com.dream.workflow.domain.{BaseActivity, BaseActivityFlow, Flow}
-import com.dream.workflow.usecase.port.WorkflowAggregateFlows
+import com.dream.workflow.domain.{BaseActivity, BaseActivityFlow, Flow, FlowDto}
+import com.dream.workflow.usecase.port.{FlowReadModelFlow, WorkflowAggregateFlows}
 
 import scala.concurrent.{ExecutionContext, Future, Promise}
 
@@ -47,7 +47,7 @@ object WorkflowAggregateUseCase {
 
 }
 
-class WorkflowAggregateUseCase(workflow: WorkflowAggregateFlows)(implicit system: ActorSystem) extends UseCaseSupport {
+class WorkflowAggregateUseCase(workflow: WorkflowAggregateFlows, readSide: FlowReadModelFlow)(implicit system: ActorSystem) extends UseCaseSupport {
 
   import UseCaseSupport._
   import WorkflowAggregateUseCase.Protocol._
@@ -74,4 +74,9 @@ class WorkflowAggregateUseCase(workflow: WorkflowAggregateFlows)(implicit system
       .via(workflow.getWorkflow.zipPromise)
       .toMat(completePromiseSink)(Keep.left)
       .run()
+
+  def list: Future[List[FlowDto]] = {
+    val sumSink =  Sink.fold[List[FlowDto], FlowDto](List.empty[FlowDto])( (m ,e) =>  e :: m )
+    Source.fromPublisher(readSide.list).toMat(sumSink)(Keep.right).run()
+  }
 }

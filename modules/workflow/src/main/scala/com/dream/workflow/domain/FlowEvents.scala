@@ -3,7 +3,7 @@ package com.dream.workflow.domain
 import java.util.UUID
 
 
-object FlowEvent {
+object FlowEvents {
 
   sealed trait FlowEvent {
     val id: UUID

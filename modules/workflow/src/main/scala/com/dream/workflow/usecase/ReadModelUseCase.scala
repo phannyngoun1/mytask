@@ -6,7 +6,7 @@ import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.{Flow, Keep, Sink, Source}
 import akka.{Done, NotUsed}
-import com.dream.workflow.domain.FlowEvent.{FlowCreated, FlowEvent}
+import com.dream.workflow.domain.FlowEvents.{FlowCreated, FlowEvent}
 import com.dream.workflow.domain.{ItemCreated, ItemEvent}
 import com.dream.workflow.usecase.port.{FlowReadModelFlow, ItemReadModelFlow, JournalReader}
 import org.sisioh.baseunits.scala.time.TimePoint
@@ -36,7 +36,7 @@ class ReadModelUseCase(
       case (event: FlowCreated, sequenceNr: Long) =>
         Source
           .single((event.id, event.name, sequenceNr, TimePoint.from(Instant.now())))
-          .via(readModelFlow.newItemFlow)
+          .via(flowReadModelFlow.newItemFlow)
     }
 
   def executeItem(): Future[Done] = {

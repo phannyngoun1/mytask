@@ -28,6 +28,7 @@ class ItemReadModelFlowImpl(val profile: JdbcProfile, val db: JdbcProfile#Backen
   override def newItemFlow(implicit ec: ExecutionContext): Flow[(UUID, String,  Long, TimePoint), Int, NotUsed] = {
     Flow[(UUID, String, Long, TimePoint)].mapAsync(1) {
       case (id, name, seq, createdAt) =>
+
         db.run(
           ItemDao.forceInsert(
             ItemRecord(

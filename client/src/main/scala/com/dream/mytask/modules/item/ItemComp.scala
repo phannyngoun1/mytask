@@ -24,6 +24,8 @@ object ItemComp {
     implicit  def renderItem(item: ItemJson) = {
       <.li(s"id: ${item.id}, name: ${item.name}")
     }
+
+
     def render(p: Props, s: State) = {
       val wrapper = p.proxy.connect(_.item)
       val message = p.proxy.connect(m=> m.message)

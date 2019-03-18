@@ -1,5 +1,6 @@
 package com.dream.mytask.shared
 
+import com.dream.mytask.shared.data.AccountData.{AccountJson, ParticipantJson}
 import com.dream.mytask.shared.data.ItemData.ItemJson
 import com.dream.mytask.shared.data.TaskItem
 import com.dream.mytask.shared.data.WorkflowData.FlowJson
@@ -27,5 +28,19 @@ trait Api {
   def getFlow(id: String): Future[FlowJson]
 
   def newFlow(name: String): Future[String]
+
+  def getFlowList(): Future[List[FlowJson]]
+
+  def getAcc(id: String): Future[AccountJson]
+
+  def newAccount(name: String, desc: String): Future[String]
+
+  def getAccountList(): Future[List[AccountJson]]
+
+  def getParticipant(id: String): Future[ParticipantJson]
+
+  def newParticipant(id: String): Future[String]
+
+  def getParticipantList(): Future[List[AccountJson]]
 
 }

@@ -6,7 +6,7 @@ import akka.actor.{ActorLogging, Props}
 import akka.persistence._
 import cats.implicits._
 import com.dream.common.EntityState
-import com.dream.workflow.domain.FlowEvent.FlowCreated
+import com.dream.workflow.domain.FlowEvents.FlowCreated
 import com.dream.workflow.domain._
 import com.dream.workflow.entity.workflow.WorkflowProtocol._
 

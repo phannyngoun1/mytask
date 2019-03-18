@@ -78,4 +78,8 @@ trait FlowService {  this: ApiService =>
     }
   }
 
+  override def getFlowList(): Future[List[WorkflowData.FlowJson]] =
+
+    workflowAggregateUseCase.list.map(_.map(item => FlowJson(item.id.toString, item.name)))
+
 }
