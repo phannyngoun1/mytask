@@ -8,8 +8,7 @@ object AccountData {
   )
 
   case class ParticipantJson(
-    id: String,
-    name: String
+    id: String
   )
 
 }

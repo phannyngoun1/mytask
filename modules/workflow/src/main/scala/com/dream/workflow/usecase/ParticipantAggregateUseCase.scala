@@ -4,10 +4,10 @@ import java.util.UUID
 
 import akka.actor.ActorSystem
 import akka.stream._
-import akka.stream.scaladsl.{Keep, Source, SourceQueueWithComplete}
+import akka.stream.scaladsl._
 import com.dream.common.domain.ResponseError
-import com.dream.workflow.domain.{AssignedTask, Participant}
-import com.dream.workflow.usecase.port.ParticipantAggregateFlows
+import com.dream.workflow.domain.{AssignedTask, ParticipantDto}
+import com.dream.workflow.usecase.port.{ParticipantAggregateFlows, ParticipantReadModelFlows}
 
 import scala.concurrent.{ExecutionContext, Future, Promise}
 
@@ -35,7 +35,6 @@ object ParticipantAggregateUseCase {
 
     case class CreateParticipantCmdFailed(error: ResponseError) extends CreateParticipantCmdRes
 
-
     case class GetParticipantCmdReq(
       id: UUID
     ) extends ParticipantCmdRequest
@@ -43,11 +42,10 @@ object ParticipantAggregateUseCase {
     sealed trait GetParticipantCmdRes extends ParticipantCmdResponse
 
     case class GetParticipantCmdSuccess(
-      participant: Participant
+      id: UUID
     ) extends GetParticipantCmdRes
 
     case class GetParticipantCmdFailed(error: ResponseError) extends GetParticipantCmdRes
-
 
     case class AssignTaskCmdReq(
       id: UUID,
@@ -74,7 +72,10 @@ object ParticipantAggregateUseCase {
 
 }
 
-class ParticipantAggregateUseCase(participantAggregateFlows: ParticipantAggregateFlows)(implicit system: ActorSystem) extends UseCaseSupport {
+class ParticipantAggregateUseCase(
+  participantAggregateFlows: ParticipantAggregateFlows,
+  participantReadModelFlows: ParticipantReadModelFlows
+)(implicit system: ActorSystem) extends UseCaseSupport {
 
   import ParticipantAggregateUseCase.Protocol._
   import UseCaseSupport._
@@ -101,6 +102,11 @@ class ParticipantAggregateUseCase(participantAggregateFlows: ParticipantAggregat
   def assignTask(req: AssignTaskCmdReq)(implicit ec: ExecutionContext): Future[AssignTaskCmdRes] =
     offerToQueue(assignTaskQueue)(req, Promise())
 
+  def list: Future[List[ParticipantDto]] = {
+    val sumSink =  Sink.fold[List[ParticipantDto], ParticipantDto](List.empty[ParticipantDto])( (m ,e) =>  e :: m )
+    Source.fromPublisher(participantReadModelFlows.list).toMat(sumSink)(Keep.right).run()
+  }
+
   private val createParticipantQueue: SourceQueueWithComplete[(CreateParticipantCmdReq, Promise[CreateParticipantCmdRes])] =
     Source.queue[(CreateParticipantCmdReq, Promise[CreateParticipantCmdRes])](bufferSize, OverflowStrategy.dropNew)
       .via(participantAggregateFlows.create.zipPromise)
@@ -119,4 +125,5 @@ class ParticipantAggregateUseCase(participantAggregateFlows: ParticipantAggregat
       .via(participantAggregateFlows.assignTask.zipPromise)
       .toMat(completePromiseSink)(Keep.left)
       .run()
+
 }

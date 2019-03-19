@@ -39,7 +39,8 @@ object DataModel {
     accountList: Pot[List[AccountJson]] = Pot.empty,
     participantList: Pot[List[ParticipantJson]] = Pot.empty,
     account: Pot[AccountJson] = Pot.empty,
-    participant: Pot[AccountJson] = Pot.empty
+    participant: Pot[AccountJson] = Pot.empty,
+    message: Pot[String] = Pot.empty
   )
 
   case class ItemModel(

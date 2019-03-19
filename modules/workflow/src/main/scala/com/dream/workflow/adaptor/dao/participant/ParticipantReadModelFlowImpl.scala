@@ -1,0 +1,36 @@
+package com.dream.workflow.adaptor.dao.participant
+
+import java.util.UUID
+
+import akka.NotUsed
+import akka.stream.scaladsl.{Flow, Source}
+import com.dream.workflow.domain.ParticipantDto
+import com.dream.workflow.usecase.port.ParticipantReadModelFlows
+import org.sisioh.baseunits.scala.time.TimePoint
+import slick.jdbc.JdbcProfile
+
+import scala.concurrent.ExecutionContext
+
+class ParticipantReadModelFlowImpl(val profile: JdbcProfile, val db: JdbcProfile#Backend#Database)
+  extends ParticipantComponent with ParticipantReadModelFlows{
+
+  import profile.api._
+
+  override def resolveLastSeqNrSource(implicit ec: ExecutionContext): Source[Long, NotUsed] =
+    Source.single(1).mapAsync(1) { _ =>
+      db.run(ParticipantDao.map(_.sequenceNr).max.result)
+        .map(_.getOrElse(0L))
+    }
+
+  override def newItemFlow(implicit ec: ExecutionContext): Flow[(UUID, String, String, String, String, Long, TimePoint), Int, NotUsed] =
+    Flow[(UUID, String, String, String, String, Long, TimePoint)].mapAsync(1) {
+      case (id, accountId, teamId, departmentId, propertyId, seq, createdAt) =>
+        db.run(
+          ParticipantDao.forceInsert(
+            ParticipantRecord(id.toString, accountId, teamId, departmentId, propertyId, seq, createdAt.asJavaZonedDateTime(), createdAt.asJavaZonedDateTime(), true))
+        )
+    }
+
+  override def list =
+    db.stream(ParticipantDao.sortBy(_.createdAt).result).mapResult(item => ParticipantDto(UUID.fromString(item.id)))
+}

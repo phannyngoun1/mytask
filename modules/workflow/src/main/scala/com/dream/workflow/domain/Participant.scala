@@ -68,6 +68,9 @@ object Participant {
   )
 }
 
+
+case class ParticipantDto(id: UUID)
+
 case class Participant(
   id: UUID,
   accountId: UUID,

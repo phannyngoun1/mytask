@@ -33,7 +33,9 @@ object Account {
     disassociateDate: Instant
   )
 
+  case class AccountDto(id: UUID, name: String, fullName: String)
 }
+
 
 case class Account(
   id: UUID,

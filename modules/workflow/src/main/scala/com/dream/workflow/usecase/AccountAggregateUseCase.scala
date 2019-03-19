@@ -5,10 +5,11 @@ import java.util.UUID
 import akka.NotUsed
 import akka.actor.ActorSystem
 import com.dream.common.domain.ResponseError
+import com.dream.workflow.domain.Account.AccountDto
 import com.dream.workflow.domain.Task
 import com.dream.workflow.usecase.ParticipantAggregateUseCase.Protocol.{GetAssignedTaskCmdReq, GetAssignedTaskCmdSuccess}
 import com.dream.workflow.usecase.ProcessInstanceAggregateUseCase.Protocol.{GetTaskCmdReq, GetTaskCmdSuccess}
-import com.dream.workflow.usecase.port.{AccountAggregateFlows, ParticipantAggregateFlows, ProcessInstanceAggregateFlows}
+import com.dream.workflow.usecase.port.{AccountAggregateFlows, AccountReadModelFlow, ParticipantAggregateFlows, ProcessInstanceAggregateFlows}
 
 import scala.concurrent.{ExecutionContext, Future, Promise}
 
@@ -76,7 +77,8 @@ object AccountAggregateUseCase {
 class AccountAggregateUseCase(
   flow: AccountAggregateFlows,
   partFlow: ParticipantAggregateFlows,
-  pInstFlow: ProcessInstanceAggregateFlows)
+  pInstFlow: ProcessInstanceAggregateFlows,
+  accReadModelFlow: AccountReadModelFlow)
   (implicit system: ActorSystem) extends UseCaseSupport {
 
   import AccountAggregateUseCase.Protocol._
@@ -145,5 +147,9 @@ class AccountAggregateUseCase(
   def getTasks(req: GetTaskLisCmdReq)(implicit ec: ExecutionContext): Future[List[Task]] =
     offerToQueue(getTaskQueue)(req, Promise())
 
+  def list: Future[List[AccountDto]] = {
+    val sumSink =  Sink.fold[List[AccountDto], AccountDto](List.empty[AccountDto])( (m ,e) =>  e :: m )
+    Source.fromPublisher(accReadModelFlow.list).toMat(sumSink)(Keep.right).run()
+  }
 
 }

@@ -62,7 +62,7 @@ class NewAccActionHandler[M](modelRW: ModelRW[M, Pot[String]]) extends ActionHan
   implicit val runner = new RunAfterJS
   import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 
-  override protected def handle: PartialFunction[Any, ActionResult[M]] ={
+  override protected def handle: PartialFunction[Any, ActionResult[M]] = {
     case action: NewAccAction =>
       val updateF = action.effect(AjaxClient[Api].newAccount(action.name.get, action.desc.get).call())(identity _)
       action.handleWith(this, updateF)(PotAction.handler())

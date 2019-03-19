@@ -1,5 +1,7 @@
 package com.dream.mytask.shared
 
+import java.util.UUID
+
 import com.dream.mytask.shared.data.AccountData.{AccountJson, ParticipantJson}
 import com.dream.mytask.shared.data.ItemData.ItemJson
 import com.dream.mytask.shared.data.TaskItem
@@ -33,7 +35,7 @@ trait Api {
 
   def getAcc(id: String): Future[AccountJson]
 
-  def newAccount(name: String, desc: String): Future[String]
+  def newAccount(name: String, fullName: String, participantId: Option[UUID] = None ): Future[String]
 
   def getAccountList(): Future[List[AccountJson]]
 
