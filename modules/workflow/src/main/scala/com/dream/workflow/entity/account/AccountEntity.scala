@@ -8,7 +8,7 @@ import cats.implicits._
 import com.dream.common.EntityState
 import com.dream.common.Protocol.CmdResponseFailed
 import com.dream.common.domain.ResponseError
-import com.dream.workflow.domain.Account._
+import com.dream.workflow.domain.Account.{AccountError, _}
 import com.dream.workflow.domain.Account
 import com.dream.workflow.entity.account.AccountProtocol._
 
@@ -94,7 +94,10 @@ class AccountEntity extends PersistentActor with ActorLogging with EntityState[A
 
     case SaveSnapshotSuccess(metadata) =>
       log.debug(s"receiveCommand: SaveSnapshotSuccess succeeded: $metadata")
-    case cmd: AccountCmdRequest =>  println(s"no handler for : ${cmd} ")
+    case cmd: AccountCmdRequest =>
+      println(s"no handler for : ${cmd} ")
+      sender() ! ResParticipantCmdFailed(cmd.id, InvalidAccountStateError() )
+
   }
 
   override def persistenceId: String =  s"$AggregateName-${self.path.name}"

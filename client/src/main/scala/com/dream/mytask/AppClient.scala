@@ -16,18 +16,18 @@ object AppClient {
     import dsl._
 
     val taskListRoute = staticRoute("#tasks", TaskListLoc) ~> renderR( c=> AppCircuit.wrap(_.taskModel.taskList)(proxy => TaskListComp(proxy, c)))
-    val processInstRoute = staticRoute("#pinst", ProcessInstLoc) ~> renderR( c=> AppCircuit.wrap(_.processInst)(proxy => ProcessInstComp(proxy, c)))
+    val processInstRoute = staticRoute("#instance", ProcessInstLoc) ~> renderR( c=> AppCircuit.wrap(_.processInst)(proxy => ProcessInstComp(proxy, c)))
     val itemRoute = staticRoute("#item", ItemLoc) ~> renderR( c=> AppCircuit.wrap(_.itemModel)(proxy => ItemComp(proxy, c)))
-    val accComp = staticRoute("#acc", AccLoc) ~> renderR( c=> AppCircuit.wrap(_.accountModel)(proxy => AccountComp(proxy, c)))
-    val flowComp = staticRoute("#flow", FlowLoc) ~> renderR( c=> AppCircuit.wrap(_.flowModel)(proxy => WorkflowComp(proxy, c)))
+    val accRoute = staticRoute("#account", AccLoc) ~> renderR( c=> AppCircuit.wrap(_.accountModel)(proxy => AccountComp(proxy, c)))
+    val flowRoute = staticRoute("#flow", FlowLoc) ~> renderR( c=> AppCircuit.wrap(_.flowModel)(proxy => WorkflowComp(proxy, c)))
 
     (
       staticRoute(root, DashboardLoc) ~> renderR(c => AppCircuit.wrap(_.message)(proxy => Dashboard(proxy, c)))
       | taskListRoute
       | processInstRoute
       | itemRoute
-      | accComp
-      | flowComp
+      | accRoute
+      | flowRoute
       ).notFound(redirectToPage(DashboardLoc)(Redirect.Replace))
 
   }.renderWith(layout)

@@ -14,7 +14,7 @@ trait ParticipantReadModelFlows {
 
   def resolveLastSeqNrSource(implicit ec: ExecutionContext): Source[Long, NotUsed]
 
-  def newItemFlow(implicit ec: ExecutionContext): Flow[(UUID, String, String, String, String, Long, TimePoint), Int, NotUsed]
+  def newItemFlow(implicit ec: ExecutionContext): Flow[(UUID, UUID, UUID, UUID, UUID, Long, TimePoint), Int, NotUsed]
 
   def list: DatabasePublisher[ParticipantDto]
 

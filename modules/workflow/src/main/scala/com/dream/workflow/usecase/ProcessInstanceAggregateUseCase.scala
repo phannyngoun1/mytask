@@ -81,7 +81,14 @@ class ProcessInstanceAggregateUseCase(
   import ProcessInstanceAggregateUseCase.Protocol._
   import UseCaseSupport._
 
-  implicit val mat: Materializer = ActorMaterializer()
+  val decider: Supervision.Decider = {
+    case _ => Supervision.Restart
+  }
+
+  implicit val mat = ActorMaterializer(
+    ActorMaterializerSettings(system)
+      .withSupervisionStrategy(decider)
+  )
 
   private val prepareCreateInst = Flow.fromGraph(GraphDSL.create() { implicit b =>
     import GraphDSL.Implicits._

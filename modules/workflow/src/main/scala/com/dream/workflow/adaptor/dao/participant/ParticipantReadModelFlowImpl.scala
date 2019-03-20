@@ -22,15 +22,25 @@ class ParticipantReadModelFlowImpl(val profile: JdbcProfile, val db: JdbcProfile
         .map(_.getOrElse(0L))
     }
 
-  override def newItemFlow(implicit ec: ExecutionContext): Flow[(UUID, String, String, String, String, Long, TimePoint), Int, NotUsed] =
-    Flow[(UUID, String, String, String, String, Long, TimePoint)].mapAsync(1) {
+  override def newItemFlow(implicit ec: ExecutionContext): Flow[(UUID, UUID, UUID, UUID, UUID, Long, TimePoint), Int, NotUsed] =
+    Flow[(UUID, UUID, UUID, UUID, UUID, Long, TimePoint)].mapAsync(1) {
       case (id, accountId, teamId, departmentId, propertyId, seq, createdAt) =>
         db.run(
           ParticipantDao.forceInsert(
-            ParticipantRecord(id.toString, accountId, teamId, departmentId, propertyId, seq, createdAt.asJavaZonedDateTime(), createdAt.asJavaZonedDateTime(), true))
+            ParticipantRecord(
+              id.toString,
+              accountId.toString,
+              teamId.toString,
+              departmentId.toString,
+              propertyId.toString, seq,
+              createdAt.asJavaZonedDateTime(),
+              createdAt.asJavaZonedDateTime(),
+              true
+            )
+          )
         )
     }
 
   override def list =
-    db.stream(ParticipantDao.sortBy(_.createdAt).result).mapResult(item => ParticipantDto(UUID.fromString(item.id)))
+    db.stream(ParticipantDao.sortBy(_.createdAt).result).mapResult(item => ParticipantDto(UUID.fromString(item.id), UUID.fromString(item.accountId)))
 }

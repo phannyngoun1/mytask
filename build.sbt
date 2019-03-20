@@ -59,8 +59,7 @@ lazy val client = (project in file("client"))
       "com.github.japgolly.scalajs-react" %%% "extra" % "1.4.0",
       "com.github.japgolly.scalacss" %%% "ext-react" % "0.5.5",
       "org.scala-js" %%% "scalajs-dom" % "0.9.6",
-      "com.lihaoyi" %%% "scalatags" % "0.6.7",
-
+      "com.lihaoyi" %%% "scalatags" % "0.6.7"
       //    "io.suzaku" %%% "diode-core" % "1.1.3",
       //    "io.suzaku" %%% "diode-react" % "1.1.3",
     ),

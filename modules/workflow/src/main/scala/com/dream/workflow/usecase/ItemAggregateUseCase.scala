@@ -4,7 +4,7 @@ import java.util.UUID
 
 import akka.actor.ActorSystem
 import akka.stream.scaladsl.{Keep, Sink, Source, SourceQueueWithComplete}
-import akka.stream.{ActorMaterializer, Materializer, OverflowStrategy}
+import akka.stream._
 import com.dream.common.domain.ResponseError
 import com.dream.workflow.domain.Item
 import com.dream.workflow.usecase.port.{ItemAggregateFlows, ItemReadModelFlow}
@@ -57,7 +57,14 @@ class ItemAggregateUseCase(itemAggregateFlows: ItemAggregateFlows,itemReadModelF
   import ItemAggregateUseCase.Protocol._
   import UseCaseSupport._
 
-  implicit val mat: Materializer = ActorMaterializer()
+  val decider: Supervision.Decider = {
+    case _ => Supervision.Restart
+  }
+
+  implicit val mat = ActorMaterializer(
+    ActorMaterializerSettings(system)
+      .withSupervisionStrategy(decider)
+  )
   private implicit val ec: ExecutionContextExecutor = system.dispatcher
 
   private val bufferSize: Int = 10

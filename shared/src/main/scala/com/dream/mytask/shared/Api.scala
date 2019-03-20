@@ -41,8 +41,8 @@ trait Api {
 
   def getParticipant(id: String): Future[ParticipantJson]
 
-  def newParticipant(id: String): Future[String]
+  def newParticipant(accId: String): Future[String]
 
-  def getParticipantList(): Future[List[AccountJson]]
+  def getParticipantList(): Future[List[ParticipantJson]]
 
 }

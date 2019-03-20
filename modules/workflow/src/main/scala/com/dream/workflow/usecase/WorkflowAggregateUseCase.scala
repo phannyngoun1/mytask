@@ -4,7 +4,7 @@ import java.util.UUID
 
 import akka.actor.ActorSystem
 import akka.stream.scaladsl.{Keep, Sink, Source, SourceQueueWithComplete}
-import akka.stream.{ActorMaterializer, Materializer, OverflowStrategy}
+import akka.stream._
 import com.dream.common.domain.ResponseError
 import com.dream.workflow.domain.{BaseActivity, BaseActivityFlow, Flow, FlowDto}
 import com.dream.workflow.usecase.port.{FlowReadModelFlow, WorkflowAggregateFlows}
@@ -53,7 +53,14 @@ class WorkflowAggregateUseCase(workflow: WorkflowAggregateFlows, readSide: FlowR
   import WorkflowAggregateUseCase.Protocol._
 
   private val bufferSize: Int = 10
-  implicit val mat: Materializer = ActorMaterializer()
+  val decider: Supervision.Decider = {
+    case _ => Supervision.Restart
+  }
+
+  implicit val mat = ActorMaterializer(
+    ActorMaterializerSettings(system)
+      .withSupervisionStrategy(decider)
+  )
 
   def createWorkflow(request: CreateWorkflowCmdRequest)(implicit ec: ExecutionContext): Future[CreateWorkflowCmdResponse] = {
     offerToQueue(createWorkflowQueue)(request, Promise())

@@ -18,7 +18,7 @@ trait ParticipantComponent  extends ComponentSupport with ParticipantComponentSu
     active: Boolean
   ) extends Record
 
-  case class Participants(tag: Tag) extends TableBase[ParticipantRecord](tag, "item") {
+  case class Participants(tag: Tag) extends TableBase[ParticipantRecord](tag, "participant") {
     // def id = column[Long]("id", O.PrimaryKey)
     def name          = column[String]("name")
     def accountId     = column[String]("account_id")

@@ -6,8 +6,10 @@ import akka.actor.ActorSystem
 import com.dream.mytask.shared.Api
 import com.dream.mytask.shared.data.{AccountData, ActionItem, TaskItem, WorkflowData}
 import com.dream.workflow.adaptor.aggregate._
+import com.dream.workflow.adaptor.dao.account.AccountReadModelFlowImpl
 import com.dream.workflow.adaptor.dao.flow.FlowReadModelFlowImpl
 import com.dream.workflow.adaptor.dao.item.ItemReadModelFlowImpl
+import com.dream.workflow.adaptor.dao.participant.ParticipantReadModelFlowImpl
 import com.dream.workflow.adaptor.journal.JournalReaderImpl
 import com.dream.workflow.usecase.AccountAggregateUseCase.Protocol.{GetAccountCmdReq, GetAccountCmdSuccess, _}
 import com.dream.workflow.usecase.ProcessInstanceAggregateUseCase.Protocol.{CreatePInstCmdRequest, CreatePInstCmdSuccess, GetPInstCmdRequest, GetPInstCmdSuccess}
@@ -30,6 +32,8 @@ class ApiService(login: UUID)(implicit val ec: ExecutionContext, implicit val  s
   val dbConfig = DatabaseConfig.forConfig[JdbcProfile](path = "slickR", rootConfig)
   val readSideFlow = new ItemReadModelFlowImpl(dbConfig.profile, dbConfig.db)
   val flowReadModelFlow = new FlowReadModelFlowImpl(dbConfig.profile, dbConfig.db)
+  val accountReadModelFlow = new AccountReadModelFlowImpl(dbConfig.profile, dbConfig.db)
+  val participantReadModelFlows = new ParticipantReadModelFlowImpl(dbConfig.profile, dbConfig.db)
 
   val localEntityAggregates = system.actorOf(LocalEntityAggregates.props, LocalEntityAggregates.name)
 
@@ -41,19 +45,24 @@ class ApiService(login: UUID)(implicit val ec: ExecutionContext, implicit val  s
   val itemAggregateUseCase = new ItemAggregateUseCase(itemFlow,readSideFlow )
   val workflowAggregateUseCase = new WorkflowAggregateUseCase(workFlow, flowReadModelFlow)
   val processInstance = new ProcessInstanceAggregateUseCase(pInstFlow, workFlow, itemFlow, participantFlow)
-  val accountUseCase = new AccountAggregateUseCase(accountFlow,participantFlow, pInstFlow )
-  val participantUseCase = new ParticipantAggregateUseCase(participantFlow)
+  val accountUseCase = new AccountAggregateUseCase(accountFlow,participantFlow, pInstFlow, accountReadModelFlow )
+  val participantUseCase = new ParticipantAggregateUseCase(participantFlow, participantReadModelFlows)
 
-
-
-  val ex = new ReadModelUseCase(readSideFlow, flowReadModelFlow, new JournalReaderImpl(system))
-  ex.executeItem()
-  ex.executeFlow()
+  val ex = new ReadModelUseCase(
+    readSideFlow,
+    flowReadModelFlow,
+    accountReadModelFlow,
+    participantReadModelFlows ,
+    new JournalReaderImpl(system)
+  )
+  ex.executeItem
+  ex.executeFlow
+  ex.executeAcc
+  ex.executeParticipant
 
   sys.addShutdownHook {
     system.terminate()
   }
-
 
   override def welcomeMessage(smg: String): Future[String] = {
     Future.successful(s"welcome $smg - ${UUID.randomUUID()}")

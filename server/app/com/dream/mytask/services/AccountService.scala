@@ -4,7 +4,7 @@ import java.util.UUID
 
 import com.dream.mytask.shared.data.AccountData._
 import com.dream.workflow.usecase.AccountAggregateUseCase.Protocol._
-import com.dream.workflow.usecase.ParticipantAggregateUseCase.Protocol.{GetParticipantCmdSuccess, _}
+import com.dream.workflow.usecase.ParticipantAggregateUseCase.Protocol.{GetParticipantCmdSuccess => GetPartSuccess, GetParticipantCmdReq => GetPart, _}
 
 import scala.concurrent.Future
 
@@ -27,25 +27,28 @@ trait AccountService { this: ApiService =>
   }
 
   override def getAccountList(): Future[List[AccountJson]] =
+//    Future.successful(List(AccountJson("sss", "sss")))
     accountUseCase.list.map(_.map(acc=> AccountJson(acc.id.toString, acc.name)))
 
   override def getParticipant(id: String): Future[ParticipantJson] = {
-    participantUseCase.getParticipant(GetParticipantCmdReq(UUID.fromString(id))) map {
-      case res: GetParticipantCmdSuccess => ParticipantJson(res.id.toString)
-      case _ => ParticipantJson("")
+    participantUseCase.getParticipant(GetPart(UUID.fromString(id))) map {
+      case res: GetPartSuccess => ParticipantJson(res.id.toString, res.accountId.toString)
+      case _ => ParticipantJson("", "")
     }
   }
 
-  override def newParticipant(id: String): Future[String] = {
-    val id = UUID.fromString(id)
-    participantUseCase.createParticipant(CreateParticipantCmdReq(id, id, id, id, id)) map {
+  override def newParticipant(accId: String): Future[String] = {
+    val accountId = UUID.fromString(accId)
+
+    participantUseCase.createParticipant(CreateParticipantCmdReq(UUID.randomUUID(), accountId, accountId, accountId, accountId)) map {
       case CreateParticipantCmdSuccess(id) => id.toString
       case _ => ""
     }
   }
 
   override def getParticipantList(): Future[List[ParticipantJson]] = {
-    participantUseCase.list.map(_.map(item => ParticipantJson(item.id.toString)))
+
+    participantUseCase.list.map(_.map(item => ParticipantJson(item.id.toString, item.accountId.toString)))
   }
 
 

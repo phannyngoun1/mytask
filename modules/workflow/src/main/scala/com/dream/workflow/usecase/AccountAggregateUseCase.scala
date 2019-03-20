@@ -63,6 +63,7 @@ object AccountAggregateUseCase {
     case class GetParticipantCmdReq(accId: UUID) extends AccountCmdRequest
 
     sealed trait GetParticipantCmdRes extends AccountCmdResponse
+
     case class GetParticipantCmdSuccess(participantIds: List[UUID]) extends GetParticipantCmdRes
     case class GetParticipantCmdFailed(responseError: ResponseError) extends GetParticipantCmdRes
 
@@ -86,7 +87,14 @@ class AccountAggregateUseCase(
   import akka.stream._
   import akka.stream.scaladsl._
 
-  implicit val mat: Materializer = ActorMaterializer()
+  val decider: Supervision.Decider = {
+    case _ => Supervision.resume
+  }
+
+  implicit val mat = ActorMaterializer(
+    ActorMaterializerSettings(system)
+      .withSupervisionStrategy(decider)
+  )
 
   private val bufferSize: Int = 10
 

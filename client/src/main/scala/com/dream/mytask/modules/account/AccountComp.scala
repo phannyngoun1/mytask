@@ -1,10 +1,11 @@
 package com.dream.mytask.modules.account
 
 import com.dream.mytask.AppClient.Loc
-import com.dream.mytask.modules.account.AccountActionHandler.{FetchAccAction, FetchAccListAction}
-import com.dream.mytask.modules.item.ItemActionHandler.NewItemAction
+import com.dream.mytask.modules.account.AccountActionHandler._
+import com.dream.mytask.modules.item.ItemActionHandler.{FetchItemListAction, NewItemAction}
+import com.dream.mytask.modules.processinst.ProcessInstActionHandler.FetchPInstAction
 import com.dream.mytask.services.DataModel.AccountModel
-import com.dream.mytask.shared.data.AccountData.AccountJson
+import com.dream.mytask.shared.data.AccountData.{AccountJson, ParticipantJson}
 import diode.react.ReactPot._
 import diode.react._
 import japgolly.scalajs.react.BackendScope
@@ -16,7 +17,7 @@ object AccountComp {
 
   case class Props(proxy: ModelProxy[AccountModel], c: RouterCtl[Loc])
 
-  case class State(id: Option[String] = None, accName: Option[String] = None, desc: Option[String] = None)
+  case class State(id: Option[String] = None, accountId: Option[String] = None , accName: Option[String] = None, fullName: Option[String] = None)
 
   class Backend($: BackendScope[Props, State]) {
 
@@ -25,14 +26,22 @@ object AccountComp {
       <.li(s"id: ${item.id}, name: ${item.name}")
     }
 
+    implicit def renderParticipantItem(item: ParticipantJson) = {
+      <.li(s"id: ${item.id}, account id: ${item.accountId}")
+    }
+
     def render(p: Props, s: State) = {
 
-      val fetchWrapper = p.proxy.connect(_.message)
+      val messageWrapper = p.proxy.connect(_.message)
+      val fetchAccountWrapper = p.proxy.connect(_.account)
+      val fetchPPWrapper = p.proxy.connect(_.participant)
       val listWrapper = p.proxy.connect(_.accountList)
+      val listParticipant = p.proxy.connect(_.participantList)
 
-      <.div("User",
-
-        <.div("Account List",
+      <.div(
+        <.h3("User"),
+        <.h2("Account List"),
+        <.div(
           listWrapper(md => {
           <.div(
             md().renderPending(_ > 500, _ => <.p("Loading...")),
@@ -43,31 +52,72 @@ object AccountComp {
           )})
         ),
 
-        <.div("Message",
-
-          fetchWrapper(md => {
+        <.h2("Participant List"),
+        <.div(
+          listParticipant(md => {
             <.div(
               md().renderPending(_ > 500, _ => <.p("Loading...")),
               md().renderFailed(ex => <.p("Failed to load")),
-              md().render(m => <.p(s"hello ${m}"))
+              md().render(m => <.ol( ^.`type` := "1",
+                m toTagMod
+              ))
+            )})
+        ),
+
+        <.div(
+          <.h3("Message"),
+          messageWrapper(md => {
+            <.div(
+              md().renderPending(_ > 500, _ => <.p("Loading...")),
+              md().renderFailed(ex => <.p("Failed to load")),
+              md().render(m => <.p(s"message: ${m}"))
             )
           })
         ),
 
 
-        <.div("Get Item",
+        <.div(
+          <.h2("Get Data"),
           <.div(
             <.input(^.`type` := "text", ^.value := s.id.getOrElse(""), ^.onChange ==> { e: ReactEventFromInput =>
               val value = if (e.target.value.trim.isEmpty) None else Some(e.target.value)
               $.modState(_.copy(id = value))
             })
           ),
-          <.button("Fetch", ^.onClick --> Callback.when(s.id.isDefined)(
+          <.button("Fetch Account", ^.onClick --> Callback.when(s.id.isDefined)(
             p.proxy.dispatchCB(FetchAccAction(s.id)))
+          ),
+          <.button("Fetch Participant", ^.onClick --> Callback.when(s.id.isDefined){
+
+            println("Fetch Participant click")
+
+            p.proxy.dispatchCB(FetchParticipantAction(s.id))
+          }
+
+          ),
+          <.div(
+            fetchAccountWrapper(md => {
+              <.div(
+                md().renderPending(_ > 500, _ => <.p("Loading...")),
+                md().renderFailed(ex => <.p("Failed to load")),
+                md().render(m => <.p(s"accId: ${m.id}, acc name: ${m.name}"))
+              )
+            })
+
+          ),
+
+          <.div(
+            fetchPPWrapper(md => {
+              <.div(
+                md().renderPending(_ > 500, _ => <.p("Loading...")),
+                md().renderFailed(ex => <.p("Failed to load")),
+                md().render(m => <.p(s"participant id: ${m.id}, acc id: ${m.accountId}"))
+              )
+            })
           )
         ),
-        <.div("New",
-
+        <.div(
+          <.h2("New account"),
           <.div(
             <.label("Name:"),
             <.input(^.`type` := "text", ^.value := s.accName.getOrElse(""), ^.onChange ==> { e: ReactEventFromInput =>
@@ -76,14 +126,26 @@ object AccountComp {
             })
           ),
           <.div(
-            <.label("Description:"),
-            <.input(^.`type` := "text", ^.value := s.desc.getOrElse(""), ^.onChange ==> { e: ReactEventFromInput =>
+            <.label("Full Name:"),
+            <.input(^.`type` := "text", ^.value := s.fullName.getOrElse(""), ^.onChange ==> { e: ReactEventFromInput =>
               val value = if (e.target.value.trim.isEmpty) None else Some(e.target.value)
-              $.modState(_.copy(desc = value))
+              $.modState(_.copy(fullName = value))
             })
           ),
-          <.button(^.value := "New Account", ^.onClick --> Callback.when(s.id.isDefined)(
-            p.proxy.dispatchCB(NewItemAction(s.accName, s.desc)))
+          <.button("New Account", ^.onClick --> Callback.when(s.accName.isDefined && s.fullName.isDefined)(
+            p.proxy.dispatchCB(NewAccAction(s.accName, s.fullName)))
+          ),
+          <.h2("New Participant"),
+          <.div(
+            <.label("Account Id:"),
+            <.input(^.`type` := "text", ^.value := s.accountId.getOrElse(""), ^.onChange ==> { e: ReactEventFromInput =>
+              val value = if (e.target.value.trim.isEmpty) None else Some(e.target.value)
+              $.modState(_.copy(accountId = value))
+            })
+          ),
+
+          <.button("New Participant", ^.onClick --> Callback.when(s.accountId.isDefined)(
+            p.proxy.dispatchCB(NewParticipantAction(s.accountId)))
           )
         )
       )
@@ -94,6 +156,7 @@ object AccountComp {
     .initialStateFromProps(p => State())
     .renderBackend[Backend]
     .componentDidMount(_.props.proxy.dispatchCB(FetchAccListAction()))
+    .componentDidMount(_.props.proxy.dispatchCB(FetchParticipantListAction()))
     .build
 
   def apply(proxy: ModelProxy[AccountModel], c: RouterCtl[Loc]) = component(Props(proxy, c))

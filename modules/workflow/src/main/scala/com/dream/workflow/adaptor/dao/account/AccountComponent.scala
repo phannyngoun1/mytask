@@ -16,10 +16,10 @@ trait AccountComponent  extends ComponentSupport with AccountComponentSupport {
     active: Boolean
   ) extends Record
 
-  case class Accounts(tag: Tag) extends TableBase[AccountRecord](tag, "item") {
+  case class Accounts(tag: Tag) extends TableBase[AccountRecord](tag, "account") {
     // def id = column[Long]("id", O.PrimaryKey)
     def name          = column[String]("name")
-    def fullName     = column[String]("account_id")
+    def fullName     = column[String]("full_name")
     def sequenceNr        = column[Long]("sequence_nr")
     def createdAt  = column[java.time.ZonedDateTime]("created_at")
     def updatedAt  = column[java.time.ZonedDateTime]("updated_at")

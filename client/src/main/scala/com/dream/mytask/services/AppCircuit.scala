@@ -6,6 +6,7 @@ import diode.data._
 import diode.react.ReactConnector
 import diode.util._
 import boopickle.Default._
+import com.dream.mytask.modules.account.AccountActionHandler
 import com.dream.mytask.modules.item.ItemActionHandler
 import com.dream.mytask.modules.processinst.{FetchPInstActionHandler, NewPInstActonHandler, ProcessInstActionHandler}
 import com.dream.mytask.modules.task.TaskActionListHandler
@@ -56,7 +57,8 @@ object AppCircuit extends Circuit[RootModel] with ReactConnector[RootModel] {
   override protected def actionHandler: AppCircuit.HandlerFunction = foldHandlers(
     handlers,
     ItemActionHandler(this),
-    WorkflowHandler(this)
+    WorkflowHandler(this),
+    AccountActionHandler(this)
   )
 
 

@@ -42,7 +42,8 @@ object ParticipantAggregateUseCase {
     sealed trait GetParticipantCmdRes extends ParticipantCmdResponse
 
     case class GetParticipantCmdSuccess(
-      id: UUID
+      id: UUID,
+      accountId: UUID
     ) extends GetParticipantCmdRes
 
     case class GetParticipantCmdFailed(error: ResponseError) extends GetParticipantCmdRes

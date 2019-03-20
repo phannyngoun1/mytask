@@ -30,7 +30,8 @@ object ItemComp {
       val wrapper = p.proxy.connect(_.item)
       val message = p.proxy.connect(m=> m.message)
       val list = p.proxy.connect(_.itemList)
-      <.div( "Item List:",
+      <.div(
+        <.h3("Item List:"),
         <.div(
           list(px => {
             <.div(
@@ -43,13 +44,15 @@ object ItemComp {
           })
         ),
         <.div(
+          <.label("item id"),
           <.input(^.`type` := "text", ^.value := s.id.getOrElse(""), ^.onChange ==> { e: ReactEventFromInput =>
             val id = if (e.target.value.trim.isEmpty) None else Some(e.target.value)
             $.modState(_.copy(id = id))
           })
         ),
           <.button("Fetch Item", ^.onClick --> p.proxy.dispatchCB(FetchItemAction(s.id))),
-        <.div( "Result",
+        <.div(
+          <.h3("Result"),
           <.div(
             wrapper(px => {
               <.div(
@@ -81,7 +84,8 @@ object ItemComp {
           <.button("Create Item", ^.onClick --> Callback.when(s.itemName.isDefined && s.desc.isDefined)(
             p.proxy.dispatchCB(NewItemAction(s.itemName, s.desc)) >>  p.proxy.dispatchCB(FetchItemListAction())
           )),
-          <.div( "new item:",
+          <.div(
+            <.h3("new item:"),
             <.div(
               message(px => {
                 <.div(
