@@ -16,6 +16,7 @@ trait AccountReadModelFlow {
 
   def newAccountFlow(implicit ec: ExecutionContext): Flow[(UUID, String, String, Long, TimePoint), Int, NotUsed]
 
+
   def list: DatabasePublisher[AccountDto]
 
 }

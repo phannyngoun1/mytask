@@ -51,6 +51,10 @@ class ReadModelUseCase(
       case (event: AccountCreated, sequenceNr: Long) =>
         Source.single((event.id, event.name, event.fullName, sequenceNr, TimePoint.from(Instant.now())))
           .via(accountReadModelFlow.newAccountFlow)
+
+      case _ => Source.single("").via(Flow[String].mapAsync(1){
+        case  _ => Future.successful(0)
+      })
     }
 
 //  teamId, departmentId, propertyId
@@ -101,6 +105,9 @@ class ReadModelUseCase(
   def executeAcc: Future[Done] = {
     accountReadModelFlow.resolveLastSeqNrSource
       .flatMapConcat { lastSeqNr =>
+
+        println(s"Account==============>lastSeqNr: ${lastSeqNr}")
+
         journalReader.eventsByTagSource(classOf[AccountEvent].getName, lastSeqNr )
       }
       .map { eventBody =>

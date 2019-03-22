@@ -14,7 +14,7 @@ trait PInstanceComponent  extends ComponentSupport with PInstanceComponentSuppor
     updatedAt: java.time.ZonedDateTime
   ) extends Record
 
-  case class PInstances(tag: Tag) extends TableBase[PInstanceRecord](tag, "participant") {
+  case class PInstances(tag: Tag) extends TableBase[PInstanceRecord](tag, "process_instance") {
     // def id = column[Long]("id", O.PrimaryKey)
     def folio          = column[String]("folio")
     def sequenceNr        = column[Long]("sequence_nr")
