@@ -1,14 +1,14 @@
 package com.dream.mytask.modules.task
 
-import com.dream.mytask.shared.data.TaskItem
+import com.dream.mytask.shared.data.TaskItemJson
 import diode._
 import diode.data._
 import autowire._
 import diode.util._
 import boopickle.Default._
 import TaskActionListHandler.TaskListActions._
-
 import com.dream.mytask.services.AjaxClient
+import com.dream.mytask.services.DataModel.RootModel
 import com.dream.mytask.shared.Api
 
 import scala.util.{Failure, Try}
@@ -37,34 +37,24 @@ object TaskActionListHandler {
 
   object TaskListActions {
 
-    case class FetchTaskListAction(potResult: Pot[List[TaskItem]] = Empty) extends PotAction[List[TaskItem], FetchTaskListAction] {
-      override def next(newResult: Pot[List[TaskItem]]): FetchTaskListAction = FetchTaskListAction(newResult)
+    case class FetchTaskListAction(accId: Option[String], potResult: Pot[List[TaskItemJson]] = Empty) extends PotAction[List[TaskItemJson], FetchTaskListAction] {
+      override def next(newResult: Pot[List[TaskItemJson]]): FetchTaskListAction = FetchTaskListAction(None, newResult)
     }
   }
+
+  def apply(circuit: Circuit[RootModel]) = circuit.composeHandlers(
+    new TaskActionListHandler(circuit.zoomRW(_.taskModel.taskList)((m, v) => m.copy(taskModel = m.taskModel.copy(taskList = v))))
+  )
+
 }
 
-
-
-//class TaskListActionHandler[M](modelRW: ModelRW[M, PotMap[String, User]]) extends ActionHandler(modelRW) {
-//
-//
-//  def loadUsers(keys: Set[String]): Future[Map[String, Pot[User]]] = ???
-//
-//  override protected def handle  = {
-//    case action: UpdateUsers =>
-//      val updateEffect = action.effect(loadUsers(action.keys))(identity)
-//      action.handleWith(this, updateEffect)(AsyncAction.mapHandler(action.keys))
-//  }
-//}
-
-
-class TaskActionListHandler[M](modelRW: ModelRW[M, Pot[List[TaskItem]]]) extends ActionHandler(modelRW) {
+class TaskActionListHandler[M](modelRW: ModelRW[M, Pot[List[TaskItemJson]]]) extends ActionHandler(modelRW) {
   implicit val runner = new RunAfterJS
   import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 
   override protected def handle = {
     case action: FetchTaskListAction =>
-      val updateF = action.effect(AjaxClient[Api].getTasks("8dbd6bf8-2f60-4e6e-8e3f-b374e060a940").call())(identity _)
+      val updateF = action.effect(AjaxClient[Api].getTasks(action.accId.get).call())(identity _)
       action.handleWith(this, updateF)(PotAction.handler())
   }
 }

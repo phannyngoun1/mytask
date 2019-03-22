@@ -15,7 +15,7 @@ object AppClient {
   val routerConfig = RouterConfigDsl[Loc].buildConfig { dsl =>
     import dsl._
 
-    val taskListRoute = staticRoute("#tasks", TaskListLoc) ~> renderR( c => AppCircuit.wrap(_.taskModel.taskList)(proxy => TaskListComp(proxy, c)))
+    val taskListRoute = staticRoute("#tasks", TaskListLoc) ~> renderR( c => AppCircuit.wrap(_.taskModel)(proxy => TaskListComp(proxy, c)))
     val processInstRoute = staticRoute("#instance", ProcessInstLoc) ~> renderR( c => AppCircuit.wrap(_.processInst)(proxy => ProcessInstComp(proxy, c)))
     val itemRoute = staticRoute("#item", ItemLoc) ~> renderR( c => AppCircuit.wrap(_.itemModel)(proxy => ItemComp(proxy, c)))
     val accRoute = staticRoute("#account", AccLoc) ~> renderR( c => AppCircuit.wrap(_.accountModel)(proxy => AccountComp(proxy, c)))

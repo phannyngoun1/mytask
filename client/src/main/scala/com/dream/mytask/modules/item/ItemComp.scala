@@ -100,7 +100,6 @@ object ItemComp {
                 )
               })
             )
-
           )
         )
       )

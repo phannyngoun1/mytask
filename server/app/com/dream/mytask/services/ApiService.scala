@@ -4,7 +4,7 @@ import java.util.UUID
 
 import akka.actor.ActorSystem
 import com.dream.mytask.shared.Api
-import com.dream.mytask.shared.data.{ActionItem, ProcessInstanceData, TaskItem}
+import com.dream.mytask.shared.data.{ActionItemJson, ProcessInstanceData, TaskItemJson}
 import com.dream.workflow.adaptor.aggregate._
 import com.dream.workflow.adaptor.dao.account.AccountReadModelFlowImpl
 import com.dream.workflow.adaptor.dao.flow.FlowReadModelFlowImpl
@@ -80,14 +80,16 @@ class ApiService(login: UUID)(implicit val ec: ExecutionContext, implicit val  s
     }
   }
 
-  override def getTasks(accId: String): Future[List[TaskItem]] = {
+  override def getTasks(accId: String): Future[List[TaskItemJson]] = {
 
     val uuId = UUID.fromString(accId)
 
-    accountUseCase.getTasks(GetTaskLisCmdReq(uuId)) map {
-      case res: GetTaskListCmdSuccess => res.taskList.map( f => TaskItem(f.id, f.activity.name, f.actions.map(a => ActionItem(a.name))) )
-      case _ => List.empty[TaskItem]
-    }
+//    accountUseCase.getTasks(GetTaskLisCmdReq(uuId)) map {
+//      case res: GetTaskListCmdSuccess => res.taskList.map( f => TaskItem(f.id, f.activity.name, f.actions.map(a => ActionItemJson(a.name))) )
+//      case _ => List.empty[TaskItemJson]
+//    }
+
+    Future.successful(List(TaskItemJson("a", "a", "a", List(ActionItemJson("Done")))))
   }
 
 }

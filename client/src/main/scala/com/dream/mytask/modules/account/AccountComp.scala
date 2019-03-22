@@ -16,8 +16,6 @@ import scala.language.postfixOps
 
 object AccountComp {
 
-
-
   case class Props(proxy: ModelProxy[AccountModel], c: RouterCtl[Loc])
 
   case class State(id: Option[String] = None, accountId: Option[String] = None , accName: Option[String] = None, fullName: Option[String] = None)
@@ -78,7 +76,6 @@ object AccountComp {
           })
         ),
 
-
         <.div(
           <.h2("Get Data"),
           <.div(
@@ -87,9 +84,7 @@ object AccountComp {
               $.modState(_.copy(id = value))
             })
           ),
-          <.button("Fetch Account", ^.onClick --> Callback.when(s.id.isDefined)(
-            p.proxy.dispatchCB(FetchAccAction(s.id)))
-          ),
+          <.button("Fetch Account", ^.onClick --> Callback.when(s.id.isDefined)(p.proxy.dispatchCB(FetchAccAction(s.id)))),
           <.button("Fetch Participant", ^.onClick --> Callback.when(s.id.isDefined){
 
             println("Fetch Participant click")
@@ -103,7 +98,7 @@ object AccountComp {
               <.div(
                 md().renderPending(_ > 500, _ => <.p("Loading...")),
                 md().renderFailed(ex => <.p("Failed to load")),
-                md().render(m => <.p(s"accId: ${m.id}, acc name: ${m.name}"))
+                md().render(m => <.p(s"accId: ${m.id}, acc name: ${m.name}, participant: ${m.currParticipantId}"))
               )
             })
 

@@ -13,8 +13,8 @@ trait AccountService { this: ApiService =>
   override def getAcc(id: String): Future[AccountJson] = {
 
     accountUseCase.getAccount(GetAccountCmdReq(UUID.fromString(id))) map {
-      case res:GetAccountCmdSuccess => AccountJson(res.id.toString, res.name)
-      case _ => AccountJson("", "")
+      case res:GetAccountCmdSuccess => AccountJson(res.id.toString, res.name, res.curParticipantId.map(_.toString))
+      case _ => AccountJson("", "", None)
     }
   }
 
@@ -28,11 +28,16 @@ trait AccountService { this: ApiService =>
 
   override def getAccountList(): Future[List[AccountJson]] =
 //    Future.successful(List(AccountJson("sss", "sss")))
-    accountUseCase.list.map(_.map(acc=> AccountJson(acc.id.toString, acc.name)))
+    accountUseCase.list.map(_.map(acc=> AccountJson(acc.id.toString, acc.name, None)))
 
   override def getParticipant(id: String): Future[ParticipantJson] = {
     participantUseCase.getParticipant(GetPart(UUID.fromString(id))) map {
-      case res: GetPartSuccess => ParticipantJson(res.id.toString, res.accountId.toString)
+      case res: GetPartSuccess => {
+
+        println(s"participant : ${res}")
+
+        ParticipantJson(res.id.toString, res.accountId.toString)
+      }
       case _ => ParticipantJson("", "")
     }
   }

@@ -44,7 +44,8 @@ object ParticipantAggregateUseCase {
 
     case class GetParticipantCmdSuccess(
       id: UUID,
-      accountId: UUID
+      accountId: UUID,
+      tasks: List[AssignedTask] = List.empty
     ) extends GetParticipantCmdRes
 
     case class GetParticipantCmdFailed(error: ResponseError) extends GetParticipantCmdRes
