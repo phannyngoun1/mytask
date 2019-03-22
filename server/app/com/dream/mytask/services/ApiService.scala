@@ -4,15 +4,15 @@ import java.util.UUID
 
 import akka.actor.ActorSystem
 import com.dream.mytask.shared.Api
-import com.dream.mytask.shared.data.{AccountData, ActionItem, TaskItem, WorkflowData}
+import com.dream.mytask.shared.data.{ ActionItem, TaskItem}
 import com.dream.workflow.adaptor.aggregate._
 import com.dream.workflow.adaptor.dao.account.AccountReadModelFlowImpl
 import com.dream.workflow.adaptor.dao.flow.FlowReadModelFlowImpl
 import com.dream.workflow.adaptor.dao.item.ItemReadModelFlowImpl
 import com.dream.workflow.adaptor.dao.participant.ParticipantReadModelFlowImpl
+import com.dream.workflow.adaptor.dao.processinstance.PInstanceReadModelFlowImpl
 import com.dream.workflow.adaptor.journal.JournalReaderImpl
 import com.dream.workflow.usecase.AccountAggregateUseCase.Protocol.{GetAccountCmdReq, GetAccountCmdSuccess, _}
-import com.dream.workflow.usecase.ProcessInstanceAggregateUseCase.Protocol.{CreatePInstCmdRequest, CreatePInstCmdSuccess, GetPInstCmdRequest, GetPInstCmdSuccess}
 import com.dream.workflow.usecase._
 import com.typesafe.config.ConfigFactory
 import slick.basic.DatabaseConfig
@@ -25,8 +25,8 @@ class ApiService(login: UUID)(implicit val ec: ExecutionContext, implicit val  s
   extends Api
     with ItemService
     with FlowService
-    with AccountService{
-
+    with AccountService
+    with PInstanceService {
 
   val rootConfig = ConfigFactory.load()
   val dbConfig = DatabaseConfig.forConfig[JdbcProfile](path = "slickR", rootConfig)
@@ -34,6 +34,8 @@ class ApiService(login: UUID)(implicit val ec: ExecutionContext, implicit val  s
   val flowReadModelFlow = new FlowReadModelFlowImpl(dbConfig.profile, dbConfig.db)
   val accountReadModelFlow = new AccountReadModelFlowImpl(dbConfig.profile, dbConfig.db)
   val participantReadModelFlows = new ParticipantReadModelFlowImpl(dbConfig.profile, dbConfig.db)
+  val pInstanceReadModelFlows = new PInstanceReadModelFlowImpl(dbConfig.profile, dbConfig.db)
+
 
   val localEntityAggregates = system.actorOf(LocalEntityAggregates.props, LocalEntityAggregates.name)
 
@@ -46,19 +48,22 @@ class ApiService(login: UUID)(implicit val ec: ExecutionContext, implicit val  s
   val workflowAggregateUseCase = new WorkflowAggregateUseCase(workFlow, flowReadModelFlow)
   val processInstance = new ProcessInstanceAggregateUseCase(pInstFlow, workFlow, itemFlow, participantFlow)
   val accountUseCase = new AccountAggregateUseCase(accountFlow,participantFlow, pInstFlow, accountReadModelFlow )
-  val participantUseCase = new ParticipantAggregateUseCase(participantFlow, participantReadModelFlows)
+  val participantUseCase = new ParticipantAggregateUseCase(participantFlow, accountFlow , participantReadModelFlows)
 
   val ex = new ReadModelUseCase(
     readSideFlow,
     flowReadModelFlow,
     accountReadModelFlow,
     participantReadModelFlows ,
+    pInstanceReadModelFlows,
     new JournalReaderImpl(system)
   )
+
   ex.executeItem
   ex.executeFlow
   ex.executeAcc
   ex.executeParticipant
+  ex.executePInst
 
   sys.addShutdownHook {
     system.terminate()
@@ -73,7 +78,6 @@ class ApiService(login: UUID)(implicit val ec: ExecutionContext, implicit val  s
       case res: GetAccountCmdSuccess => s"id: ${res.id}, name: ${res.name}, full name: ${res.fullName}, participant id: ${res.curParticipantId} "
       case _ => "Failed"
     }
-
   }
 
   override def getTasks(accId: String): Future[List[TaskItem]] = {
@@ -83,26 +87,6 @@ class ApiService(login: UUID)(implicit val ec: ExecutionContext, implicit val  s
     accountUseCase.getTasks(GetTaskLisCmdReq(uuId)) map {
       case res: GetTaskListCmdSuccess => res.taskList.map( f => TaskItem(f.id, f.activity.name, f.actions.map(a => ActionItem(a.name))) )
       case _ => List.empty[TaskItem]
-    }
-  }
-
-  override def createProcessInstance(): Future[String] = {
-
-    processInstance.createPInst(CreatePInstCmdRequest(
-      itemID = UUID.fromString("8c557884-0d50-4ba1-aa82-26b49b5be368"),
-      by = UUID.fromString("8dbd6bf8-2f60-4e6e-8e3f-b374e060a940")
-    )) map {
-      case res: CreatePInstCmdSuccess => s"Process instance ${res.folio} created"
-      case _ => "Failed"
-    }
-  }
-
-  override def getProcessInstance(id: String): Future[String] = {
-    val uuId = UUID.fromString(id)
-
-    processInstance.getPInst(GetPInstCmdRequest(uuId))  map {
-      case res: GetPInstCmdSuccess => res.folio
-      case _ => s"Failed to fetch ${id}"
     }
   }
 

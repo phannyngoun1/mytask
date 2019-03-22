@@ -9,6 +9,7 @@ import akka.{Done, NotUsed}
 import com.dream.workflow.domain.Account.{AccountCreated, AccountEvent}
 import com.dream.workflow.domain.FlowEvents.{FlowCreated, FlowEvent}
 import com.dream.workflow.domain.Participant.{ParticipantCreated, ParticipantEvent}
+import com.dream.workflow.domain.ProcessInstance.{ProcessInstanceCreated, ProcessInstanceEvent}
 import com.dream.workflow.domain.{ItemCreated, ItemEvent}
 import com.dream.workflow.usecase.port._
 import org.sisioh.baseunits.scala.time.TimePoint
@@ -20,6 +21,7 @@ class ReadModelUseCase(
   flowReadModelFlow: FlowReadModelFlow,
   accountReadModelFlow: AccountReadModelFlow,
   participantReadModelFlows: ParticipantReadModelFlows,
+  pInstanceReadModelFlows: PInstanceReadModelFlows,
   journalReader: JournalReader)(implicit val system: ActorSystem)
   extends UseCaseSupport {
 
@@ -58,6 +60,14 @@ class ReadModelUseCase(
       case (event: ParticipantCreated, sequenceNr: Long) =>
         Source.single((event.id, event.accountId, event.teamId,  event.departmentId, event.propertyId, sequenceNr, TimePoint.from(Instant.now())))
           .via(participantReadModelFlows.newItemFlow)
+    }
+
+
+  private val projectPInstance: Flow[(ProcessInstanceEvent, Long), Int, NotUsed] =
+    Flow[(ProcessInstanceEvent, Long)].flatMapConcat {
+      case (event: ProcessInstanceCreated, seq: Long) =>
+        Source.single((event.id, event.folio, seq, TimePoint.from(Instant.now()) ))
+        .via(pInstanceReadModelFlows.newPInst)
     }
 
   def executeItem : Future[Done] = {
@@ -114,4 +124,18 @@ class ReadModelUseCase(
       .run()
   }
 
+  def executePInst: Future[Done] = {
+    pInstanceReadModelFlows.resolveLastSeqNrSource
+      .flatMapConcat { lastSeqNr =>
+        journalReader.eventsByTagSource(classOf[ProcessInstanceEvent].getName, lastSeqNr )
+      }
+      .map { eventBody =>
+        (eventBody.event.asInstanceOf[ProcessInstanceEvent], eventBody.sequenceNr)
+      }
+      .via(projectPInstance)
+      .toMat(Sink.ignore)(Keep.right)
+      .run()
+  }
+
+//  processInstanceAggregateFlows
 }

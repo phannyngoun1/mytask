@@ -15,7 +15,7 @@ trait Api {
 
   def getUser(id: String): Future[String]
 
-  def newItem(name: String, desc: String): Future[String]
+  def newItem(name: String, flowId: String, desc: String): Future[String]
 
   def getItem(id: String) : Future[ItemJson]
 
@@ -23,13 +23,13 @@ trait Api {
 
   def getTasks(accId: String): Future[List[TaskItem]]
 
-  def createProcessInstance(): Future[String]
+  def createProcessInstance(itemId: String, submitter: String): Future[String]
 
   def getProcessInstance(id: String): Future[String]
 
   def getFlow(id: String): Future[FlowJson]
 
-  def newFlow(name: String): Future[String]
+  def newFlow(name: String,  participants: List[String]): Future[String]
 
   def getFlowList(): Future[List[FlowJson]]
 

@@ -21,15 +21,16 @@ object ItemActionHandler {
     override def next(newResult: Pot[ItemJson]): FetchItemAction = FetchItemAction(None, newResult)
   }
 
-  case class NewItemAction(name: Option[String], desc: Option[String], potResult: Pot[String] = Empty) extends PotAction[String, NewItemAction] {
-    override def next(newResult: Pot[String]): NewItemAction = NewItemAction(None, None, newResult)
+  case class NewItemAction(name: Option[String], flowId: Option[String], desc: Option[String], potResult: Pot[String] = Empty) extends PotAction[String, NewItemAction]{
+
+    override def next(newResult: Pot[String]): NewItemAction = NewItemAction(None, None, None, newResult)
+
   }
 
   def apply(circuit: Circuit[RootModel]) = circuit.composeHandlers(
     new FetchItemListActionHandler(zoomRW(_.itemModel.itemList)((m, v) => m.copy(itemModel = m.itemModel.copy(itemList = v)))),
-    new FetchItemActionHandler(zoomRW(_.itemModel.item)((m, v) => m.copy(itemModel = m.itemModel.copy(item = v)) )),
+    new FetchItemActionHandler(zoomRW(_.itemModel.item)((m, v) => m.copy(itemModel = m.itemModel.copy(item = v)))),
     new ItemActionHandler(zoomRW(_.itemModel.message)((m, v) => m.copy(itemModel = m.itemModel.copy(message = v)))),
-
   )
 }
 
@@ -66,8 +67,7 @@ class ItemActionHandler[M](modelRW: ModelRW[M, Pot[String]]) extends ActionHandl
 
   override protected def handle = {
     case action: NewItemAction =>
-      val updateF = action.effect(AjaxClient[Api].newItem(action.name.get, action.desc.get).call())(identity _ )
+      val updateF = action.effect(AjaxClient[Api].newItem(action.name.get, action.flowId.get, action.desc.get).call())(identity _ )
       action.handleWith(this, updateF)(PotAction.handler())
-
   }
 }

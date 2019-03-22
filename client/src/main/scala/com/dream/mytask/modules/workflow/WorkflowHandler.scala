@@ -22,8 +22,8 @@ object WorkflowHandler {
     override def next(newResult: Pot[FlowJson]): FetchFlowAction = FetchFlowAction(None, newResult)
   }
 
-  case class NewFlowAction(name: Option[String], potResult: Pot[String] = Pot.empty ) extends PotAction[String, NewFlowAction] {
-    override def next(newResult: Pot[String]): NewFlowAction = NewFlowAction(name, newResult)
+  case class NewFlowAction(name: Option[String], participants: Option[List[String]], potResult: Pot[String] = Pot.empty ) extends PotAction[String, NewFlowAction] {
+    override def next(newResult: Pot[String]): NewFlowAction = NewFlowAction(name,participants , newResult)
   }
 
   def apply(circuit: Circuit[RootModel]) = circuit.composeHandlers(
@@ -71,7 +71,7 @@ class NewFlowActionHandler[M](modelRW: ModelRW[M, Pot[String]]) extends ActionHa
 
   override protected def handle: PartialFunction[Any, ActionResult[M]] = {
     case action: NewFlowAction =>
-      val updateF = action.effect(AjaxClient[Api].newFlow(action.name.getOrElse("None")).call())(identity _ )
+      val updateF = action.effect(AjaxClient[Api].newFlow(action.name.getOrElse("None"), action.participants.get).call())(identity _ )
       action.handleWith(this, updateF)(PotAction.handler())
   }
 

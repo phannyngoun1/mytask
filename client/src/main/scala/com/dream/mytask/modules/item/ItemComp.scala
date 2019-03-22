@@ -17,7 +17,7 @@ object ItemComp {
 
   case class Props(proxy: ModelProxy[ItemModel], c: RouterCtl[Loc])
 
-  case class State(id: Option[String] = None, itemName: Option[String] = None, desc: Option[String] = None )
+  case class State(id: Option[String] = None, flowId: Option[String] = None, itemName: Option[String] = None, desc: Option[String] = None )
 
   class Backend($: BackendScope[Props, State]) {
 
@@ -70,20 +70,25 @@ object ItemComp {
                 <.input(^.`type` := "text", ^.value := s.itemName.getOrElse(""), ^.onChange ==> { e: ReactEventFromInput =>
                   val value = if (e.target.value.trim.isEmpty) None else Some(e.target.value)
                   $.modState(_.copy(itemName = value))
+                })),
+              <.div(
+                <.label("Flow ID:"),
+                <.input(^.`type` := "text", ^.value := s.flowId.getOrElse(""), ^.onChange ==> { e: ReactEventFromInput =>
+                  val value = if (e.target.value.trim.isEmpty) None else Some(e.target.value)
+                  $.modState(_.copy(flowId = value))
+                })),
+              <.div(
+                <.label("description:"),
+                <.input(^.`type` := "text", ^.value := s.desc.getOrElse(""), ^.onChange ==> { e: ReactEventFromInput =>
+                  val value = if (e.target.value.trim.isEmpty) None else Some(e.target.value)
+                  $.modState(_.copy(desc = value))
                 }))
             ),
-            <.div(
-              <.label("description:"),
-              <.input(^.`type` := "text", ^.value := s.desc.getOrElse(""), ^.onChange ==> { e: ReactEventFromInput =>
-                val value = if (e.target.value.trim.isEmpty) None else Some(e.target.value)
-                $.modState(_.copy(desc = value))
-              }))
 
+            <.button("Create Item", ^.onClick --> Callback.when(s.itemName.isDefined && s.desc.isDefined)(
+              p.proxy.dispatchCB(NewItemAction(s.itemName, s.flowId, s.desc)) >>  p.proxy.dispatchCB(FetchItemListAction())
+            ))
           ),
-
-          <.button("Create Item", ^.onClick --> Callback.when(s.itemName.isDefined && s.desc.isDefined)(
-            p.proxy.dispatchCB(NewItemAction(s.itemName, s.desc)) >>  p.proxy.dispatchCB(FetchItemListAction())
-          )),
           <.div(
             <.h3("new item:"),
             <.div(

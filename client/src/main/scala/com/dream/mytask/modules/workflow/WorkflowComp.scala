@@ -16,7 +16,12 @@ object WorkflowComp {
 
   case class Props(proxy: ModelProxy[FlowModel], c: RouterCtl[Loc])
 
-  case class State(id: Option[String] = None, name: Option[String] = None)
+  case class State(
+    id: Option[String] = None,
+    name: Option[String] = None,
+    participants: List[String] = List.empty,
+    participantId: Option[String]= None
+  )
 
   class Backend($: BackendScope[Props, State]) {
 
@@ -29,8 +34,10 @@ object WorkflowComp {
       val wrapper = p.proxy.connect(_.message)
       val fetchWrapper = p.proxy.connect(_.flow)
       val list = p.proxy.connect(_.flowList)
-      <.div("work flow",
-        <.div("Flow list",
+      <.div(
+        <.h2("work flow"),
+        <.div(
+          <.h3("Flow list"),
           <.div(
             list(px => {
               <.div(
@@ -44,7 +51,8 @@ object WorkflowComp {
           )
         ),
 
-        <.div("Creation",
+        <.div(
+          <.h3("Creation"),
           <.div(
             <.label("Name")
           ),
@@ -53,10 +61,27 @@ object WorkflowComp {
             $.modState(_.copy(name = value))
           })),
           <.div(
-            <.button("New", ^.onClick --> Callback.when(s.name.isDefined)(p.proxy.dispatchCB(NewFlowAction(s.name))))
-          ),
-          <.div("New Flow: ",
+            <.label("Participants"),
+            <.ol(^.`type` := "1",
+              s.participants toTagMod(item =>
+                <.li(item)
+                )
+            ),
+            <.div(
+              <.input(^.`type` := "text", ^.value := s.participantId.getOrElse(""), ^.onChange ==> { e: ReactEventFromInput =>
+                val value = if (e.target.value.trim.isEmpty) None else Some(e.target.value)
+                $.modState(_.copy(participantId = value))
+              }),
+              <.button("Add", ^.onClick --> $.modState(m => m.copy(participants = s.participantId.get :: m.participants, participantId = None)))
+            )
 
+          ),
+
+          <.div(
+            <.button("New", ^.onClick --> Callback.when(s.name.isDefined && !s.participants.isEmpty)(p.proxy.dispatchCB(NewFlowAction(s.name, Some(s.participants)))))
+          ),
+          <.div(
+            <.h3("New Flow"),
             <.div(
               wrapper(px => {
                 <.div(
@@ -70,7 +95,8 @@ object WorkflowComp {
           )
         ),
 
-        <.div("Fetch Flow",
+        <.div(
+          <.h3("Fetch Flow"),
           <.div(
             <.label("Id"),
             <.input(^.`type` := "text", ^.value := s.id.getOrElse(""), ^.onChange ==> { e: ReactEventFromInput =>
@@ -81,7 +107,7 @@ object WorkflowComp {
           <.div(
             <.button("Fetch", ^.onClick --> Callback.when(s.id.isDefined)(p.proxy.dispatchCB(FetchFlowAction(s.id))))
           ),
-          <.div("Result:"),
+          <.h3("Result:"),
           <.div(
             fetchWrapper(px => {
               <.div(

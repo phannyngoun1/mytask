@@ -14,7 +14,7 @@ import japgolly.scalajs.react._
 object ProcessInstComp {
 
   case class Props(proxy: ModelProxy[ProcessInstanceModel], c: RouterCtl[Loc])
-  case class State(pInstId: Option[String] = None, accId: Option[String] = None)
+  case class State(pInstId: Option[String] = None, itemId: Option[String] = None, participantId: Option[String] = None)
 
   class Backend($: BackendScope[Props, State]) {
 
@@ -26,7 +26,7 @@ object ProcessInstComp {
 
     def setAccId(e: ReactEventFromInput) = {
       val id = if (e.target.value.trim.isEmpty) None else Some(e.target.value)
-      $.modState(_.copy(accId =  id))
+      $.modState(_.copy(participantId =  id))
     }
 
 
@@ -41,17 +41,31 @@ object ProcessInstComp {
             proxy().data.render(m => <.p( m.value))
           )
         }),
+
         <.div(
-          <.button(^.onClick --> p.proxy.dispatchCB(CreateProcessInstAction()), "Create")
-        ),
-        <.div(
-          <.label(^.value := "Fetch process instance"),
-          <.input(^.`type`  := "text", ^.value:= s.pInstId.getOrElse("") , ^.onChange ==>  setValue),
+          <.div(
+            <.label("Pinstance Id"),
+            <.input(^.`type`  := "text", ^.value:= s.pInstId.getOrElse("") , ^.onChange ==>  setValue)
+          ),
           <.button(^.onClick --> p.proxy.dispatchCB(FetchPInstAction(s.pInstId)), "Fetch")
         ),
         <.div(
-          <.label(^.value := "Fetch process instance"),
-          <.input(^.`type`  := "text", ^.value:= s.accId.getOrElse("") , ^.onChange ==>  setAccId)
+          <.label("item id"),
+          <.input(^.`type`  := "text", ^.value:= s.itemId.getOrElse("") , ^.onChange ==> { e: ReactEventFromInput =>
+            val value = if (e.target.value.trim.isEmpty) None else Some(e.target.value)
+            $.modState(_.copy(itemId = value))
+          })
+        ),
+
+        <.div(
+          <.label("Participant Id"),
+          <.input(^.`type`  := "text", ^.value:= s.participantId.getOrElse("") ,  ^.onChange ==> { e: ReactEventFromInput =>
+            val value = if (e.target.value.trim.isEmpty) None else Some(e.target.value)
+            $.modState(_.copy(participantId = value))
+          })
+        ),
+        <.div(
+          <.button(^.onClick --> Callback.when(s.itemId.isDefined && s.participantId.isDefined)(p.proxy.dispatchCB(CreateProcessInstAction(s.itemId, s.participantId))), "Create")
         )
       )
     }

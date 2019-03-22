@@ -16,15 +16,6 @@ object ProcessInstance {
     override val message: String = s"Invalid state${id.fold("")(id => s":id = ${id.toString}")}"
   }
 
-//
-//  case class AssignedTask(
-//    id: UUID,
-//    description: String,
-//    participants: List[UUID],
-//    //Priority
-//    activity: BaseActivity
-//  )
-
   case class InstanceType(
     id: UUID,
     name: String,
@@ -46,6 +37,12 @@ object ProcessInstance {
   ) extends ProcessInstanceEvent
 
 }
+
+
+case class ProcessInstanceDto(
+  id: UUID,
+  folio: String
+)
 
 case class ProcessInstance(
   id: UUID,

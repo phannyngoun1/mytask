@@ -7,7 +7,8 @@ import akka.stream._
 import akka.stream.scaladsl._
 import com.dream.common.domain.ResponseError
 import com.dream.workflow.domain.{AssignedTask, ParticipantDto}
-import com.dream.workflow.usecase.port.{ParticipantAggregateFlows, ParticipantReadModelFlows}
+import com.dream.workflow.usecase.AccountAggregateUseCase.Protocol.{AssignParticipantCmdReq, AssignParticipantCmdRes, AssignParticipantCmdSuccess}
+import com.dream.workflow.usecase.port.{AccountAggregateFlows, ParticipantAggregateFlows, ParticipantReadModelFlows}
 
 import scala.concurrent.{ExecutionContext, Future, Promise}
 
@@ -75,6 +76,7 @@ object ParticipantAggregateUseCase {
 
 class ParticipantAggregateUseCase(
   participantAggregateFlows: ParticipantAggregateFlows,
+  accountAggregateFlows: AccountAggregateFlows,
   participantReadModelFlows: ParticipantReadModelFlows
 )(implicit system: ActorSystem) extends UseCaseSupport {
 
@@ -108,9 +110,27 @@ class ParticipantAggregateUseCase(
     Source.fromPublisher(participantReadModelFlows.list).toMat(sumSink)(Keep.right).run()
   }
 
+  private val createParticipantGraph = Flow.fromGraph(GraphDSL.create() { implicit b =>
+    import GraphDSL.Implicits._
+
+    val broadcast = b.add(Broadcast[CreateParticipantCmdReq](2))
+    val zip = b.add(Zip[CreateParticipantCmdRes, AssignParticipantCmdRes])
+    val convertToAssignReq = Flow[CreateParticipantCmdReq].map(req=> AssignParticipantCmdReq(req.accountId, req.id))
+
+    broadcast.out(0) ~> participantAggregateFlows.create ~> zip.in0
+    broadcast.out(1) ~> convertToAssignReq ~> accountAggregateFlows.assignParticipant ~> zip.in1
+
+    //TODO: workaround, need to be fixed
+    val output = zip.out map {
+      case (a: CreateParticipantCmdRes, b: AssignParticipantCmdSuccess) => a
+    }
+    FlowShape(broadcast.in, output.outlet)
+  })
+
+
   private val createParticipantQueue: SourceQueueWithComplete[(CreateParticipantCmdReq, Promise[CreateParticipantCmdRes])] =
     Source.queue[(CreateParticipantCmdReq, Promise[CreateParticipantCmdRes])](bufferSize, OverflowStrategy.dropNew)
-      .via(participantAggregateFlows.create.zipPromise)
+      .via(createParticipantGraph.zipPromise)
       .toMat(completePromiseSink)(Keep.left)
       .run()
 

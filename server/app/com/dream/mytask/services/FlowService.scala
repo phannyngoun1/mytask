@@ -18,7 +18,7 @@ trait FlowService {  this: ApiService =>
       case _ => FlowJson("", "")
     }
 
-  override def newFlow(name: String): Future[String] = {
+  override def newFlow(name: String, participants: List[String]): Future[String] = {
 
     val ticketActivity = Activity("Ticketing")
 
@@ -56,9 +56,7 @@ trait FlowService {  this: ApiService =>
 
     val ticketActivityFlow = ActivityFlow(
       activity = ticketActivity,
-      participants = List(
-        UUID.fromString("2329698-6019-4689-b41e-c21f2a5a0262"),
-        UUID.fromString("c798826a-18ac-4935-9342-760d86296059")),
+      participants = participants.map(UUID.fromString),
       actionFlows = List(
         editTicketActionFlow,
         closeTicketActionFlow,

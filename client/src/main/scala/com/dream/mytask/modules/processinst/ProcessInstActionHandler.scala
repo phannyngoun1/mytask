@@ -12,8 +12,8 @@ import diode.{Action, ActionHandler, ActionResult, ModelRW}
 object ProcessInstActionHandler {
 
 
-  case class CreateProcessInstAction(potResult: Pot[String] = Empty) extends PotAction[String, CreateProcessInstAction] {
-    override def next(newResult: Pot[String]): CreateProcessInstAction = CreateProcessInstAction(newResult)
+  case class CreateProcessInstAction(itemId: Option[String], participantId: Option[String], potResult: Pot[String] = Empty) extends PotAction[String, CreateProcessInstAction] {
+    override def next(newResult: Pot[String]): CreateProcessInstAction = CreateProcessInstAction(None, None, newResult)
   }
 
   case class SetPInstIdAction(id: String) extends Action
@@ -42,7 +42,7 @@ class NewPInstActonHandler[M](modelRW: ModelRW[M, Pot[String]]) extends ActionHa
 
   override protected def handle = {
     case action: CreateProcessInstAction =>
-      val updateF = action.effect(AjaxClient[Api].createProcessInstance().call())(identity _)
+      val updateF = action.effect(AjaxClient[Api].createProcessInstance(action.itemId.get, action.participantId.get).call())(identity _)
       action.handleWith(this, updateF)(PotAction.handler())
   }
 }
