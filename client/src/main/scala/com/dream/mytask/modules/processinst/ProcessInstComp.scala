@@ -32,25 +32,50 @@ object ProcessInstComp {
 
 
     def render(p: Props, s: State) = {
-      val wrapper = p.proxy.connect(m => m)
-      <.div(
-        wrapper(proxy => {
-          <.div(
-            proxy().data.renderPending(_ > 500, _ => <.p("Loading...")),
-            proxy().data.renderFailed(ex => <.p("Failed to load")),
-            proxy().data.render(m => <.p( m.value))
-          )
-        }),
 
+      val wrapper = p.proxy.connect(m => m)
+
+      val listWrapper = p.proxy.connect(_.list)
+
+      <.div(
         <.div(
+          <.h4("Instance List"),
           <.div(
-            <.label("Pinstance Id"),
-            <.input(^.`type`  := "text", ^.value:= s.pInstId.getOrElse("") , ^.onChange ==>  setValue)
-          ),
-          <.button(^.onClick --> p.proxy.dispatchCB(FetchPInstAction(s.pInstId)), "Fetch")
+            listWrapper(px => {
+              <.div(
+                px().renderPending(_ > 500, _ => <.p("Loading...")),
+                px().renderFailed(ex => <.p("Failed to load")),
+                px().render(m => <.ol(^.`type` := "1",
+                  m toTagMod { item =>
+                    <.li( s"id: ${item.id}, Folio: ${item.folio}")
+                  }
+                ))
+              )
+            })
+          )
+
         ),
         <.div(
-          <.label("item id"),
+          <.h4("Fetch process instance"),
+          <.div(
+            <.label("P instance Id: "),
+            <.input(^.`type`  := "text", ^.value:= s.pInstId.getOrElse("") , ^.onChange ==>  setValue)
+          ),
+          <.button(^.onClick --> p.proxy.dispatchCB(FetchPInstAction(s.pInstId)), "Fetch"),
+
+          wrapper(proxy => {
+            <.div(
+              proxy().data.renderPending(_ > 500, _ => <.p("Loading...")),
+              proxy().data.renderFailed(ex => <.p("Failed to load")),
+              proxy().data.render(m => <.p( m.value))
+            )
+          })
+        ),
+
+        <.h4("Create process instance"),
+
+        <.div(
+          <.label("item id: "),
           <.input(^.`type`  := "text", ^.value:= s.itemId.getOrElse("") , ^.onChange ==> { e: ReactEventFromInput =>
             val value = if (e.target.value.trim.isEmpty) None else Some(e.target.value)
             $.modState(_.copy(itemId = value))
@@ -58,7 +83,7 @@ object ProcessInstComp {
         ),
 
         <.div(
-          <.label("Participant Id"),
+          <.label("Participant Id: "),
           <.input(^.`type`  := "text", ^.value:= s.participantId.getOrElse("") ,  ^.onChange ==> { e: ReactEventFromInput =>
             val value = if (e.target.value.trim.isEmpty) None else Some(e.target.value)
             $.modState(_.copy(participantId = value))
@@ -74,6 +99,7 @@ object ProcessInstComp {
   private val  component = ScalaComponent.builder[Props]("DashboardModule")
     .initialStateFromProps(p => State())
     .renderBackend[Backend]
+    .componentDidMount(_.props.proxy.dispatchCB(FetchPInstListAction()))
     .build
 
   def apply(proxy: ModelProxy[ProcessInstanceModel], c: RouterCtl[Loc]) = component(Props(proxy, c))

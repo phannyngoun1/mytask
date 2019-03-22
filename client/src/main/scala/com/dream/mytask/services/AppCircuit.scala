@@ -8,7 +8,7 @@ import diode.util._
 import boopickle.Default._
 import com.dream.mytask.modules.account.AccountActionHandler
 import com.dream.mytask.modules.item.ItemActionHandler
-import com.dream.mytask.modules.processinst.{FetchPInstActionHandler, NewPInstActonHandler, ProcessInstActionHandler}
+import com.dream.mytask.modules.processinst.{ProcessInstActionHandler}
 import com.dream.mytask.modules.task.TaskActionListHandler
 import com.dream.mytask.modules.workflow.WorkflowHandler
 import com.dream.mytask.services.DataModel.RootModel
@@ -48,17 +48,15 @@ object AppCircuit extends Circuit[RootModel] with ReactConnector[RootModel] {
 
   val handlers = composeHandlers(
     new MessageHandler(zoomRW(_.message)((m, v) => m.copy(message = v))),
-    new TaskActionListHandler(zoomRW(_.taskModel.taskList)((m, v) => m.copy(taskModel = m.taskModel.copy(taskList = v)))),
-    new ProcessInstActionHandler(zoomRW(_.processInst)((m, v) => m.copy(processInst = v))),
-    new NewPInstActonHandler(zoomRW(_.message)((m, v) => m.copy(message = v))),
-    new FetchPInstActionHandler(zoomRW(_.processInst.data)((m, v) => m.copy(processInst = m.processInst.copy(data = v))))
+    new TaskActionListHandler(zoomRW(_.taskModel.taskList)((m, v) => m.copy(taskModel = m.taskModel.copy(taskList = v))))
   )
 
   override protected def actionHandler: AppCircuit.HandlerFunction = foldHandlers(
     handlers,
     ItemActionHandler(this),
     WorkflowHandler(this),
-    AccountActionHandler(this)
+    AccountActionHandler(this),
+    ProcessInstActionHandler(this)
   )
 
 

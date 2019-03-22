@@ -4,7 +4,7 @@ import java.util.UUID
 
 import akka.actor.ActorSystem
 import com.dream.mytask.shared.Api
-import com.dream.mytask.shared.data.{ ActionItem, TaskItem}
+import com.dream.mytask.shared.data.{ActionItem, ProcessInstanceData, TaskItem}
 import com.dream.workflow.adaptor.aggregate._
 import com.dream.workflow.adaptor.dao.account.AccountReadModelFlowImpl
 import com.dream.workflow.adaptor.dao.flow.FlowReadModelFlowImpl
@@ -46,7 +46,7 @@ class ApiService(login: UUID)(implicit val ec: ExecutionContext, implicit val  s
   val participantFlow = new ParticipantAggregateFlowsImpl(localEntityAggregates)
   val itemAggregateUseCase = new ItemAggregateUseCase(itemFlow,readSideFlow )
   val workflowAggregateUseCase = new WorkflowAggregateUseCase(workFlow, flowReadModelFlow)
-  val processInstance = new ProcessInstanceAggregateUseCase(pInstFlow, workFlow, itemFlow, participantFlow)
+  val processInstance = new ProcessInstanceAggregateUseCase(pInstFlow, workFlow, itemFlow, participantFlow, pInstanceReadModelFlows)
   val accountUseCase = new AccountAggregateUseCase(accountFlow,participantFlow, pInstFlow, accountReadModelFlow )
   val participantUseCase = new ParticipantAggregateUseCase(participantFlow, accountFlow , participantReadModelFlows)
 

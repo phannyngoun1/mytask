@@ -2,6 +2,7 @@ package com.dream.mytask.services
 
 import java.util.UUID
 
+import com.dream.mytask.shared.data.ProcessInstanceData.ProcessInstanceJson
 import com.dream.workflow.usecase.ProcessInstanceAggregateUseCase.Protocol.{CreatePInstCmdRequest, CreatePInstCmdSuccess, GetPInstCmdRequest, GetPInstCmdSuccess}
 
 import scala.concurrent.Future
@@ -27,5 +28,8 @@ trait PInstanceService { this: ApiService =>
       case _ => s"Failed to fetch ${id}"
     }
   }
+
+  override def getPInstanceList(): Future[List[ProcessInstanceJson]] =
+    processInstance.list.map(_.map(item => ProcessInstanceJson(item.id.toString, item.folio)))
 
 }

@@ -4,6 +4,7 @@ import java.util.UUID
 
 import com.dream.mytask.shared.data.AccountData.{AccountJson, ParticipantJson}
 import com.dream.mytask.shared.data.ItemData.ItemJson
+import com.dream.mytask.shared.data.ProcessInstanceData.ProcessInstanceJson
 import com.dream.mytask.shared.data.TaskItem
 import com.dream.mytask.shared.data.WorkflowData.FlowJson
 
@@ -24,6 +25,8 @@ trait Api {
   def getTasks(accId: String): Future[List[TaskItem]]
 
   def createProcessInstance(itemId: String, submitter: String): Future[String]
+
+  def getPInstanceList(): Future[List[ProcessInstanceJson]]
 
   def getProcessInstance(id: String): Future[String]
 

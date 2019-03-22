@@ -2,6 +2,7 @@ package com.dream.mytask.services
 
 import com.dream.mytask.shared.data.AccountData.{AccountJson, ParticipantJson}
 import com.dream.mytask.shared.data.ItemData.ItemJson
+import com.dream.mytask.shared.data.ProcessInstanceData.ProcessInstanceJson
 import com.dream.mytask.shared.data.TaskItem
 import com.dream.mytask.shared.data.WorkflowData.FlowJson
 import diode.data.Pot
@@ -51,6 +52,8 @@ object DataModel {
 
   case class ProcessInstanceModel(
     criteria: Option[ProcessInstanceCriteria] = None,
+    list: Pot[List[ProcessInstanceJson]] = Pot.empty,
+    item: Pot[ProcessInstanceJson] = Pot.empty,
     data: Pot[ProcessInstanceResult] = Pot.empty
   )
 

@@ -35,6 +35,9 @@ class ReadModelUseCase(
         Source
           .single((event.id, event.name, sequenceNr, event.createdAt))
           .via(readModelFlow.newItemFlow)
+      case _ => Source.single("").via(Flow[String].mapAsync(1){
+        case  _ => Future.successful(0)
+      })
     }
 
   private val projectionWorkflow: Flow[(FlowEvent, Long), Int, NotUsed] =
@@ -43,6 +46,9 @@ class ReadModelUseCase(
         Source
           .single((event.id, event.name, sequenceNr, TimePoint.from(Instant.now())))
           .via(flowReadModelFlow.newItemFlow)
+      case _ => Source.single("").via(Flow[String].mapAsync(1){
+        case  _ => Future.successful(0)
+      })
     }
 
 
@@ -64,6 +70,9 @@ class ReadModelUseCase(
       case (event: ParticipantCreated, sequenceNr: Long) =>
         Source.single((event.id, event.accountId, event.teamId,  event.departmentId, event.propertyId, sequenceNr, TimePoint.from(Instant.now())))
           .via(participantReadModelFlows.newItemFlow)
+      case _ => Source.single("").via(Flow[String].mapAsync(1){
+        case  _ => Future.successful(0)
+      })
     }
 
 
@@ -72,6 +81,9 @@ class ReadModelUseCase(
       case (event: ProcessInstanceCreated, seq: Long) =>
         Source.single((event.id, event.folio, seq, TimePoint.from(Instant.now()) ))
         .via(pInstanceReadModelFlows.newPInst)
+      case _ => Source.single("").via(Flow[String].mapAsync(1){
+        case  _ => Future.successful(0)
+      })
     }
 
   def executeItem : Future[Done] = {

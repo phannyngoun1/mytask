@@ -6,12 +6,12 @@ import akka.actor.ActorSystem
 import akka.stream._
 import akka.stream.scaladsl._
 import com.dream.common.domain.ResponseError
-import com.dream.workflow.domain.{ Flow => WFlow, _}
-import com.dream.workflow.entity.processinstance.ProcessInstanceProtocol.{ CreatePInstCmdRequest => CreateInst}
+import com.dream.workflow.domain.{Flow => WFlow, _}
+import com.dream.workflow.entity.processinstance.ProcessInstanceProtocol.{CreatePInstCmdRequest => CreateInst}
 import com.dream.workflow.usecase.ItemAggregateUseCase.Protocol.{GetItemCmdRequest, GetItemCmdSuccess}
 import com.dream.workflow.usecase.ParticipantAggregateUseCase.Protocol.AssignTaskCmdReq
 import com.dream.workflow.usecase.WorkflowAggregateUseCase.Protocol.{GetWorkflowCmdRequest, GetWorkflowCmdSuccess}
-import com.dream.workflow.usecase.port.{ItemAggregateFlows, ParticipantAggregateFlows, ProcessInstanceAggregateFlows, WorkflowAggregateFlows}
+import com.dream.workflow.usecase.port._
 
 import scala.concurrent.{ExecutionContext, Future, Promise}
 
@@ -74,7 +74,8 @@ class ProcessInstanceAggregateUseCase(
   processInstanceAggregateFlows: ProcessInstanceAggregateFlows,
   workflowAggregateFlows: WorkflowAggregateFlows,
   itemAggregateFlows: ItemAggregateFlows,
-  participantAggregateFlows: ParticipantAggregateFlows
+  participantAggregateFlows: ParticipantAggregateFlows,
+  pInstanceReadModelFlows: PInstanceReadModelFlows
 )(implicit system: ActorSystem)
   extends UseCaseSupport {
 
@@ -165,5 +166,10 @@ class ProcessInstanceAggregateUseCase(
 
   def getPInst(request: GetPInstCmdRequest)(implicit ec: ExecutionContext): Future[GetPInstCmdResponse] =
     offerToQueue(getPInstFlow)(request, Promise())
+
+  def list: Future[List[ProcessInstanceDto]] = {
+    val sumSink =  Sink.fold[List[ProcessInstanceDto], ProcessInstanceDto](List.empty[ProcessInstanceDto])( (m ,e) =>  e :: m )
+    Source.fromPublisher(pInstanceReadModelFlows.list).toMat(sumSink)(Keep.right).run()
+  }
 
 }

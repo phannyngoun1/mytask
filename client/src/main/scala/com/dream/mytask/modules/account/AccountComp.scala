@@ -2,8 +2,6 @@ package com.dream.mytask.modules.account
 
 import com.dream.mytask.AppClient.Loc
 import com.dream.mytask.modules.account.AccountActionHandler._
-import com.dream.mytask.modules.item.ItemActionHandler.{FetchItemListAction, NewItemAction}
-import com.dream.mytask.modules.processinst.ProcessInstActionHandler.FetchPInstAction
 import com.dream.mytask.services.DataModel.AccountModel
 import com.dream.mytask.shared.data.AccountData.{AccountJson, ParticipantJson}
 import diode.react.ReactPot._
@@ -13,7 +11,12 @@ import japgolly.scalajs.react.extra.router.RouterCtl
 import japgolly.scalajs.react.vdom.html_<^._
 import japgolly.scalajs.react._
 
+import scala.language.implicitConversions
+import scala.language.postfixOps
+
 object AccountComp {
+
+
 
   case class Props(proxy: ModelProxy[AccountModel], c: RouterCtl[Loc])
 

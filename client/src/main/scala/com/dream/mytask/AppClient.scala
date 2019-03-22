@@ -15,11 +15,11 @@ object AppClient {
   val routerConfig = RouterConfigDsl[Loc].buildConfig { dsl =>
     import dsl._
 
-    val taskListRoute = staticRoute("#tasks", TaskListLoc) ~> renderR( c=> AppCircuit.wrap(_.taskModel.taskList)(proxy => TaskListComp(proxy, c)))
-    val processInstRoute = staticRoute("#instance", ProcessInstLoc) ~> renderR( c=> AppCircuit.wrap(_.processInst)(proxy => ProcessInstComp(proxy, c)))
-    val itemRoute = staticRoute("#item", ItemLoc) ~> renderR( c=> AppCircuit.wrap(_.itemModel)(proxy => ItemComp(proxy, c)))
-    val accRoute = staticRoute("#account", AccLoc) ~> renderR( c=> AppCircuit.wrap(_.accountModel)(proxy => AccountComp(proxy, c)))
-    val flowRoute = staticRoute("#flow", FlowLoc) ~> renderR( c=> AppCircuit.wrap(_.flowModel)(proxy => WorkflowComp(proxy, c)))
+    val taskListRoute = staticRoute("#tasks", TaskListLoc) ~> renderR( c => AppCircuit.wrap(_.taskModel.taskList)(proxy => TaskListComp(proxy, c)))
+    val processInstRoute = staticRoute("#instance", ProcessInstLoc) ~> renderR( c => AppCircuit.wrap(_.processInst)(proxy => ProcessInstComp(proxy, c)))
+    val itemRoute = staticRoute("#item", ItemLoc) ~> renderR( c => AppCircuit.wrap(_.itemModel)(proxy => ItemComp(proxy, c)))
+    val accRoute = staticRoute("#account", AccLoc) ~> renderR( c => AppCircuit.wrap(_.accountModel)(proxy => AccountComp(proxy, c)))
+    val flowRoute = staticRoute("#flow", FlowLoc) ~> renderR( c => AppCircuit.wrap(_.flowModel)(proxy => WorkflowComp(proxy, c)))
 
     (
       staticRoute(root, DashboardLoc) ~> renderR(c => AppCircuit.wrap(_.message)(proxy => Dashboard(proxy, c)))
@@ -38,11 +38,6 @@ object AppClient {
   }
 
   def main(args: Array[String]): Unit = {
-
-    //    val NoArgs = ScalaComponent.builder[Unit]("No args")
-    //      .renderStatic(<.div("Hello!"))
-    //      .build
-    //    NoArgs().renderIntoDOM (dom.document.getElementById("root"))
 
     val router = Router(BaseUrl.until_#, routerConfig)
     router().renderIntoDOM(dom.document.getElementById("root"))
