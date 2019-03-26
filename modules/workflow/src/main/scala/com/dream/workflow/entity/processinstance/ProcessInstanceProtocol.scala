@@ -54,7 +54,7 @@ object ProcessInstanceProtocol {
     taskId: UUID
   ) extends ProcessInstanceCmdRequest
 
-  case class GetTaskCmdRes(task: Task) extends PerformTaskCmdRes
+  case class GetTaskCmdRes(pInstId: UUID,task: Task) extends PerformTaskCmdRes
 
 
 }

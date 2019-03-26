@@ -52,9 +52,16 @@ object ProcessInstanceAggregateUseCase {
 
     sealed trait GetTaskCmdRes extends ProcessInstanceCmdResponse
 
-    case class GetTaskCmdSuccess(task: Task) extends GetTaskCmdRes
+    case class GetTaskCmdSuccess(taskDto: TaskDto) extends GetTaskCmdRes
 
     case class GetTaskCmdFailed(error: ResponseError) extends GetTaskCmdRes
+
+    case class TakeActionCmdRequest(pInstId: UUID, taskId: UUID, action: BaseAction, participantId: UUID, payLoad: PayLoad)  extends ProcessInstanceCmdRequest
+
+    trait TakeActionCmdResponse
+
+    case class TakeActionCmdSuccess() extends TakeActionCmdResponse
+    case class TakeActionCmdFailed(error: ResponseError) extends TakeActionCmdResponse
 
 
     case class PerformTaskCmdReq(
@@ -65,17 +72,17 @@ object ProcessInstanceAggregateUseCase {
     sealed trait PerformTaskCmdRes extends ProcessInstanceCmdResponse
 
     case class PerformTaskSuccess() extends PerformTaskCmdRes
-
   }
-
 }
 
 class ProcessInstanceAggregateUseCase(
+
   processInstanceAggregateFlows: ProcessInstanceAggregateFlows,
   workflowAggregateFlows: WorkflowAggregateFlows,
   itemAggregateFlows: ItemAggregateFlows,
   participantAggregateFlows: ParticipantAggregateFlows,
   pInstanceReadModelFlows: PInstanceReadModelFlows
+
 )(implicit system: ActorSystem)
   extends UseCaseSupport {
 
@@ -119,7 +126,8 @@ class ProcessInstanceAggregateUseCase(
           task =  Task(
             id =  UUID.randomUUID(),
             activity =  nextFlow.activity,
-            actions = nextFlow.actionFlows.map(_.action)
+            actions = nextFlow.actionFlows.map(_.action),
+            nextFlow.participants.map(TaskDestination(_))
           )
         )
       }
@@ -148,6 +156,17 @@ class ProcessInstanceAggregateUseCase(
   })
 
 
+  private val takeActionFlowGraph = Flow.fromGraph(GraphDSL.create() { implicit b =>
+    import GraphDSL.Implicits._
+    val broadcast = b.add(Broadcast[TakeActionCmdRequest](2))
+
+
+
+    val zip = b.add(Zip[String, String])
+    FlowShape(broadcast.in, zip.out)
+
+  })
+
   private val createInstanceFlow: SourceQueueWithComplete[(CreatePInstCmdRequest, Promise[CreatePInstCmdResponse])] = Source
     .queue[(CreatePInstCmdRequest, Promise[CreatePInstCmdResponse])](10, OverflowStrategy.dropNew)
     .via(prepareCreateInst.zipPromise)
@@ -171,5 +190,7 @@ class ProcessInstanceAggregateUseCase(
     val sumSink =  Sink.fold[List[ProcessInstanceDto], ProcessInstanceDto](List.empty[ProcessInstanceDto])( (m ,e) =>  e :: m )
     Source.fromPublisher(pInstanceReadModelFlows.list).toMat(sumSink)(Keep.right).run()
   }
+
+
 
 }
