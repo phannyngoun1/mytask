@@ -8,7 +8,7 @@ import akka.util.Timeout
 import com.dream.common.Protocol.CmdResponseFailed
 import com.dream.common.domain.ResponseError
 import com.dream.workflow.domain.TaskDto
-import com.dream.workflow.entity.processinstance.ProcessInstanceProtocol.{PerformTaskCmdRes, _}
+import com.dream.workflow.entity.processinstance.ProcessInstanceProtocol._
 import com.dream.workflow.usecase.ProcessInstanceAggregateUseCase.Protocol
 import com.dream.workflow.usecase.port.ProcessInstanceAggregateFlows
 

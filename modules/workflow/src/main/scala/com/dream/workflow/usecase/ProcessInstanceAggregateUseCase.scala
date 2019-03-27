@@ -157,10 +157,13 @@ class ProcessInstanceAggregateUseCase(
 
 
   private val takeActionFlowGraph = Flow.fromGraph(GraphDSL.create() { implicit b =>
+
     import GraphDSL.Implicits._
     val broadcast = b.add(Broadcast[TakeActionCmdRequest](2))
 
+    val mapToGetTaskReq = Flow[TakeActionCmdRequest].map(item => GetTaskCmdReq(AssignedTask(item.taskId, item.participantId)))
 
+    broadcast.out(0) ~> mapToGetTaskReq ~> processInstanceAggregateFlows.getTask
 
     val zip = b.add(Zip[String, String])
     FlowShape(broadcast.in, zip.out)
