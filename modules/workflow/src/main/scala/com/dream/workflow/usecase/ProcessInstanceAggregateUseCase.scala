@@ -9,7 +9,7 @@ import akka.stream.scaladsl._
 import com.dream.common.domain.ResponseError
 import com.dream.workflow.domain.{Flow => WFlow, _}
 import com.dream.workflow.entity.processinstance.ProcessInstanceProtocol.{CreatePInstCmdRequest => CreateInst}
-import com.dream.workflow.usecase.ItemAggregateUseCase.Protocol.{GetItemCmdRequest, GetItemCmdSuccess}
+import com.dream.workflow.usecase.ItemAggregateUseCase.Protocol.{GetItemCmdRequest, GetItemCmdSuccess, GetWorkflowIdCmdSuccess}
 import com.dream.workflow.usecase.ParticipantAggregateUseCase.Protocol.AssignTaskCmdReq
 import com.dream.workflow.usecase.WorkflowAggregateUseCase.Protocol.{GetWorkflowCmdRequest, GetWorkflowCmdSuccess}
 import com.dream.workflow.usecase.port._
@@ -100,8 +100,8 @@ class ProcessInstanceAggregateUseCase(
   )
 
 
-  private val getNextFlowByItem: Flow[(UUID), Int, NotUsed] =
-    Flow[UUID].map()
+  private val getNextFlowByItem = Flow[UUID].map(GetWorkflowIdCmdSuccess(_))
+
 
   //TODO: workaround, need to be fixed
   private val prepareCreateInst = Flow.fromGraph(GraphDSL.create() { implicit b =>
@@ -165,6 +165,8 @@ class ProcessInstanceAggregateUseCase(
 
     import GraphDSL.Implicits._
     val broadcast = b.add(Broadcast[TakeActionCmdRequest](2))
+
+
 
     val mapToGetTaskReq = Flow[TakeActionCmdRequest].map(item => GetTaskCmdReq(AssignedTask(item.taskId, item.participantId)))
 
