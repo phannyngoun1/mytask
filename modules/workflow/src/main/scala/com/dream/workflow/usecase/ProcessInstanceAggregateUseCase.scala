@@ -2,6 +2,7 @@ package com.dream.workflow.usecase
 
 import java.util.UUID
 
+import akka.NotUsed
 import akka.actor.ActorSystem
 import akka.stream._
 import akka.stream.scaladsl._
@@ -56,22 +57,22 @@ object ProcessInstanceAggregateUseCase {
 
     case class GetTaskCmdFailed(error: ResponseError) extends GetTaskCmdRes
 
-    case class TakeActionCmdRequest(pInstId: UUID, taskId: UUID, action: BaseAction, participantId: UUID, payLoad: PayLoad)  extends ProcessInstanceCmdRequest
+    case class TakeActionCmdRequest(pInstId: UUID, taskId: UUID, action: BaseAction, participantId: UUID, payLoad: PayLoad) extends ProcessInstanceCmdRequest
 
     trait TakeActionCmdResponse
 
     case class TakeActionCmdSuccess() extends TakeActionCmdResponse
     case class TakeActionCmdFailed(error: ResponseError) extends TakeActionCmdResponse
 
-
     case class PerformTaskCmdReq(
       pInstId: UUID,
-      activity: BaseActivity,
+      activity: BaseActivity
     ) extends ProcessInstanceCmdRequest
 
     sealed trait PerformTaskCmdRes extends ProcessInstanceCmdResponse
 
     case class PerformTaskSuccess() extends PerformTaskCmdRes
+
   }
 }
 
@@ -97,6 +98,10 @@ class ProcessInstanceAggregateUseCase(
     ActorMaterializerSettings(system)
       .withSupervisionStrategy(decider)
   )
+
+
+  private val getNextFlowByItem: Flow[(UUID), Int, NotUsed] =
+    Flow[UUID].map()
 
   //TODO: workaround, need to be fixed
   private val prepareCreateInst = Flow.fromGraph(GraphDSL.create() { implicit b =>
@@ -163,7 +168,9 @@ class ProcessInstanceAggregateUseCase(
 
     val mapToGetTaskReq = Flow[TakeActionCmdRequest].map(item => GetTaskCmdReq(AssignedTask(item.taskId, item.participantId)))
 
-    broadcast.out(0) ~> mapToGetTaskReq ~> processInstanceAggregateFlows.getTask
+    broadcast.out(0) ~> mapToGetTaskReq ~> processInstanceAggregateFlows.getTask map {
+      case GetTaskCmdSuccess(dto) =>
+    }
 
     val zip = b.add(Zip[String, String])
     FlowShape(broadcast.in, zip.out)
@@ -193,7 +200,5 @@ class ProcessInstanceAggregateUseCase(
     val sumSink =  Sink.fold[List[ProcessInstanceDto], ProcessInstanceDto](List.empty[ProcessInstanceDto])( (m ,e) =>  e :: m )
     Source.fromPublisher(pInstanceReadModelFlows.list).toMat(sumSink)(Keep.right).run()
   }
-
-
 
 }

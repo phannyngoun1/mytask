@@ -39,11 +39,11 @@ object ItemProtocol {
   ) extends ItemCmdRequest
 
 
-  case class GetWorkflowId(
+  case class GetWorkflowIdCmdRequest(
     id: UUID
   ) extends ItemCmdRequest
 
-  case class GetWorkflowCmdSuccess(
+  case class GetWorkflowIdCmdSuccess(
     workflowId: UUID
   ) extends ItemCmdResponse
 

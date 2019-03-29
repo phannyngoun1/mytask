@@ -47,6 +47,14 @@ object ItemAggregateUseCase {
 
     case class GetItemCmdFailed(error: ResponseError) extends GetItemCmdResponse
 
+    case class GetWorkflowIdCmdRequest(itemId: UUID) extends ItemCmdRequest
+
+    abstract class GetWorkflowIdCmdResponse extends ItemCmdResponse
+
+    case class GetWorkflowIdCmdSuccess(workflowId: UUID) extends GetWorkflowIdCmdResponse
+
+    case class GetWorkflowIdCmdFailed(error: ResponseError) extends GetWorkflowIdCmdResponse
+
   }
 
 }

@@ -8,5 +8,6 @@ trait ItemAggregateFlows {
 
   def createItem:  Flow[CreateItemCmdRequest, CreateItemCmdResponse, NotUsed]
   def getItem: Flow[GetItemCmdRequest, GetItemCmdResponse, NotUsed]
+  def getWorkflowId: Flow[GetWorkflowIdCmdRequest, GetWorkflowIdCmdResponse, NotUsed]
 
 }

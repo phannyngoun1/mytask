@@ -87,6 +87,12 @@ class ItemEntity extends PersistentActor with ActorLogging  with EntityState[Ite
       foreachState{ state =>
         sender() ! GetItemCmdSuccess(state.id, state.name, state.desc, state.workflowId)
       }
+
+    case cmd: GetWorkflowIdCmdRequest  if equalsId(cmd.id)(state, _.id.equals(cmd.id)) =>
+      foreachState { state =>
+        sender() ! GetWorkflowIdCmdSuccess(state.workflowId)
+      }
+
     case SaveSnapshotSuccess(metadata) =>
       log.debug(s"receiveCommand: SaveSnapshotSuccess succeeded: $metadata")
   }
