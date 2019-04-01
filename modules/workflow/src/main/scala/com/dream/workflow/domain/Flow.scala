@@ -224,7 +224,7 @@ case class Flow(
     */
   //TODO: check for authorized participant
 
-  def nextActivity(action: BaseAction, onActivity: BaseActivity, by: ParticipantAccess, noneParticipantAllowed: Boolean): Either[WorkflowError, BaseActivityFlow ] = {
+  def nextActivity(action: BaseAction, onActivity: BaseActivity, by: ParticipantAccess, noneParticipantAllowed: Boolean = false): Either[WorkflowError, BaseActivityFlow ] = {
 
     for {
       currAct <- checkCurrentActivity(onActivity)

@@ -57,4 +57,12 @@ object ProcessInstanceProtocol {
   case class GetTaskCmdRes(pInstId: UUID,task: Task) extends PerformTaskCmdRes
 
 
+  case class TakeActionCmdReq(
+    id: UUID,
+    task: Task,
+    participantId: UUID
+  )  extends ProcessInstanceCmdRequest
+
+  case class TakeActionCmdSuccess() extends ProcessInstanceCmdResponse
+
 }

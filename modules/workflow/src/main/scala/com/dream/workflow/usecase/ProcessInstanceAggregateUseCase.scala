@@ -45,7 +45,7 @@ object ProcessInstanceAggregateUseCase {
 
     sealed trait GetPInstCmdResponse extends ProcessInstanceCmdResponse
 
-    case class GetPInstCmdSuccess(id: UUID, folio: String) extends GetPInstCmdResponse
+    case class GetPInstCmdSuccess(id: UUID, flowId: UUID, folio: String) extends GetPInstCmdResponse
 
     case class GetPInstCmdFailed(error: ResponseError) extends GetPInstCmdResponse
 
@@ -100,7 +100,16 @@ class ProcessInstanceAggregateUseCase(
   )
 
 
-  private val getNextFlowByItem = Flow[UUID].map(GetWorkflowIdCmdSuccess(_))
+ private val getWorflowByItem =
+   Flow[UUID].map(GetItemCmdRequest)
+   .via(itemAggregateFlows.getItem)
+   .map {
+     case res: GetItemCmdSuccess => GetWorkflowCmdRequest(res.workflowId)
+   }
+   .via(workflowAggregateFlows.getWorkflow)
+   .map {
+     case GetWorkflowCmdSuccess(workflow) => workflow
+   }
 
 
   //TODO: workaround, need to be fixed
@@ -138,7 +147,9 @@ class ProcessInstanceAggregateUseCase(
       }
     )
 
-    broadcast.out(0) ~> convertToGetItem ~> itemAggregateFlows.getItem.map {
+//    broadcast.out(0) ~> Flow[CreatePInstCmdRequest].map(_.itemID) ~> getWorflowByItem ~> createInstZip.in0
+
+    broadcast.out(0) ~>  convertToGetItem ~> itemAggregateFlows.getItem.map {
       case res: GetItemCmdSuccess => GetWorkflowCmdRequest(res.workflowId)
     } ~> workflowAggregateFlows.getWorkflow.map {
       case GetWorkflowCmdSuccess(workflow) => workflow
@@ -161,18 +172,46 @@ class ProcessInstanceAggregateUseCase(
   })
 
 
+  private case class TakeActionParams(
+    flow: WFlow,
+    task: TaskDto,
+    action: TakeActionCmdRequest,
+    nexActivity: Option[BaseActivityFlow] = None
+  )
+
   private val takeActionFlowGraph = Flow.fromGraph(GraphDSL.create() { implicit b =>
 
     import GraphDSL.Implicits._
-    val broadcast = b.add(Broadcast[TakeActionCmdRequest](2))
+    val broadcast = b.add(Broadcast[TakeActionCmdRequest](3))
+    val zipFlowTask =  b.add(Zip[WFlow, TaskDto])
+    val zipActionParam = b.add(Zip[(WFlow, TaskDto), TakeActionCmdRequest])
 
-
+    val takeActonBroadcast = b.add(Broadcast[TakeActionParams](1))
 
     val mapToGetTaskReq = Flow[TakeActionCmdRequest].map(item => GetTaskCmdReq(AssignedTask(item.taskId, item.participantId)))
 
-    broadcast.out(0) ~> mapToGetTaskReq ~> processInstanceAggregateFlows.getTask map {
-      case GetTaskCmdSuccess(dto) =>
-    }
+
+    broadcast.out(0) ~> Flow[TakeActionCmdRequest].map(it => GetPInstCmdRequest(it.pInstId)) ~> processInstanceAggregateFlows.getPInst.map {
+      case res: GetPInstCmdSuccess => GetWorkflowCmdRequest(res.flowId)
+    } ~> workflowAggregateFlows.getWorkflow.map {
+      case GetWorkflowCmdSuccess(workflow) => workflow
+    } ~> zipFlowTask.in0
+
+    broadcast.out(1) ~> mapToGetTaskReq ~> processInstanceAggregateFlows.getTask.map {
+      case GetTaskCmdSuccess(dto) => dto
+    } ~> zipFlowTask.in1
+
+
+    zipFlowTask.out ~> zipActionParam.in0
+    broadcast.out(2) ~> zipActionParam.in1
+
+    zipActionParam.out.map(f => TakeActionParams(f._1._1, f._1._2, f._2 )) ~> Flow[TakeActionParams].map(
+      f => f.flow.nextActivity(f.action.action, f.task.activity, ParticipantAccess(f.action.participantId))  match {
+        case Right(activity) => f.copy(nexActivity = Some(activity))
+      }
+    ) ~> takeActonBroadcast.in
+
+
 
     val zip = b.add(Zip[String, String])
     FlowShape(broadcast.in, zip.out)

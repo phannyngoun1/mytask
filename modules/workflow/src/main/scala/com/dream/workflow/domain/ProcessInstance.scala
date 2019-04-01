@@ -3,6 +3,7 @@ package com.dream.workflow.domain
 import java.util.UUID
 
 import com.dream.common.domain.ErrorMessage
+import com.dream.workflow.domain.ProcessInstance.InstError
 
 
 object ProcessInstance {
@@ -53,4 +54,10 @@ case class ProcessInstance(
   description: String,
   tasks: List[Task],
   isActive: Boolean = true
-)
+) {
+  def takAction(task: Task, by: UUID):  Either[InstError, ProcessInstance] = {
+    val state = copy(tasks = tasks.map(item => if (item.active) item.copy(active = false) else item ))
+    Right(state.copy(tasks = task :: tasks))
+  }
+
+}

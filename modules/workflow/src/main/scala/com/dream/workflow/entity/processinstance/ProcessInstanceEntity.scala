@@ -79,6 +79,10 @@ class ProcessInstanceEntity extends PersistentActor
           case None => sender() ! CmdResponseFailed(ResponseError(Some(id), s"Task id: ${taskId} not found"))
         }
       }
+    case TakeActionCmdReq(id, task, by) if equalsId(id)(state, _.id.equals(id)) =>
+      foreachState { state =>
+        state.takAction(task, by)
+      }
     case SaveSnapshotSuccess(metadata) =>
       log.debug(s"receiveCommand: SaveSnapshotSuccess succeeded: $metadata")
   }
