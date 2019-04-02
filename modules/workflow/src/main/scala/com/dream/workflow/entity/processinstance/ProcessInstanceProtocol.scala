@@ -1,9 +1,12 @@
 package com.dream.workflow.entity.processinstance
 
+import java.time.Instant
 import java.util.UUID
 
 import com.dream.common.Protocol.{CmdRequest, CmdResponse}
 import com.dream.workflow.domain._
+import com.dream.workflow.entity.processinstance.ProcessInstanceProtocol.ProcessInstanceCmdRequest
+import org.sisioh.baseunits.scala.time.TimePoint
 
 object ProcessInstanceProtocol {
 
@@ -29,7 +32,8 @@ object ProcessInstanceProtocol {
     contentType: String,
     description: String,
     destIds: List[UUID],
-    task: Task
+    task: Task,
+    payLoad: PayLoad
   ) extends ProcessInstanceCmdRequest
 
   case class CreatePInstCmdSuccess(id: UUID) extends CreatePInstCmdResponse
@@ -44,7 +48,12 @@ object ProcessInstanceProtocol {
 
   case class PerformTaskCmdReq(
     pInstId: UUID,
+    taskId: UUID,
+    action: BaseAction,
     activity: BaseActivity,
+    payLoad: PayLoad,
+    processBy: UUID
+
   ) extends TaskCmdRequest
 
   case class PerformTaskSuccess() extends PerformTaskCmdRes
@@ -57,12 +66,16 @@ object ProcessInstanceProtocol {
   case class GetTaskCmdRes(pInstId: UUID,task: Task) extends PerformTaskCmdRes
 
 
-  case class TakeActionCmdReq(
+  case class CreateNewTaskCmdReq(
     id: UUID,
     task: Task,
     participantId: UUID
   )  extends ProcessInstanceCmdRequest
 
-  case class TakeActionCmdSuccess() extends ProcessInstanceCmdResponse
+  case class CreateNewTaskCmdSuccess(id: UUID, taskId: UUID) extends ProcessInstanceCmdResponse
+
+  case class CommitActionCmdReq(id: UUID, taskId: UUID, participantId: UUID, action: BaseAction,  processAt: Instant) extends ProcessInstanceCmdRequest
+  case class CommitActionCmdSuccess(id: UUID) extends ProcessInstanceCmdResponse
+
 
 }

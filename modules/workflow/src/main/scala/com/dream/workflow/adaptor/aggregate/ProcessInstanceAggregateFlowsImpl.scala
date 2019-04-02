@@ -1,5 +1,7 @@
 package com.dream.workflow.adaptor.aggregate
 
+import java.time.Instant
+
 import akka.NotUsed
 import akka.actor.ActorRef
 import akka.pattern.ask
@@ -11,6 +13,7 @@ import com.dream.workflow.domain.TaskDto
 import com.dream.workflow.entity.processinstance.ProcessInstanceProtocol._
 import com.dream.workflow.usecase.ProcessInstanceAggregateUseCase.Protocol
 import com.dream.workflow.usecase.port.ProcessInstanceAggregateFlows
+import org.sisioh.baseunits.scala.time.TimePoint
 
 import scala.concurrent.Future
 import scala.concurrent.duration._
@@ -28,11 +31,15 @@ class ProcessInstanceAggregateFlowsImpl(aggregateRef: ActorRef) extends ProcessI
         case  CmdResponseFailed(message) => Protocol.CreatePInstCmdFailed(ResponseError(message))
       }
 
+
+
   override def performTask: Flow[Protocol.PerformTaskCmdReq, Protocol.PerformTaskCmdRes, NotUsed] =
-    Flow[Protocol.PerformTaskCmdReq].mapAsync(1) {
-      case _ =>
-        println("performTask")
-        Future.successful(Protocol.PerformTaskSuccess())
+    Flow[Protocol.PerformTaskCmdReq]
+    .map(req => PerformTaskCmdReq(req.pInstId, req.taskId, req.action, req.activity, req.payLoad, req.processBy))
+      .mapAsync(1)(aggregateRef ? _)
+    .map{
+      case req:PerformTaskCmdReq =>
+        Protocol.PerformTaskSuccess(req.pInstId, req.taskId, req.processBy,Instant.now())
     }
 
   override def getPInst: Flow[Protocol.GetPInstCmdRequest, Protocol.GetPInstCmdResponse, NotUsed] =
@@ -40,7 +47,7 @@ class ProcessInstanceAggregateFlowsImpl(aggregateRef: ActorRef) extends ProcessI
     .map(req => GetPInstCmdRequest(req.id))
     .mapAsync(1)(aggregateRef ? _)
     .map {
-      case GetPInstCmdSuccess(pInst) => Protocol.GetPInstCmdSuccess(pInst.id, pInst.folio)
+      case GetPInstCmdSuccess(pInst) => Protocol.GetPInstCmdSuccess(pInst.id, pInst.flowId, pInst.folio)
       case  CmdResponseFailed(message) => Protocol.GetPInstCmdFailed(ResponseError(message))
     }
 
@@ -53,4 +60,7 @@ class ProcessInstanceAggregateFlowsImpl(aggregateRef: ActorRef) extends ProcessI
       case CmdResponseFailed(message) => Protocol.GetTaskCmdFailed(ResponseError(message))
     }
 
+  override def commitAction: Flow[Protocol.CommitActionCmdReq, Protocol.CommitActionCmdRes, NotUsed] = ???
+
+  override def createNewTask: Flow[Protocol.CreateNewTaskCmdRequest, Protocol.CreateNewTaskCmdResponse, NotUsed] = ???
 }

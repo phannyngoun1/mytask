@@ -8,7 +8,7 @@ import cats.implicits._
 import com.dream.common.EntityState
 import com.dream.common.Protocol.CmdResponseFailed
 import com.dream.common.domain.ResponseError
-import com.dream.workflow.domain.ProcessInstance.{InstError, InvalidInstStateError, ProcessInstanceCreated}
+import com.dream.workflow.domain.ProcessInstance._
 import com.dream.workflow.domain._
 import com.dream.workflow.entity.processinstance.ProcessInstanceProtocol._
 
@@ -46,6 +46,9 @@ class ProcessInstanceEntity extends PersistentActor
     case event: ProcessInstanceCreated =>
       println(s"replay event: $event")
       state = applyState(event).toSomeOrThrow
+    case event: NewTaskCreated =>
+      println(s"replay event: $event")
+      state = mapState(_.createTask(event.task, event.participantId)).toSomeOrThrow
     case RecoveryCompleted =>
       println(s"Recovery completed: $persistenceId")
     case _ => log.debug("Other")
@@ -79,10 +82,26 @@ class ProcessInstanceEntity extends PersistentActor
           case None => sender() ! CmdResponseFailed(ResponseError(Some(id), s"Task id: ${taskId} not found"))
         }
       }
-    case TakeActionCmdReq(id, task, by) if equalsId(id)(state, _.id.equals(id)) =>
-      foreachState { state =>
-        state.takAction(task, by)
-      }
+
+    case CommitActionCmdReq(id, taskId, participantId, action, processAt) if equalsId(id)(state, _.id.equals(id)) =>
+      foreachState(_.commitTask(taskId, participantId, action, processAt) match {
+        case Left(error) => sender() ! CmdResponseFailed( ResponseError(Some(id), error.message))
+        case Right(newState) => persist(ActionCommitted(id, taskId, participantId, action, processAt)) { event =>
+          state = Some(newState)
+          sender() ! CommitActionCmdSuccess(event.id)
+          //TODO:  tryToSaveSnapshot()
+        }
+      })
+
+    case CreateNewTaskCmdReq(id, task, by) if equalsId(id)(state, _.id.equals(id)) =>
+      foreachState(_.createTask(task, by) match {
+        case Left(error) => sender() ! CmdResponseFailed( ResponseError(Some(id), error.message))
+        case Right(newState) => persist(NewTaskCreated(id, task, by)) { event =>
+          state = Some(newState)
+          sender() ! CreateNewTaskCmdSuccess(event.id, event.task.id)
+          //TODO:  tryToSaveSnapshot()
+        }
+      })
     case SaveSnapshotSuccess(metadata) =>
       log.debug(s"receiveCommand: SaveSnapshotSuccess succeeded: $metadata")
   }

@@ -11,6 +11,10 @@ trait ProcessInstanceAggregateFlows {
 
   def getPInst: Flow[Protocol.GetPInstCmdRequest, Protocol.GetPInstCmdResponse, NotUsed]
 
+  def commitAction:  Flow[Protocol.CommitActionCmdReq, Protocol.CommitActionCmdRes, NotUsed]
+
+  def createNewTask: Flow[Protocol.CreateNewTaskCmdRequest, Protocol.CreateNewTaskCmdResponse, NotUsed]
+
   def performTask: Flow[Protocol.PerformTaskCmdReq, Protocol.PerformTaskCmdRes, NotUsed]
 
   def getTask: Flow[Protocol.GetTaskCmdReq, Protocol.GetTaskCmdRes, NotUsed]
