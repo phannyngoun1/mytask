@@ -5,8 +5,6 @@ import java.util.UUID
 
 import com.dream.common.Protocol.{CmdRequest, CmdResponse}
 import com.dream.workflow.domain._
-import com.dream.workflow.entity.processinstance.ProcessInstanceProtocol.ProcessInstanceCmdRequest
-import org.sisioh.baseunits.scala.time.TimePoint
 
 object ProcessInstanceProtocol {
 

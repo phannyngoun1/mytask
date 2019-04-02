@@ -8,6 +8,7 @@ import akka.util.Timeout
 import com.dream.common.Protocol.CmdResponseFailed
 import com.dream.common.domain.ResponseError
 import com.dream.workflow.entity.item.ItemProtocol._
+import com.dream.workflow.entity.workflow.WorkflowProtocol.GetWorkflowCmdSuccess
 import com.dream.workflow.usecase.ItemAggregateUseCase.Protocol
 import com.dream.workflow.usecase.port.ItemAggregateFlows
 
@@ -43,7 +44,7 @@ class ItemAggregateFlowsImpl(aggregateRef: ActorRef) extends ItemAggregateFlows 
       .map(req => GetWorkflowIdCmdRequest(req.itemId))
       .mapAsync(1)(aggregateRef ? _)
     .map {
-      case GetWorkflowCmdSuccess(id) => Protocol.GetWorkflowIdCmdSuccess(id)
+      case GetWorkflowCmdSuccess(flow) => Protocol.GetWorkflowIdCmdSuccess(flow.id)
       case CmdResponseFailed(message) => Protocol.GetWorkflowIdCmdFailed(ResponseError(message))
     }
 

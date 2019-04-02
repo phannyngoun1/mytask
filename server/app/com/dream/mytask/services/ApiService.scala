@@ -4,7 +4,7 @@ import java.util.UUID
 
 import akka.actor.ActorSystem
 import com.dream.mytask.shared.Api
-import com.dream.mytask.shared.data.{ActionItemJson, ProcessInstanceData, TaskItemJson}
+import com.dream.mytask.shared.data.{ActionItemJson, TaskItemJson}
 import com.dream.workflow.adaptor.aggregate._
 import com.dream.workflow.adaptor.dao.account.AccountReadModelFlowImpl
 import com.dream.workflow.adaptor.dao.flow.FlowReadModelFlowImpl

@@ -13,9 +13,7 @@ import com.dream.workflow.domain.TaskDto
 import com.dream.workflow.entity.processinstance.ProcessInstanceProtocol._
 import com.dream.workflow.usecase.ProcessInstanceAggregateUseCase.Protocol
 import com.dream.workflow.usecase.port.ProcessInstanceAggregateFlows
-import org.sisioh.baseunits.scala.time.TimePoint
 
-import scala.concurrent.Future
 import scala.concurrent.duration._
 import scala.language.postfixOps
 

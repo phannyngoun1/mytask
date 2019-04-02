@@ -3,7 +3,6 @@ package com.dream.workflow.entity.item
 import java.util.UUID
 
 import com.dream.common.Protocol.{CmdRequest, CmdResponse}
-import com.dream.workflow.domain.Item.ItemError
 
 object ItemProtocol {
 

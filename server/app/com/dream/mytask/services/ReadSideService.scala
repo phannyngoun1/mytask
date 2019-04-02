@@ -2,8 +2,6 @@ package com.dream.mytask.services
 
 import com.dream.workflow.adaptor.dao.flow.FlowReadModelFlowImpl
 import com.dream.workflow.adaptor.dao.item.ItemReadModelFlowImpl
-import com.dream.workflow.adaptor.journal.JournalReaderImpl
-import com.dream.workflow.usecase.ReadModelUseCase
 import com.typesafe.config.ConfigFactory
 import slick.basic.DatabaseConfig
 import slick.jdbc.JdbcProfile
