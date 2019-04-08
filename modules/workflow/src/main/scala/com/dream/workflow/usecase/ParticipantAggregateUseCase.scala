@@ -68,7 +68,7 @@ object ParticipantAggregateUseCase {
 
     sealed trait GetAssignedTaskCmdRes  extends ParticipantCmdResponse
 
-    case class GetAssignedTaskCmdSuccess(assignedTasks: List[AssignedTask]) extends GetAssignedTaskCmdRes
+    case class GetAssignedTaskCmdSuccess(id: UUID, assignedTasks: List[AssignedTask]) extends GetAssignedTaskCmdRes
 
     case class GetAssignedTaskCmdFailed(error: ResponseError) extends GetAssignedTaskCmdRes
   }

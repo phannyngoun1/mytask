@@ -85,13 +85,9 @@ class ApiService(login: UUID)(implicit val ec: ExecutionContext, implicit val  s
     val uuId = UUID.fromString(accId)
 
     accountUseCase.getTasks(GetTaskLisCmdReq(uuId)) map (_.map(f =>
-      TaskItemJson(f.id.toString, f.pInstId.toString, f.activity.name, f.actions.map(a => ActionItemJson(a.name)))
+      TaskItemJson(f.id.toString, f.pInstId.toString, f.participantId.toString, f.activity.name, f.actions.map(a => ActionItemJson(a.name)))
     ))
-//      case res: GetTaskListCmdSuccess => res.taskList.map(f => TaskItemJson(f.id.toString, f.id.toString, f.activity.name, f.actions.map(a => ActionItemJson(a.name))))
-//      case _ => List.empty[TaskItemJson]
-
-
-    //Future.successful(List(TaskItemJson("a", "a", "a", List(ActionItemJson("Done")))))
   }
 
+  override def takeAction(pInstId: String, taskId: String, participantId: String, action: String): Future[List[TaskItemJson]] = ???
 }

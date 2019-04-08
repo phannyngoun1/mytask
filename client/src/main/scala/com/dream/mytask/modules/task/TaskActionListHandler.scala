@@ -6,7 +6,7 @@ import diode.data._
 import autowire._
 import diode.util._
 import boopickle.Default._
-import TaskActionListHandler.TaskListActions._
+import TaskActionListHandler.TaskListActions.{FetchTaskListAction, _}
 import com.dream.mytask.services.AjaxClient
 import com.dream.mytask.services.DataModel.RootModel
 import com.dream.mytask.shared.Api
@@ -37,6 +37,10 @@ object TaskActionListHandler {
 
   object TaskListActions {
 
+    case class TakeAction(pInstId: Option[String], taskId: Option[String], participantId: Option[String], action: Option[String], potResult: Pot[List[TaskItemJson]] = Empty )  extends PotAction[List[TaskItemJson], TakeAction] {
+      override def next(newResult: Pot[List[TaskItemJson]]): TakeAction = TakeAction(None, None, None, None, newResult)
+    }
+
     case class FetchTaskListAction(accId: Option[String], potResult: Pot[List[TaskItemJson]] = Empty) extends PotAction[List[TaskItemJson], FetchTaskListAction] {
       override def next(newResult: Pot[List[TaskItemJson]]): FetchTaskListAction = FetchTaskListAction(None, newResult)
     }
@@ -56,5 +60,9 @@ class TaskActionListHandler[M](modelRW: ModelRW[M, Pot[List[TaskItemJson]]]) ext
     case action: FetchTaskListAction =>
       val updateF = action.effect(AjaxClient[Api].getTasks(action.accId.get).call())(identity _)
       action.handleWith(this, updateF)(PotAction.handler())
+    case action: TakeAction =>
+      val updateF = action.effect(AjaxClient[Api].takeAction(action.pInstId.get, action.taskId.get, action.participantId.get, action.action.get ).call())(identity _)
+      action.handleWith(this, updateF)(PotAction.handler())
   }
 }
+

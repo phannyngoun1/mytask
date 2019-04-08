@@ -3,6 +3,7 @@ package com.dream.mytask.modules.task
 import com.dream.mytask.AppClient.Loc
 import com.dream.mytask.modules.task.TaskActionListHandler.TaskListActions.FetchTaskListAction
 import com.dream.mytask.services.DataModel.TaskModel
+import com.dream.mytask.shared.data.ActionItemJson
 import diode.react._
 import japgolly.scalajs.react.BackendScope
 import diode.react.ReactPot._
@@ -18,6 +19,13 @@ object TaskListComp {
 
   class Backend($: BackendScope[Props, State]) {
     def render(p: Props, s: State) = {
+
+      implicit  def renderItem(item: ActionItemJson) = {
+
+        <.div(
+          <.button(item.name)
+        )
+      }
 
       val wrapper = p.proxy.connect(_.taskList)
         <.div(
@@ -41,7 +49,10 @@ object TaskListComp {
                 px().renderFailed(ex => <.p("Failed to load")),
                 px().render(m => <.ol( ^.`type` := "1",
                   m toTagMod { item =>
-                    <.li( s"P inst: ${item.pInstId}, task Id: ${item.id}, activity: ${item.activityName}, actions: ${item.actions.mkString(";")}")
+                    <.li( s"P inst: ${item.pInstId}, task Id: ${item.id}, participantId: ${item.participantId}, activity: ${item.activityName}",
+
+                      item.actions toTagMod
+                    )
                   }
                 ))
               )

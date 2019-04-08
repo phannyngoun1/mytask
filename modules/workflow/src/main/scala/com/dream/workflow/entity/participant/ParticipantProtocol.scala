@@ -47,6 +47,6 @@ object ParticipantProtocol {
 
   case class GetAssignedTaskCmdReq(id: UUID) extends ParticipantCmdRequest
 
-  case class GetAssignedTaskCmdSuccess(assignedTasks: List[AssignedTask]) extends ParticipantCmdResponse
+  case class GetAssignedTaskCmdSuccess(id: UUID, assignedTasks: List[AssignedTask]) extends ParticipantCmdResponse
 
 }

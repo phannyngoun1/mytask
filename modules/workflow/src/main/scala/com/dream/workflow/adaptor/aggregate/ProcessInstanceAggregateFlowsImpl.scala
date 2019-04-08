@@ -12,6 +12,7 @@ import com.dream.common.domain.ResponseError
 import com.dream.workflow.domain.TaskDto
 import com.dream.workflow.entity.processinstance.ProcessInstanceProtocol._
 import com.dream.workflow.usecase.ProcessInstanceAggregateUseCase.Protocol
+import com.dream.workflow.usecase.ProcessInstanceAggregateUseCase.Protocol.CreateNewTaskCmdRequest
 import com.dream.workflow.usecase.port.ProcessInstanceAggregateFlows
 
 import scala.concurrent.duration._
@@ -37,7 +38,7 @@ class ProcessInstanceAggregateFlowsImpl(aggregateRef: ActorRef) extends ProcessI
       .mapAsync(1)(aggregateRef ? _)
     .map{
       case req:PerformTaskCmdReq =>
-        Protocol.PerformTaskSuccess(req.pInstId, req.taskId, req.processBy,Instant.now())
+        Protocol.PerformTaskSuccess(req.pInstId, req.taskId, req.action, req.processBy,Instant.now())
     }
 
   override def getPInst: Flow[Protocol.GetPInstCmdRequest, Protocol.GetPInstCmdResponse, NotUsed] =
@@ -51,14 +52,28 @@ class ProcessInstanceAggregateFlowsImpl(aggregateRef: ActorRef) extends ProcessI
 
   override def getTask: Flow[Protocol.GetTaskCmdReq, Protocol.GetTaskCmdRes, NotUsed] =
     Flow[Protocol.GetTaskCmdReq]
-    .map( req => GetTaskCmdReq(req.assignedTask.pInstId, req.assignedTask.taskId))
+      .map( req => GetTaskCmdReq(req.assignedTask.pInstId, req.assignedTask.taskId, req.participantId))
       .mapAsync(1)(aggregateRef ? _)
+      .map {
+        case GetTaskCmdRes(pInstId, participantId , task) => Protocol.GetTaskCmdSuccess(TaskDto(task.id, pInstId, participantId,  task.activity, task.actions))
+        case CmdResponseFailed(message) => Protocol.GetTaskCmdFailed(ResponseError(message))
+      }
+
+  override def commitAction: Flow[Protocol.CommitActionCmdReq, Protocol.CommitActionCmdRes, NotUsed] =
+    Flow[Protocol.CommitActionCmdReq]
+    .map(req => CommitActionCmdReq(req.id,req.taskId, req.participantId,req.action, req.processAt ) )
+    .mapAsync(1)(aggregateRef ? _)
     .map {
-      case GetTaskCmdRes(pInstId, task) => Protocol.GetTaskCmdSuccess(TaskDto(task.id, pInstId,  task.activity, task.actions))
-      case CmdResponseFailed(message) => Protocol.GetTaskCmdFailed(ResponseError(message))
+      case CommitActionCmdSuccess(id) => Protocol.CommitActionCmdSuccess(id)
+      case CmdResponseFailed(message) => Protocol.CommitActionCmdFailed(ResponseError(message))
     }
 
-  override def commitAction: Flow[Protocol.CommitActionCmdReq, Protocol.CommitActionCmdRes, NotUsed] = ???
-
-  override def createNewTask: Flow[Protocol.CreateNewTaskCmdRequest, Protocol.CreateNewTaskCmdResponse, NotUsed] = ???
+  override def createNewTask: Flow[Protocol.CreateNewTaskCmdRequest, Protocol.CreateNewTaskCmdResponse, NotUsed] =
+    Flow[Protocol.CreateNewTaskCmdRequest]
+    .map(req => CreateNewTaskCmdRequest(req.id, req.task, req.participantId))
+      .mapAsync(1)(aggregateRef ? _)
+      .map {
+        case CreateNewTaskCmdSuccess(id, taskId, dest) => Protocol.CreateNewTaskCmdSuccess(id, taskId, dest)
+        case CmdResponseFailed(message) => Protocol.CreateNewTaskCmdFailed(ResponseError(message))
+      }
 }

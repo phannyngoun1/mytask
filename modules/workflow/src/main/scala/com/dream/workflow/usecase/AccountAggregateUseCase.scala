@@ -6,7 +6,7 @@ import akka.NotUsed
 import akka.actor.ActorSystem
 import com.dream.common.domain.ResponseError
 import com.dream.workflow.domain.Account.AccountDto
-import com.dream.workflow.domain.{Activity, Task, TaskDto}
+import com.dream.workflow.domain.{Activity, AssignedTask, Task, TaskDto}
 import com.dream.workflow.usecase.ParticipantAggregateUseCase.Protocol.{GetAssignedTaskCmdReq, GetAssignedTaskCmdSuccess}
 import com.dream.workflow.usecase.ProcessInstanceAggregateUseCase.Protocol.{GetTaskCmdReq, GetTaskCmdSuccess}
 import com.dream.workflow.usecase.port.{AccountAggregateFlows, AccountReadModelFlow, ParticipantAggregateFlows, ProcessInstanceAggregateFlows}
@@ -65,11 +65,15 @@ object AccountAggregateUseCase {
     sealed trait GetParticipantCmdRes extends AccountCmdResponse
 
     case class GetParticipantCmdSuccess(participantIds: List[UUID]) extends GetParticipantCmdRes
+
     case class GetParticipantCmdFailed(responseError: ResponseError) extends GetParticipantCmdRes
 
     case class GetTaskLisCmdReq(id: UUID) extends  AccountCmdRequest
+
     trait GetTaskListCmdRes extends  AccountCmdResponse
+
     case class GetTaskListCmdSuccess(taskList: List[Task]) extends GetTaskListCmdRes
+
     case class GetTaskListCmdFailed(responseError: ResponseError) extends AccountCmdResponse
 
   }
@@ -98,34 +102,6 @@ class AccountAggregateUseCase(
 
   private val bufferSize: Int = 10
 
-
-//  val testFlow = Flow[GetTaskCmdReq].map(item =>  {
-//    println(s"-----------${item.assignedTask}-----------")
-//    Task(item.assignedTask.taskId, Activity("test"), List.empty)
-//  })
-
-
-
-//  private val getTaskFlow: Flow[GetTaskLisCmdReq, List[Task], NotUsed] =
-//    Flow[GetTaskLisCmdReq]
-//    .map(req => GetParticipantCmdReq(req.id))
-//      .via(flow.getParticipant.map {
-//        case GetParticipantCmdSuccess(partIds) => partIds
-//      })
-//    .flatMapConcat(parts => Source(parts.map(GetAssignedTaskCmdReq(_))))
-//    .via(partFlow.getAssignedTasks.map {
-//      case GetAssignedTaskCmdSuccess(assignedTasks) => assignedTasks
-//      case _ => List.empty
-//    })
-//    .flatMapConcat(assignedTasks=> Source(assignedTasks.map(GetTaskCmdReq(_))))
-//    .via(testFlow)
-//    .fold(List.empty[Task])((m, e) => e:: m).map { ls =>
-//
-//      println( s"result : ${ls}"  )
-//      ls
-//    }
-
-
   private val getTaskFlow: Flow[GetTaskLisCmdReq, TaskDto, NotUsed] =
     Flow[GetTaskLisCmdReq]
       .map(req => GetParticipantCmdReq(req.id))
@@ -134,40 +110,20 @@ class AccountAggregateUseCase(
       })
       .flatMapConcat(parts => Source(parts.map(GetAssignedTaskCmdReq(_))))
       .via(partFlow.getAssignedTasks.map {
-        case GetAssignedTaskCmdSuccess(assignedTasks) => assignedTasks
-        case _ => List.empty
+        case res : GetAssignedTaskCmdSuccess => res
+        case _ => GetAssignedTaskCmdSuccess(UUID.randomUUID(), List[AssignedTask]())
       })
-      .flatMapConcat(assignedTasks=> Source(assignedTasks.map(GetTaskCmdReq(_))))
+      .flatMapConcat(f=>   Source(f.assignedTasks.map(GetTaskCmdReq(f.id, _))))
       .via(pInstFlow.getTask)
       .map ( _ match {
         case GetTaskCmdSuccess(task) => task
-        case _ => TaskDto(UUID.randomUUID(), UUID.randomUUID(), Activity("test"), List.empty)
+        case _ => TaskDto(UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID() , Activity("test"), List.empty)
       })
-
-
 
   private val foldTasks = Sink.fold[List[TaskDto], TaskDto](List.empty[TaskDto])( (m ,e) =>  e :: m )
 
   def getTasks(req: GetTaskLisCmdReq)(implicit ec: ExecutionContext): Future[List[TaskDto]]  =
     Source.single(req).via(getTaskFlow).toMat(foldTasks)(Keep.right).run()
-
-
-
-
-//    .via(pInstFlow.getTask)
-//    .fold(List.empty[Task])((m, e) => (e match {
-//      case GetTaskCmdSuccess(task) => task
-//      case _ => Task(UUID.randomUUID(), Activity("test"), List.empty)
-//    }) :: m )
-
-
-
-
-//  private val getTaskQueue: SourceQueueWithComplete[(GetTaskLisCmdReq, Promise[List[Task]])] =
-//  Source.queue[(GetTaskLisCmdReq, Promise[List[Task]])](bufferSize, OverflowStrategy.dropNew)
-//    .via(getTaskFlow.zipPromise)
-//    .toMat(completePromiseSink)(Keep.left)
-//    .run()
 
   private val createAccountQueue: SourceQueueWithComplete[(CreateAccountCmdReq, Promise[CreateAccountCmdRes])] =
     Source.queue[(CreateAccountCmdReq, Promise[CreateAccountCmdRes])](bufferSize, OverflowStrategy.dropNew)
@@ -195,9 +151,6 @@ class AccountAggregateUseCase(
 
   def assignParticipant(req: AssignParticipantCmdReq)(implicit ec: ExecutionContext): Future[AssignParticipantCmdRes] =
     offerToQueue(assignParticipantQueue)(req, Promise())
-
-//  def getTasks(req: GetTaskLisCmdReq)(implicit ec: ExecutionContext): Future[List[Task]] =
-//    offerToQueue(getTaskQueue)(req, Promise())
 
   def list: Future[List[AccountDto]] = {
     val sumSink =  Sink.fold[List[AccountDto], AccountDto](List.empty[AccountDto])( (m ,e) =>  e :: m )

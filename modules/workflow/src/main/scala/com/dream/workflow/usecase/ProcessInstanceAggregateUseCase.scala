@@ -49,7 +49,7 @@ object ProcessInstanceAggregateUseCase {
 
     case class GetPInstCmdFailed(error: ResponseError) extends GetPInstCmdResponse
 
-    case class GetTaskCmdReq(assignedTask: AssignedTask) extends ProcessInstanceCmdRequest
+    case class GetTaskCmdReq(participantId: UUID, assignedTask: AssignedTask) extends ProcessInstanceCmdRequest
 
     sealed trait GetTaskCmdRes extends ProcessInstanceCmdResponse
 
@@ -93,11 +93,11 @@ object ProcessInstanceAggregateUseCase {
 
     sealed trait PerformTaskCmdRes extends ProcessInstanceCmdResponse
 
-    case class PerformTaskSuccess(id: UUID, taskId: UUID, participantId: UUID,  processAt: Instant) extends PerformTaskCmdRes
+    case class PerformTaskSuccess(id: UUID, taskId: UUID, action: BaseAction , participantId: UUID,  processAt: Instant) extends PerformTaskCmdRes
 
     case class PerformTaskFailed(error: ResponseError) extends PerformTaskCmdRes
 
-    case class CommitActionCmdReq(id: UUID, taskId: UUID, participantId: UUID,  processAt: Instant) extends ProcessInstanceCmdRequest
+    case class CommitActionCmdReq(id: UUID, taskId: UUID, participantId: UUID, action: BaseAction,  processAt: Instant) extends ProcessInstanceCmdRequest
 
     sealed trait CommitActionCmdRes extends ProcessInstanceCmdResponse
 
@@ -221,7 +221,7 @@ class ProcessInstanceAggregateUseCase(
 
     val takeActonBroadcast = b.add(Broadcast[TakeActionParams](2))
 
-    val mapToGetTaskReq = Flow[TakeActionCmdRequest].map(item => GetTaskCmdReq(AssignedTask(item.taskId, item.participantId)))
+    val mapToGetTaskReq = Flow[TakeActionCmdRequest].map(item => GetTaskCmdReq(item.participantId, AssignedTask(item.taskId, item.participantId)))
 
     broadcast.out(0) ~> Flow[TakeActionCmdRequest].map(it => GetPInstCmdRequest(it.pInstId)) ~> processInstanceAggregateFlows.getPInst.map {
       case res: GetPInstCmdSuccess => GetWorkflowCmdRequest(res.flowId)
@@ -246,7 +246,7 @@ class ProcessInstanceAggregateUseCase(
     val out = takeActonBroadcast.out(0) ~> Flow[TakeActionParams].map(
       f => PerformTaskCmdReq(f.action.pInstId, f.action.taskId , f.action.action ,f.task.activity, f.action.payLoad, f.action.participantId)
     ) ~> processInstanceAggregateFlows.performTask ~> Flow[PerformTaskCmdRes].map {
-      case req: PerformTaskSuccess => CommitActionCmdReq(req.id,req.taskId, req.participantId, req.processAt )
+      case res: PerformTaskSuccess => CommitActionCmdReq(res.id,res.taskId, res.participantId, res.action , res.processAt )
     } ~> processInstanceAggregateFlows.commitAction
 
     takeActonBroadcast.out(1) ~> Flow[TakeActionParams].map(item => {

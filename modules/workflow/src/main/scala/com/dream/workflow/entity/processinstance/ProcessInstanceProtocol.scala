@@ -58,10 +58,11 @@ object ProcessInstanceProtocol {
 
   case class GetTaskCmdReq(
     id: UUID,
-    taskId: UUID
+    taskId: UUID,
+    participantId: UUID
   ) extends ProcessInstanceCmdRequest
 
-  case class GetTaskCmdRes(pInstId: UUID,task: Task) extends PerformTaskCmdRes
+  case class GetTaskCmdRes(pInstId: UUID, participantId: UUID,task: Task) extends PerformTaskCmdRes
 
 
   case class CreateNewTaskCmdReq(
@@ -70,7 +71,7 @@ object ProcessInstanceProtocol {
     participantId: UUID
   )  extends ProcessInstanceCmdRequest
 
-  case class CreateNewTaskCmdSuccess(id: UUID, taskId: UUID) extends ProcessInstanceCmdResponse
+  case class CreateNewTaskCmdSuccess(id: UUID, taskId: UUID,  destinations: List[UUID]) extends ProcessInstanceCmdResponse
 
   case class CommitActionCmdReq(id: UUID, taskId: UUID, participantId: UUID, action: BaseAction,  processAt: Instant) extends ProcessInstanceCmdRequest
   case class CommitActionCmdSuccess(id: UUID) extends ProcessInstanceCmdResponse

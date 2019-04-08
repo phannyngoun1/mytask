@@ -6,6 +6,7 @@ import java.time.Instant
 case class TaskDto(
   id: UUID,
   pInstId: UUID,
+  participantId: UUID,
   activity: BaseActivity,
   actions: List[BaseAction]
 )
