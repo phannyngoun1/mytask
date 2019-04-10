@@ -5,8 +5,9 @@ import java.util.UUID
 import akka.actor.ActorSystem
 import akka.stream.scaladsl.{Keep, Sink, Source, SourceQueueWithComplete}
 import akka.stream._
+import com.dream.common.BaseActivity
 import com.dream.common.domain.ResponseError
-import com.dream.workflow.domain.{BaseActivity, BaseActivityFlow, Flow, FlowDto}
+import com.dream.workflow.domain.{BaseActivityFlow, Flow, FlowDto}
 import com.dream.workflow.usecase.port.{FlowReadModelFlow, WorkflowAggregateFlows}
 
 import scala.concurrent.{ExecutionContext, Future, Promise}

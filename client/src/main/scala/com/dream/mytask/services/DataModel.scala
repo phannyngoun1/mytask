@@ -32,7 +32,8 @@ object DataModel {
   )
 
   case class TaskModel(
-    taskList: Pot[List[TaskItemJson]] = Pot.empty
+    taskList: Pot[List[TaskItemJson]] = Pot.empty,
+    message: Pot[String] = Pot.empty
   )
 
   case class AccountModel(

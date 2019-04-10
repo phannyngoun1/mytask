@@ -90,6 +90,7 @@ class ParticipantEntity extends PersistentActor with ActorLogging with EntitySta
 
     case GetParticipantCmdReq(id) if equalsId(id)(state, _.id.equals(id)) =>
       foreachState{ state =>
+
         sender() ! GetParticipantCmdSuccess(state)
       }
 

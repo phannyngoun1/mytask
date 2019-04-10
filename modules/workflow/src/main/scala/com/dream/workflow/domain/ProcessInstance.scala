@@ -3,6 +3,7 @@ package com.dream.workflow.domain
 import java.time.Instant
 import java.util.UUID
 
+import com.dream.common.BaseAction
 import com.dream.common.domain.ErrorMessage
 import com.dream.workflow.domain.ProcessInstance.InstError
 

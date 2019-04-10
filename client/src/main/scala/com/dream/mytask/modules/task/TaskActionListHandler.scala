@@ -37,8 +37,8 @@ object TaskActionListHandler {
 
   object TaskListActions {
 
-    case class TakeAction(pInstId: Option[String], taskId: Option[String], participantId: Option[String], action: Option[String], potResult: Pot[List[TaskItemJson]] = Empty )  extends PotAction[List[TaskItemJson], TakeAction] {
-      override def next(newResult: Pot[List[TaskItemJson]]): TakeAction = TakeAction(None, None, None, None, newResult)
+    case class TakeAction(pInstId: Option[String], taskId: Option[String], accId: Option[String], participantId: Option[String], action: Option[String], potResult: Pot[String] = Empty )  extends PotAction[String, TakeAction] {
+      override def next(newResult: Pot[String]): TakeAction = TakeAction(None, None, None, None, None, newResult)
     }
 
     case class FetchTaskListAction(accId: Option[String], potResult: Pot[List[TaskItemJson]] = Empty) extends PotAction[List[TaskItemJson], FetchTaskListAction] {
@@ -47,9 +47,21 @@ object TaskActionListHandler {
   }
 
   def apply(circuit: Circuit[RootModel]) = circuit.composeHandlers(
-    new TaskActionListHandler(circuit.zoomRW(_.taskModel.taskList)((m, v) => m.copy(taskModel = m.taskModel.copy(taskList = v))))
+    new TaskActionListHandler(circuit.zoomRW(_.taskModel.taskList)((m, v) => m.copy(taskModel = m.taskModel.copy(taskList = v)))),
+    new TakeActionHandler(circuit.zoomRW(_.taskModel.message)((m, v) => m.copy(taskModel = m.taskModel.copy(message = v))))
   )
 
+}
+
+class TakeActionHandler[M](modelRW: ModelRW[M, Pot[String]]) extends ActionHandler(modelRW) {
+  implicit val runner = new RunAfterJS
+  import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
+
+  override protected def handle: PartialFunction[Any, ActionResult[M]] = {
+    case action: TakeAction =>
+      val updateF = action.effect(AjaxClient[Api].takeAction(action.pInstId.get, action.taskId.get, action.accId.get, action.participantId.get, action.action.get ).call())(identity _)
+      action.handleWith(this, updateF)(PotAction.handler())
+  }
 }
 
 class TaskActionListHandler[M](modelRW: ModelRW[M, Pot[List[TaskItemJson]]]) extends ActionHandler(modelRW) {
@@ -60,9 +72,7 @@ class TaskActionListHandler[M](modelRW: ModelRW[M, Pot[List[TaskItemJson]]]) ext
     case action: FetchTaskListAction =>
       val updateF = action.effect(AjaxClient[Api].getTasks(action.accId.get).call())(identity _)
       action.handleWith(this, updateF)(PotAction.handler())
-    case action: TakeAction =>
-      val updateF = action.effect(AjaxClient[Api].takeAction(action.pInstId.get, action.taskId.get, action.participantId.get, action.action.get ).call())(identity _)
-      action.handleWith(this, updateF)(PotAction.handler())
+
   }
 }
 

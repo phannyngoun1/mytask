@@ -3,6 +3,7 @@ package com.dream.workflow.domain
 import java.time.Instant
 import java.util.UUID
 
+import com.dream.common.{BaseAction, BaseActivity}
 import com.dream.common.domain.ErrorMessage
 import com.dream.workflow.domain.Participant.{DefaultParticipantError, ParticipantError, ParticipantEvent, TaskAssigned}
 import play.api.libs.json.{Format, Json}

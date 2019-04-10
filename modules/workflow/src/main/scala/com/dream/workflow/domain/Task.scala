@@ -3,6 +3,8 @@ package com.dream.workflow.domain
 import java.util.UUID
 import java.time.Instant
 
+import com.dream.common.{BaseAction, BaseActivity}
+
 case class TaskDto(
   id: UUID,
   pInstId: UUID,

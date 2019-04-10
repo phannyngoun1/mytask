@@ -109,7 +109,7 @@ object AccountComp {
               <.div(
                 md().renderPending(_ > 500, _ => <.p("Loading...")),
                 md().renderFailed(ex => <.p("Failed to load")),
-                md().render(m => <.p(s"participant id: ${m.id}, acc id: ${m.accountId}"))
+                md().render(m => <.p(s"participant id: ${m.id}, acc id: ${m.accountId}, tasks: ${m.tasks.mkString(",")}"))
               )
             })
           )

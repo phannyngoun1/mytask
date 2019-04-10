@@ -10,7 +10,9 @@ object AccountData {
 
   case class ParticipantJson(
     id: String,
-    accountId: String
+    accountId: String,
+    tasks: List[String]
+
   )
 
 }

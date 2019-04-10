@@ -36,9 +36,9 @@ trait AccountService { this: ApiService =>
 
         println(s"participant : ${res}")
 
-        ParticipantJson(res.id.toString, res.accountId.toString)
+        ParticipantJson(res.id.toString, res.accountId.toString, res.tasks.map(_.taskId.toString))
       }
-      case _ => ParticipantJson("", "")
+      case _ => ParticipantJson("", "", List())
     }
   }
 
@@ -53,7 +53,7 @@ trait AccountService { this: ApiService =>
 
   override def getParticipantList(): Future[List[ParticipantJson]] = {
 
-    participantUseCase.list.map(_.map(item => ParticipantJson(item.id.toString, item.accountId.toString)))
+    participantUseCase.list.map(_.map(item => ParticipantJson(item.id.toString, item.accountId.toString, List())))
   }
 
 

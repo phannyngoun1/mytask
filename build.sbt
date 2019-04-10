@@ -11,6 +11,25 @@ lazy val common =  (project in file("modules/common"))
     )
   )
 
+lazy val ticket =  (project in file("modules/ticket"))
+  .settings(Common.commonSettings)
+  .settings(Common.ServerSettings)
+  .settings(
+    libraryDependencies ++= Seq(
+      "com.typesafe.akka" %% "akka-actor" % Common.akkaVersion,
+      "com.typesafe.akka" %% "akka-persistence" % Common.akkaVersion,
+      "com.typesafe.akka" %% "akka-stream" % Common.akkaVersion,
+      "com.typesafe.akka" %% "akka-slf4j" % "2.5.19",
+      "ch.qos.logback" % "logback-classic" % "1.2.3",
+      "com.github.dnvriend" %% "akka-persistence-jdbc" % "3.4.0",
+      "org.iq80.leveldb" % "leveldb" % "0.7",
+      "mysql" % "mysql-connector-java" % "5.1.42",
+      "org.fusesource.leveldbjni" % "leveldbjni-all" % "1.8"
+    )
+  )
+  //.aggregate(common)
+  .dependsOn(common)
+
 lazy val workflow =  (project in file("modules/workflow"))
   .settings(Common.commonSettings)
   .settings(Common.ServerSettings)
@@ -23,13 +42,12 @@ lazy val workflow =  (project in file("modules/workflow"))
       "ch.qos.logback" % "logback-classic" % "1.2.3",
       "com.github.dnvriend" %% "akka-persistence-jdbc" % "3.4.0",
       "org.iq80.leveldb" % "leveldb" % "0.7",
-      "org.fusesource.leveldbjni" % "leveldbjni-all" % "1.8",
-
       "mysql" % "mysql-connector-java" % "5.1.42",
+      "org.fusesource.leveldbjni" % "leveldbjni-all" % "1.8"
     )
   )
-  .aggregate(common)
-  .dependsOn(common)
+  //.aggregate(common, ticket)
+  .dependsOn(common, ticket)
 
 lazy val server = (project in file("server"))
   .settings(Common.commonSettings)
@@ -46,8 +64,9 @@ lazy val server = (project in file("server"))
     ),
     // Compile the project before generating Eclipse files, so that generated .scala or .class files for views and routes are present
     EclipseKeys.preTasks := Seq(compile in Compile)
-  ).enablePlugins(PlayScala, WebScalaJSBundlerPlugin).
-  dependsOn(sharedJvm, workflow)
+  ).enablePlugins(PlayScala, WebScalaJSBundlerPlugin)
+  .aggregate(common, ticket, workflow)
+  .dependsOn(sharedJvm, workflow)
 
 lazy val client = (project in file("client"))
   .settings(Common.commonSettings)
@@ -100,8 +119,6 @@ lazy val shared = crossProject(JSPlatform, JVMPlatform)
   )
 lazy val sharedJvm = shared.jvm
 lazy val sharedJs = shared.js
-
-
 
 // loads the server project at sbt startup
 onLoad in Global := (onLoad in Global).value andThen { s: State => "project server" :: s }

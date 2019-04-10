@@ -1,9 +1,9 @@
 package com.dream.mytask.modules.task
 
 import com.dream.mytask.AppClient.Loc
-import com.dream.mytask.modules.task.TaskActionListHandler.TaskListActions.FetchTaskListAction
+import com.dream.mytask.modules.task.TaskActionListHandler.TaskListActions.{FetchTaskListAction, TakeAction}
 import com.dream.mytask.services.DataModel.TaskModel
-import com.dream.mytask.shared.data.ActionItemJson
+import com.dream.mytask.shared.data.{ActionItemJson, TaskItemJson}
 import diode.react._
 import japgolly.scalajs.react.BackendScope
 import diode.react.ReactPot._
@@ -20,14 +20,15 @@ object TaskListComp {
   class Backend($: BackendScope[Props, State]) {
     def render(p: Props, s: State) = {
 
-      implicit  def renderItem(item: ActionItemJson) = {
+      implicit  def renderItem(task: TaskItemJson, action: ActionItemJson, accId: String) = {
 
         <.div(
-          <.button(item.name)
+          <.button(action.name, ^.onClick --> p.proxy.dispatchCB(TakeAction(Some(task.pInstId), Some(task.id), Some(accId), Some(task.participantId), Some(action.name))))
         )
       }
 
       val wrapper = p.proxy.connect(_.taskList)
+      val message = p.proxy.connect(_.message)
         <.div(
           <.div(
             <.label("Account Id: "),
@@ -40,6 +41,15 @@ object TaskListComp {
             )
           ),
 
+          <.div(
+            message(px =>
+              <.div(
+                px().renderPending(_ > 500, _ => <.p("Loading...")),
+                px().renderFailed(ex => <.p("Failed to load")),
+                px().render(m => m )
+              )
+            )
+          ),
           <.h3(s"Task list for account: ${s.accountId.getOrElse("None")}" ),
 
           <.div(
@@ -50,8 +60,7 @@ object TaskListComp {
                 px().render(m => <.ol( ^.`type` := "1",
                   m toTagMod { item =>
                     <.li( s"P inst: ${item.pInstId}, task Id: ${item.id}, participantId: ${item.participantId}, activity: ${item.activityName}",
-
-                      item.actions toTagMod
+                      item.actions toTagMod(action => renderItem(item, action, s.accountId.get))
                     )
                   }
                 ))

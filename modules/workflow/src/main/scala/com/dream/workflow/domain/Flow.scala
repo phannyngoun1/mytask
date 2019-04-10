@@ -3,8 +3,8 @@ package com.dream.workflow.domain
 import java.time.Instant
 import java.util.UUID
 
+import com.dream.common.{BaseAction, BaseActivity, Params}
 import com.dream.common.domain.ErrorMessage
-import julienrf.json._
 import org.sisioh.baseunits.scala.time.TimePoint
 import play.api.libs.json._
 
@@ -18,52 +18,11 @@ case class InvalidWorkflowStateError(override val id: Option[UUID] = None ) exte
   override val message: String = s"Invalid state${id.fold("")(id => s":id = ${id.toString}")}"
 }
 
-sealed trait BaseActivity {
-  def name: String
-
-
-  override def equals(obj: Any): Boolean = obj match {
-    case a: BaseActivity => name.equals(a.name)
-    case _ => false
-  }
-}
-
 
 case object TestActivity extends BaseActivity {
   override def name: String = "test"
 }
 
-object BaseActivity {
-  implicit val jsonFormat: OFormat[BaseActivity] = derived.oformat[BaseActivity]()
-}
-
-sealed trait BaseAction {
-  def name: String
-}
-
-object BaseAction {
-  implicit val jsonFormat: OFormat[BaseAction] = derived.oformat[BaseAction]()
-}
-
-sealed trait PayLoad {
-
-}
-
-object PayLoad {
-  implicit val jsonFormat: OFormat[PayLoad] = derived.oformat[PayLoad]()
-}
-
-case class DefaultPayLoad(
-  value: String
-) extends PayLoad
-
-sealed trait Params
-
-object Params {
-  implicit val jsonFormat: OFormat[Params] = derived.oformat[Params]()
-}
-
-case class DefaultFlowParams(value: String) extends Params
 
 sealed trait BaseActivityFlow {
   def activity: BaseActivity
@@ -81,9 +40,6 @@ case class ActionHis(
   action: BaseAction
 )
 
-object ActionHis {
-  implicit val format: Format[ActionHis] = Json.format
-}
 
 case class ActivityHis(
   id: UUID,
@@ -93,29 +49,10 @@ case class ActivityHis(
   actionDate: Instant = Instant.now()
 )
 
-object ActivityHis {
-  implicit val format: Format[ActivityHis] = Json.format
-}
 
 case class ActionFlow(action: BaseAction, activity: BaseActivity )
 
-object ActionFlow {
-  implicit val format: Format[ActionFlow] = Json.format
-}
-
 case class ActivityFlow(activity: BaseActivity, participants: List[UUID], actionFlows: List[ActionFlow]) extends BaseActivityFlow
-
-//
-//object ActivityFlow {
-//  implicit val format: Format[ActivityFlow] = Json.format
-//}
-
-
-/**
-  * Predefined actions
-  */
-
-
 
 case class StartAction() extends BaseAction {
   override val name: String = "Start"
@@ -125,10 +62,6 @@ case class StartAction() extends BaseAction {
 case class DoneAction() extends BaseAction {
   override val name: String = "Done"
 }
-
-/**
-  * Predefined activities
-  */
 
 case class StartActivity() extends BaseActivity() {
   override val name: String = "Start"
@@ -231,7 +164,6 @@ case class Flow(
       nextAct <- nextActivity(by, action)(currAct)
     } yield nextAct
 
-    //Right(NaActivityFlow())
   }
 
   private def checkCurrentActivity(activity: BaseActivity) : Either[WorkflowError, BaseActivityFlow] =
@@ -241,22 +173,23 @@ case class Flow(
       case Some(act: BaseActivityFlow )=> Right(act)
     }
 
-  private def nextActivity(participantAccess: ParticipantAccess, action: BaseAction)(currActivityFlow: BaseActivityFlow): Either[WorkflowError, BaseActivityFlow] =
-
+  private def nextActivity(participantAccess: ParticipantAccess, action: BaseAction)(currActivityFlow: BaseActivityFlow): Either[WorkflowError, BaseActivityFlow] = {
     currActivityFlow match {
-      case act: ActivityFlow => act.actionFlows.find(_.action == action) match {
+      case act: ActivityFlow =>
+        act.actionFlows.find(_.action == action) match {
+          case Some(ActionFlow(_, _: CurrActivity)) => Right(currActivityFlow)
         case Some(af: ActionFlow) => workflowList.find(_.activity == af.activity) match {
-          case Some(_: StayStillActivityFlow) => Right(currActivityFlow)
           case Some(value) => Right(value)
-          case _  => Left(ActivityNotFoundError(s"Next activity cannot found by action: ${action.name}; current activity ${currActivityFlow.activity.name}"))
+          case _  => Left(ActivityNotFoundError(s"1.Next activity cannot found by action: ${action.name}; current activity ${currActivityFlow.activity.name}"))
         }
-        case _ => Left(ActivityNotFoundError(s"Next activity cannot found by action: ${action.name}; current activity ${currActivityFlow.activity.name}"))
+        case _ => Left(ActivityNotFoundError(s"2.Next activity cannot found by action: ${action.name}; current activity ${currActivityFlow.activity.name}"))
       }
       case act: StayStillActivityFlow => Right(act)
       case  _ => Left(ActivityNotFoundError(""))
     }
+  }
+
 }
-//
 
 
 

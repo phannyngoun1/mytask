@@ -24,7 +24,7 @@ trait PInstanceService { this: ApiService =>
     val uuId = UUID.fromString(id)
 
     processInstance.getPInst(GetPInstCmdRequest(uuId))  map {
-      case res: GetPInstCmdSuccess => s"id: ${res.id.toString}, folio: ${res.folio}"
+      case res: GetPInstCmdSuccess => s"id: ${res.id.toString}, folio: ${res.folio}, tasks : ${res.tasks.mkString(";")}"
       case _ => s"Failed to fetch ${id}"
     }
   }
