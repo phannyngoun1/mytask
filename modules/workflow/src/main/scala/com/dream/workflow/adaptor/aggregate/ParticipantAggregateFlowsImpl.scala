@@ -55,7 +55,9 @@ class ParticipantAggregateFlowsImpl(aggregateRef: ActorRef) extends ParticipantA
       ))
       .mapAsync(1)(aggregateRef ? _)
       .map {
-        case AssignTaskCmdSuccess(id) => Protocol.AssignTaskCmdSuccess(id)
+        case AssignTaskCmdSuccess(id) =>
+          println(s" retrieve  AssignTaskCmdSuccess ${id}")
+          Protocol.AssignTaskCmdSuccess(id)
         case CmdResponseFailed(message) => Protocol.AssignTaskCmdFailed(ResponseError(message))
       }
 

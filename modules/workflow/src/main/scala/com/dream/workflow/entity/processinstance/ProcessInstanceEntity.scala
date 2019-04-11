@@ -49,6 +49,8 @@ class ProcessInstanceEntity extends PersistentActor
     case event: NewTaskCreated =>
       println(s"replay event: $event")
       state = mapState(_.createTask(event.task, event.participantId)).toSomeOrThrow
+    case event: ActionCommitted =>
+      state = mapState(_.commitTask(event.taskId, event.participantId, event.action, event.processAt)).toSomeOrThrow
     case RecoveryCompleted =>
       println(s"Recovery completed: $persistenceId")
     case _ => log.debug("Other")
@@ -93,6 +95,7 @@ class ProcessInstanceEntity extends PersistentActor
       foreachState(_.commitTask(taskId, participantId, action, processAt) match {
         case Left(error) => sender() ! CmdResponseFailed( ResponseError(Some(id), error.message))
         case Right(newState) => persist(ActionCommitted(id, taskId, participantId, action, processAt)) { event =>
+          log.info(s"--------instance state------- ${newState}")
           state = Some(newState)
           sender() ! CommitActionCmdSuccess(event.id)
           //TODO:  tryToSaveSnapshot()

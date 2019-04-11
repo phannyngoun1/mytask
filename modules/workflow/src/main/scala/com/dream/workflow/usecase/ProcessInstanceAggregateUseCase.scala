@@ -12,7 +12,7 @@ import com.dream.common.domain.ResponseError
 import com.dream.workflow.domain.{Flow => WFlow, _}
 import com.dream.workflow.entity.processinstance.ProcessInstanceProtocol.{CreatePInstCmdRequest => CreateInst}
 import com.dream.workflow.usecase.ItemAggregateUseCase.Protocol.{GetItemCmdRequest, GetItemCmdSuccess}
-import com.dream.workflow.usecase.ParticipantAggregateUseCase.Protocol.{AssignTaskCmdReq, AssignTaskCmdRes}
+import com.dream.workflow.usecase.ParticipantAggregateUseCase.Protocol.{AssignTaskCmdReq, AssignTaskCmdRes, AssignTaskCmdSuccess}
 import com.dream.workflow.usecase.WorkflowAggregateUseCase.Protocol.{GetWorkflowCmdRequest, GetWorkflowCmdSuccess}
 import com.dream.workflow.usecase.port._
 
@@ -47,7 +47,7 @@ object ProcessInstanceAggregateUseCase {
 
     sealed trait GetPInstCmdResponse extends ProcessInstanceCmdResponse
 
-    case class GetPInstCmdSuccess(id: UUID, flowId: UUID, folio: String, tasks: List[Task] ) extends GetPInstCmdResponse
+    case class GetPInstCmdSuccess(id: UUID, flowId: UUID, folio: String, tasks: List[Task]) extends GetPInstCmdResponse
 
     case class GetPInstCmdFailed(error: ResponseError) extends GetPInstCmdResponse
 
@@ -64,6 +64,7 @@ object ProcessInstanceAggregateUseCase {
     trait TakeActionCmdResponse extends ProcessInstanceCmdResponse
 
     case class TakeActionCmdSuccess() extends TakeActionCmdResponse
+
     case class TakeActionCmdFailed(error: ResponseError) extends TakeActionCmdResponse
 
 
@@ -95,11 +96,11 @@ object ProcessInstanceAggregateUseCase {
 
     sealed trait PerformTaskCmdRes extends ProcessInstanceCmdResponse
 
-    case class PerformTaskSuccess(id: UUID) extends PerformTaskCmdRes
+    case class PerformTaskSuccess(activityId: UUID) extends PerformTaskCmdRes
 
     case class PerformTaskFailed(error: ResponseError) extends PerformTaskCmdRes
 
-    case class CommitActionCmdReq(id: UUID, taskId: UUID, participantId: UUID, action: BaseAction,  processAt: Instant) extends ProcessInstanceCmdRequest
+    case class CommitActionCmdReq(id: UUID, taskId: UUID, participantId: UUID, action: BaseAction, processAt: Instant) extends ProcessInstanceCmdRequest
 
     sealed trait CommitActionCmdRes extends ProcessInstanceCmdResponse
 
@@ -108,7 +109,9 @@ object ProcessInstanceAggregateUseCase {
     case class CommitActionCmdFailed(error: ResponseError) extends CommitActionCmdRes
 
     case class ActionCompleted()
+
   }
+
 }
 
 class ProcessInstanceAggregateUseCase(
@@ -134,16 +137,16 @@ class ProcessInstanceAggregateUseCase(
       .withSupervisionStrategy(decider)
   )
 
- private val getWorflowByItem =
-   Flow[UUID].map(GetItemCmdRequest)
-   .via(itemAggregateFlows.getItem)
-   .map {
-     case res: GetItemCmdSuccess => GetWorkflowCmdRequest(res.workflowId)
-   }
-   .via(workflowAggregateFlows.getWorkflow)
-   .map {
-     case GetWorkflowCmdSuccess(workflow) => workflow
-   }
+  private val getWorflowByItem =
+    Flow[UUID].map(GetItemCmdRequest)
+      .via(itemAggregateFlows.getItem)
+      .map {
+        case res: GetItemCmdSuccess => GetWorkflowCmdRequest(res.workflowId)
+      }
+      .via(workflowAggregateFlows.getWorkflow)
+      .map {
+        case GetWorkflowCmdSuccess(workflow) => workflow
+      }
 
 
   //TODO: workaround, need to be fixed
@@ -171,9 +174,9 @@ class ProcessInstanceAggregateUseCase(
           contentType = "ticket",
           description = "Test",
           destIds = nextFlow.participants,
-          task =  Task(
-            id =  UUID.randomUUID(),
-            activity =  nextFlow.activity,
+          task = Task(
+            id = UUID.randomUUID(),
+            activity = nextFlow.activity,
             actions = nextFlow.actionFlows.map(_.action),
             nextFlow.participants.map(TaskDestination(_))
           ),
@@ -182,9 +185,9 @@ class ProcessInstanceAggregateUseCase(
       }
     )
 
-//    broadcast.out(0) ~> Flow[CreatePInstCmdRequest].map(_.itemID) ~> getWorflowByItem ~> createInstZip.in0
+    //    broadcast.out(0) ~> Flow[CreatePInstCmdRequest].map(_.itemID) ~> getWorflowByItem ~> createInstZip.in0
 
-    broadcast.out(0) ~>  convertToGetItem ~> itemAggregateFlows.getItem.map {
+    broadcast.out(0) ~> convertToGetItem ~> itemAggregateFlows.getItem.map {
       case res: GetItemCmdSuccess => GetWorkflowCmdRequest(res.workflowId)
     } ~> workflowAggregateFlows.getWorkflow.map {
       case GetWorkflowCmdSuccess(workflow) => workflow
@@ -193,11 +196,11 @@ class ProcessInstanceAggregateUseCase(
     broadcast.out(1) ~> createInstZip.in1
 
     val createPrepareB = b.add(Broadcast[CreateInst](3))
-    val convertToTaskCmdRequestFlow = Flow[CreateInst].map(p => PerformTaskCmdReq(p.id, p.task.id, StartAction(), p.task.activity,p.payLoad, p.createdBy))
+    val convertToTaskCmdRequestFlow = Flow[CreateInst].map(p => PerformTaskCmdReq(p.id, p.task.id, StartAction(), p.task.activity, p.payLoad, p.createdBy))
 
     //TODO: adding real tasks
 
-    val assignTaskCmdFlow = Flow[CreateInst].flatMapConcat(p => Source(p.destIds.map(dest =>  AssignTaskCmdReq(dest ,p.task.id, p.id))))
+    val assignTaskCmdFlow = Flow[CreateInst].flatMapConcat(p => Source(p.destIds.map(dest => AssignTaskCmdReq(dest, p.task.id, p.id))))
 
     val out = createInstZip.out ~> convertToCreatePInstCmdReq ~> createPrepareB ~> processInstanceAggregateFlows.createInst
     createPrepareB ~> convertToTaskCmdRequestFlow ~> processInstanceAggregateFlows.performTask ~> Sink.ignore
@@ -220,12 +223,12 @@ class ProcessInstanceAggregateUseCase(
 
     import GraphDSL.Implicits._
     val broadcast = b.add(Broadcast[TakeActionCmdRequest](3))
-    val zipFlowTask =  b.add(Zip[WFlow, TaskDto])
+    val zipFlowTask = b.add(Zip[WFlow, TaskDto])
     val zipActionParam = b.add(Zip[(WFlow, TaskDto), TakeActionCmdRequest])
 
     val takeActonBroadcast = b.add(Broadcast[TakeActionParams](3))
 
-    val mapToGetTaskReq = Flow[TakeActionCmdRequest].map(item =>  {
+    val mapToGetTaskReq = Flow[TakeActionCmdRequest].map(item => {
       println(" mapToGetTaskReq ")
       GetTaskCmdReq(item.participantId, AssignedTask(item.taskId, item.pInstId))
     })
@@ -233,10 +236,10 @@ class ProcessInstanceAggregateUseCase(
     broadcast.out(0) ~> Flow[TakeActionCmdRequest].map(it => GetPInstCmdRequest(it.pInstId)) ~> processInstanceAggregateFlows.getPInst.map {
       case res: GetPInstCmdSuccess => {
         println(s"get PInsta  ${res.flowId} ")
-        GetWorkflowCmdRequest (res.flowId)
+        GetWorkflowCmdRequest(res.flowId)
       }
     } ~> workflowAggregateFlows.getWorkflow.map {
-      case GetWorkflowCmdSuccess(workflow) =>  {
+      case GetWorkflowCmdSuccess(workflow) => {
         println(s"workflow ${workflow}")
         workflow
       }
@@ -258,8 +261,8 @@ class ProcessInstanceAggregateUseCase(
     zipFlowTask.out ~> zipActionParam.in0
     broadcast.out(2) ~> zipActionParam.in1
 
-    zipActionParam.out.map(f => TakeActionParams(f._1._1, f._1._2, f._2 )) ~> Flow[TakeActionParams].map(
-      f => f.flow.nextActivity(f.action.action, f.task.activity, ParticipantAccess(f.action.participantId))  match {
+    zipActionParam.out.map(f => TakeActionParams(f._1._1, f._1._2, f._2)) ~> Flow[TakeActionParams].map(
+      f => f.flow.nextActivity(f.action.action, f.task.activity, ParticipantAccess(f.action.participantId)) match {
         case Right(activity) => f.copy(nexActivity = Some(activity), newTaskId = Some(UUID.randomUUID()))
       }
     ) ~> takeActonBroadcast.in
@@ -268,41 +271,31 @@ class ProcessInstanceAggregateUseCase(
     val performTaskZip = b.add(Zip[PerformTaskCmdRes, CommitActionCmdRes])
 
     //perform task
+
     takeActonBroadcast.out(0) ~> Flow[TakeActionParams].map(
-      f => PerformTaskCmdReq(f.action.pInstId, f.action.taskId , f.action.action ,f.task.activity, f.action.payLoad, f.action.participantId)
+      f => PerformTaskCmdReq(f.action.pInstId, f.action.taskId, f.action.action, f.task.activity, f.action.payLoad, f.action.participantId)
     ) ~> processInstanceAggregateFlows.performTask ~> performTaskZip.in0
-
-
-    takeActonBroadcast.out(1) ~> Flow[TakeActionParams].map( f =>
-      CommitActionCmdReq(f.action.pInstId, f.action.taskId , f.action.participantId, f.action.action , f.actionDate )
+    
+    takeActonBroadcast.out(1) ~> Flow[TakeActionParams].map(f =>
+      CommitActionCmdReq(f.action.pInstId, f.action.taskId, f.action.participantId, f.action.action, f.actionDate)
     ) ~> processInstanceAggregateFlows.commitAction ~> performTaskZip.in1
 
-
-    val prepareNextTask = b.add(Zip[ActionCompleted, TakeActionParams])
-
-
-     performTaskZip.out ~> Flow[(PerformTaskCmdRes, CommitActionCmdRes)].map {
-      case (a: PerformTaskSuccess, b: CommitActionCmdSuccess ) =>
-
-        println(s"PerformTaskSuccess ${a}, CommitActionCmdSuccess ${b} ")
-
+    val out = performTaskZip.out ~> Flow[(PerformTaskCmdRes, CommitActionCmdRes)].map {
+      case (a: PerformTaskSuccess, b: CommitActionCmdSuccess) =>
         ActionCompleted()
-    } ~> prepareNextTask.in0
+    }
 
-    takeActonBroadcast.out(2) ~> prepareNextTask.in1
-
-    val out = prepareNextTask.out ~> Flow[(ActionCompleted, TakeActionParams)].map(item => {
-      val param = item._2
+    takeActonBroadcast.out(2) ~> Flow[TakeActionParams].map(item => {
+      val param = item
       val newActivity = param.nexActivity.get
       CreateNewTaskCmdRequest(
         param.action.pInstId,
-        Task(param.newTaskId.get,  newActivity.activity, newActivity.actionFlows.map(_.action), newActivity.participants.map(TaskDestination(_))),
+        Task(param.newTaskId.get, newActivity.activity, newActivity.actionFlows.map(_.action), newActivity.participants.map(TaskDestination(_))),
         param.action.participantId
       )
     }) ~> processInstanceAggregateFlows.createNewTask.map {
-      case CreateNewTaskCmdSuccess(pInstId, taskId, dests) => dests.map(AssignTaskCmdReq(_, taskId, pInstId ))
-    }.flatMapConcat(Source(_)) ~> participantAggregateFlows.assignTask ~> Flow[AssignTaskCmdRes].fold(List[AssignTaskCmdRes]())((m ,e) =>  e :: m).map( _ => ActionCompleted())
-
+      case CreateNewTaskCmdSuccess(pInstId, taskId, dests) => dests.map(AssignTaskCmdReq(_, taskId, pInstId))
+    }.flatMapConcat(Source(_)) ~> participantAggregateFlows.assignTask ~> Sink.ignore
 
     FlowShape(broadcast.in, out.outlet)
 
@@ -314,8 +307,8 @@ class ProcessInstanceAggregateUseCase(
     .toMat(completePromiseSink)(Keep.left)
     .run()
 
-  private val takeActionFlow:  SourceQueueWithComplete[(TakeActionCmdRequest, Promise[ActionCompleted])] = Source
-    .queue[(TakeActionCmdRequest, Promise[ActionCompleted])](10,OverflowStrategy.dropNew)
+  private val takeActionFlow: SourceQueueWithComplete[(TakeActionCmdRequest, Promise[ActionCompleted])] = Source
+    .queue[(TakeActionCmdRequest, Promise[ActionCompleted])](10, OverflowStrategy.dropNew)
     .via(takeActionFlowGraph.zipPromise)
     .toMat(completePromiseSink)(Keep.left)
     .run()
@@ -338,7 +331,7 @@ class ProcessInstanceAggregateUseCase(
     offerToQueue(getPInstFlow)(request, Promise())
 
   def list: Future[List[ProcessInstanceDto]] = {
-    val sumSink =  Sink.fold[List[ProcessInstanceDto], ProcessInstanceDto](List.empty[ProcessInstanceDto])( (m ,e) =>  e :: m )
+    val sumSink = Sink.fold[List[ProcessInstanceDto], ProcessInstanceDto](List.empty[ProcessInstanceDto])((m, e) => e :: m)
     Source.fromPublisher(pInstanceReadModelFlows.list).toMat(sumSink)(Keep.right).run()
   }
 

@@ -98,9 +98,10 @@ class ParticipantEntity extends PersistentActor with ActorLogging with EntitySta
       mapState(_.assignTask(cmd.taskId, cmd.pInstId)) match {
         case Left(error) => sender() ! CmdResponseFailed(ResponseError(Some(cmd.id), error.message))
         case Right(newState) => persist(TaskAssigned(cmd.id,cmd.taskId , cmd.pInstId)) { event =>
+
+          println(s"assign task ${event}")
           state = Some(newState)
           sender() ! AssignTaskCmdSuccess(event.id)
-          tryToSaveSnapshot()
         }
       }
 

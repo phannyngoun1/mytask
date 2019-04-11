@@ -12,7 +12,6 @@ import com.dream.common.domain.ResponseError
 import com.dream.workflow.domain.TaskDto
 import com.dream.workflow.entity.processinstance.ProcessInstanceProtocol._
 import com.dream.workflow.usecase.ProcessInstanceAggregateUseCase.Protocol
-import com.dream.workflow.usecase.ProcessInstanceAggregateUseCase.Protocol.CreateNewTaskCmdRequest
 import com.dream.workflow.usecase.port.ProcessInstanceAggregateFlows
 
 import scala.concurrent.duration._
@@ -58,7 +57,7 @@ class ProcessInstanceAggregateFlowsImpl(aggregateRef: ActorRef) extends ProcessI
       .map {
         case GetTaskCmdRes(pInstId, participantId, task) => {
           println(s"retrieve task ${pInstId}, ${participantId}")
-          Protocol.GetTaskCmdSuccess(TaskDto(task.id, pInstId, participantId, task.activity, task.actions))
+          Protocol.GetTaskCmdSuccess(TaskDto(task.id, pInstId, participantId, task.activity, task.actions, task.active))
         }
         case CmdResponseFailed(message) => Protocol.GetTaskCmdFailed(ResponseError(message))
         case _ =>
@@ -77,10 +76,12 @@ class ProcessInstanceAggregateFlowsImpl(aggregateRef: ActorRef) extends ProcessI
 
   override def createNewTask: Flow[Protocol.CreateNewTaskCmdRequest, Protocol.CreateNewTaskCmdResponse, NotUsed] =
     Flow[Protocol.CreateNewTaskCmdRequest]
-      .map(req => CreateNewTaskCmdRequest(req.id, req.task, req.participantId))
+      .map(req => CreateNewTaskCmdReq(req.id, req.task, req.participantId))
       .mapAsync(1)(aggregateRef ? _)
       .map {
-        case CreateNewTaskCmdSuccess(id, taskId, dest) => Protocol.CreateNewTaskCmdSuccess(id, taskId, dest)
+        case CreateNewTaskCmdSuccess(id, taskId, dest) =>
+          println(s"receive CreateNewTaskCmdSuccess ${taskId}")
+          Protocol.CreateNewTaskCmdSuccess(id, taskId, dest)
         case CmdResponseFailed(message) => Protocol.CreateNewTaskCmdFailed(ResponseError(message))
       }
 }

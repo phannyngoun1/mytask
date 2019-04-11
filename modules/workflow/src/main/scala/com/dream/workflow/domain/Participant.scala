@@ -89,7 +89,7 @@ case class Participant(
       Right(copy(
         tasks = AssignedTask(
           taskId = taskId,
-          pInstId = pInstId
+          pInstId = pInstId,
         ) :: tasks
       ))
     else

@@ -8,6 +8,7 @@ import com.dream.mytask.shared.Api
 import com.dream.mytask.shared.data.{ActionItemJson, TaskItemJson}
 import com.dream.workflow.adaptor.aggregate._
 import com.dream.workflow.adaptor.dao.account.AccountReadModelFlowImpl
+import com.dream.workflow.adaptor.dao.flag.FlagReadModelFlowImpl
 import com.dream.workflow.adaptor.dao.flow.FlowReadModelFlowImpl
 import com.dream.workflow.adaptor.dao.item.ItemReadModelFlowImpl
 import com.dream.workflow.adaptor.dao.participant.ParticipantReadModelFlowImpl
@@ -15,7 +16,7 @@ import com.dream.workflow.adaptor.dao.processinstance.PInstanceReadModelFlowImpl
 import com.dream.workflow.adaptor.journal.JournalReaderImpl
 import com.dream.workflow.domain.Action
 import com.dream.workflow.usecase.AccountAggregateUseCase.Protocol.{GetAccountCmdReq, GetAccountCmdSuccess, _}
-import com.dream.workflow.usecase.ProcessInstanceAggregateUseCase.Protocol.{ActionCompleted, CommitActionCmdSuccess, TakeActionCmdRequest}
+import com.dream.workflow.usecase.ProcessInstanceAggregateUseCase.Protocol.{ActionCompleted, TakeActionCmdRequest}
 import com.dream.workflow.usecase._
 import com.typesafe.config.ConfigFactory
 import slick.basic.DatabaseConfig
@@ -38,6 +39,7 @@ class ApiService(login: UUID)(implicit val ec: ExecutionContext, implicit val  s
   val accountReadModelFlow = new AccountReadModelFlowImpl(dbConfig.profile, dbConfig.db)
   val participantReadModelFlows = new ParticipantReadModelFlowImpl(dbConfig.profile, dbConfig.db)
   val pInstanceReadModelFlows = new PInstanceReadModelFlowImpl(dbConfig.profile, dbConfig.db)
+  val flagReadModelFlows = new FlagReadModelFlowImpl(dbConfig.profile, dbConfig.db)
 
 
   val localEntityAggregates = system.actorOf(LocalEntityAggregates.props, LocalEntityAggregates.name)
@@ -59,14 +61,17 @@ class ApiService(login: UUID)(implicit val ec: ExecutionContext, implicit val  s
     accountReadModelFlow,
     participantReadModelFlows ,
     pInstanceReadModelFlows,
+    flagReadModelFlows,
     new JournalReaderImpl(system)
   )
 
-  ex.executeItem
-  ex.executeFlow
-  ex.executeAcc
-  ex.executeParticipant
-  ex.executePInst
+//  ex.executeItem
+//  ex.executeFlow
+//  ex.executeAcc
+//  ex.executeParticipant
+//  ex.executePInst
+
+  ex.execute
 
   sys.addShutdownHook {
     system.terminate()

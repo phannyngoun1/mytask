@@ -10,7 +10,8 @@ case class TaskDto(
   pInstId: UUID,
   participantId: UUID,
   activity: BaseActivity,
-  actions: List[BaseAction]
+  actions: List[BaseAction],
+  active: Boolean
 )
 
 case class Task(

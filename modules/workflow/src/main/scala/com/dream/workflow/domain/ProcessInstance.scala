@@ -77,12 +77,17 @@ case class ProcessInstance(
 
   def commitTask(taskId: UUID, participantId: UUID, action: BaseAction, actionDate: Instant): Either[InstError, ProcessInstance] = {
     Right(
-      copy(tasks = tasks.map(task => task.copy(
-        destinations = task.destinations.map { dest =>
-          if (dest.participantId.equals(participantId)) dest.copy(action = Some(action), actionDate = Some(actionDate)) else dest
-        },
-        active = false
-      )))
+      copy(tasks = tasks.map(task =>
+        if(task.id.equals(taskId))
+          task.copy(
+            active = false,
+            destinations = task.destinations.map { dest =>
+              if (dest.participantId.equals(participantId)) dest.copy(action = Some(action), actionDate = Some(actionDate)) else dest
+            }
+          )
+        else
+          task
+      ))
     )
   }
 
