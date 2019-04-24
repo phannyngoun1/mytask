@@ -3,7 +3,7 @@ package com.dream.workflow.entity.processinstance
 import java.time.Instant
 import java.util.UUID
 
-import com.dream.common.{BaseAction, BaseActivity, PayLoad}
+import com.dream.common.{BaseAction, BaseActivity, Payload}
 import com.dream.common.Protocol.{CmdRequest, CmdResponse}
 import com.dream.workflow.domain._
 
@@ -31,7 +31,7 @@ object ProcessInstanceProtocol {
     description: String,
     destIds: List[UUID],
     task: Task,
-    payLoad: PayLoad
+    payLoad: Payload
   ) extends ProcessInstanceCmdRequest
 
   case class CreatePInstCmdSuccess(id: UUID) extends CreatePInstCmdResponse

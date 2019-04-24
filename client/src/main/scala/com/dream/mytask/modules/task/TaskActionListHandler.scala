@@ -10,6 +10,7 @@ import TaskActionListHandler.TaskListActions.{FetchTaskListAction, _}
 import com.dream.mytask.services.AjaxClient
 import com.dream.mytask.services.DataModel.RootModel
 import com.dream.mytask.shared.Api
+import com.dream.mytask.shared.data.WorkflowData.EditTicketPayloadJs
 
 import scala.util.{Failure, Try}
 
@@ -59,7 +60,7 @@ class TakeActionHandler[M](modelRW: ModelRW[M, Pot[String]]) extends ActionHandl
 
   override protected def handle: PartialFunction[Any, ActionResult[M]] = {
     case action: TakeAction =>
-      val updateF = action.effect(AjaxClient[Api].takeAction(action.pInstId.get, action.taskId.get, action.accId.get, action.participantId.get, action.action.get ).call())(identity _)
+      val updateF = action.effect(AjaxClient[Api].takeAction(action.pInstId.get, action.taskId.get, action.accId.get, action.participantId.get, action.action.get, EditTicketPayloadJs() ).call())(identity _)
       action.handleWith(this, updateF)(PotAction.handler())
   }
 }

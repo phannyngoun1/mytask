@@ -14,7 +14,7 @@ object Protocol {
     def taskId: UUID
     def action: BaseAction
     def activity: BaseActivity
-    def payLoad: PayLoad
+    def payLoad: Payload
   }
 
 

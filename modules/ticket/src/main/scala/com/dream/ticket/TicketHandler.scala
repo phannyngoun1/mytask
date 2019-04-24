@@ -4,7 +4,7 @@ import java.util.UUID
 
 import akka.actor.{Actor, ActorLogging, Props}
 import com.dream.common.Protocol.{DefaultTaskPerformCmdResponse, TaskPerformCmdRequest}
-import com.dream.common.{BaseAction, BaseActivity, PayLoad}
+import com.dream.common.{BaseAction, BaseActivity, Payload}
 import com.dream.ticket.TicketHandler.Protocol.{PerformTicketCmdRequest, TicketCmdResponse}
 
 object TicketHandler {
@@ -23,7 +23,7 @@ object TicketHandler {
       val taskId: UUID,
       val action: BaseAction,
       val activity: BaseActivity,
-      val payLoad: PayLoad
+      val payLoad: Payload
     ) extends TicketCmdRequest
   }
 
@@ -33,7 +33,7 @@ class TicketHandler extends Actor with ActorLogging {
   override def receive: Receive = {
     case req: PerformTicketCmdRequest => {
 
-      log.info(s" handle ticket task ${req}")
+      println(s"--do perform task ${req}")
 
       sender() ! DefaultTaskPerformCmdResponse(UUID.randomUUID())
     }

@@ -59,7 +59,7 @@ object ProcessInstanceAggregateUseCase {
 
     case class GetTaskCmdFailed(error: ResponseError) extends GetTaskCmdRes
 
-    case class TakeActionCmdRequest(pInstId: UUID, taskId: UUID, action: BaseAction, participantId: UUID, payLoad: PayLoad) extends ProcessInstanceCmdRequest
+    case class TakeActionCmdRequest(pInstId: UUID, taskId: UUID, action: BaseAction, participantId: UUID, payLoad: Payload) extends ProcessInstanceCmdRequest
 
     trait TakeActionCmdResponse extends ProcessInstanceCmdResponse
 
@@ -90,7 +90,7 @@ object ProcessInstanceAggregateUseCase {
       taskId: UUID,
       action: BaseAction,
       activity: BaseActivity,
-      payLoad: PayLoad,
+      payLoad: Payload,
       processBy: UUID
     ) extends TaskPerformCmdRequest
 
@@ -295,7 +295,7 @@ class ProcessInstanceAggregateUseCase(
       )
     }) ~> processInstanceAggregateFlows.createNewTask.map {
       case CreateNewTaskCmdSuccess(pInstId, taskId, dests) => dests.map(AssignTaskCmdReq(_, taskId, pInstId))
-    }.flatMapConcat(Source(_)) ~> participantAggregateFlows.assignTask ~> Sink.ignore
+    }.flatMapConcat(Source(_)) ~> participantAggregateFlows.assignTask  ~> Sink.ignore
 
     FlowShape(broadcast.in, out.outlet)
 

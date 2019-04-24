@@ -1,6 +1,7 @@
 package com.dream.workflow.adaptor.aggregate
 
 import akka.actor.{Actor, ActorContext, ActorRef}
+import com.dream.common.BaseActivity
 import com.dream.common.Protocol.{CmdResponseFailed, TaskPerformCmdRequest}
 import com.dream.common.domain.ResponseError
 import com.dream.ticket.TicketHandler
@@ -68,7 +69,6 @@ trait AggregatesLookup {
     cmd.activity match {
       case Activity("Ticketing") =>
         val ticketCmd = PerformTicketCmdRequest(cmd.taskId, cmd.action, cmd.activity, cmd.payLoad)
-
         context
           .child(TicketHandler.serviceName)
           .fold(

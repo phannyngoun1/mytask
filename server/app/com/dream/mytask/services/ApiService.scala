@@ -3,8 +3,8 @@ package com.dream.mytask.services
 import java.util.UUID
 
 import akka.actor.ActorSystem
-import com.dream.common.DefaultPayLoad
 import com.dream.mytask.shared.Api
+import com.dream.mytask.shared.data.WorkflowData.PayloadJs
 import com.dream.mytask.shared.data.{ActionItemJson, TaskItemJson}
 import com.dream.workflow.adaptor.aggregate._
 import com.dream.workflow.adaptor.dao.account.AccountReadModelFlowImpl
@@ -21,12 +21,13 @@ import com.dream.workflow.usecase._
 import com.typesafe.config.ConfigFactory
 import slick.basic.DatabaseConfig
 import slick.jdbc.JdbcProfile
-
+import TicketPayloadConverter._
 import scala.concurrent.{ExecutionContext, Future}
 
 
 class ApiService(login: UUID)(implicit val ec: ExecutionContext, implicit val  system: ActorSystem)
   extends Api
+    with PayloadConverter
     with ItemService
     with FlowService
     with AccountService
@@ -97,16 +98,15 @@ class ApiService(login: UUID)(implicit val ec: ExecutionContext, implicit val  s
     ))
   }
 
-  override def takeAction(pInstId: String, taskId: String, accId: String, participantId: String, actionName: String): Future[String] = {
+  override def takeAction(pInstId: String, taskId: String, accId: String, participantId: String, actionName: String, payLoad: PayloadJs): Future[String] = {
 
     val pInstIdUUID = UUID.fromString(pInstId)
     val taskIdUUID = UUID.fromString(taskId)
     val participantUUI = UUID.fromString(participantId)
     val action = Action(actionName)
 
-    processInstance.takeAction(TakeActionCmdRequest(pInstIdUUID, taskIdUUID, action, participantUUI, DefaultPayLoad("Test"))).map {
-      case ActionCompleted() => "Completed"
-      case _ => "Failed"
+    processInstance.takeAction(TakeActionCmdRequest(pInstIdUUID, taskIdUUID, action, participantUUI, convertPayload(payLoad) )).map {
+      case _ => "Completed"
     }
   }
 }

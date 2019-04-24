@@ -27,7 +27,7 @@ lazy val ticket =  (project in file("modules/ticket"))
       "org.fusesource.leveldbjni" % "leveldbjni-all" % "1.8"
     )
   )
-  //.aggregate(common)
+  .aggregate(common)
   .dependsOn(common)
 
 lazy val workflow =  (project in file("modules/workflow"))

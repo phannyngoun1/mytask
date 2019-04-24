@@ -1,25 +1,17 @@
 package com.dream.common
 
-import julienrf.json.derived
-import play.api.libs.json.OFormat
-
-
-
 trait BaseAction {
   def name: String
 }
 
-sealed trait PayLoad {
+trait Payload
 
-}
 
-object PayLoad {
-  implicit val jsonFormat: OFormat[PayLoad] = derived.oformat[PayLoad]()
-}
+case class NonePayload() extends Payload
 
 case class DefaultPayLoad(
   value: String
-) extends PayLoad
+) extends Payload
 
 trait Params
 
