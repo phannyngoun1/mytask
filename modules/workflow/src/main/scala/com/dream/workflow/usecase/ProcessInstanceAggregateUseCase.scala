@@ -219,6 +219,67 @@ class ProcessInstanceAggregateUseCase(
     newTaskId: Option[UUID] = None
   )
 
+  private case class ActionParams(
+    flow: WFlow,
+    task: Option[TaskDto] = None,
+    action: Option[TakeActionCmdRequest] = None,
+    actionDate: Instant = Instant.now(),
+    nexActivity: Option[BaseActivityFlow] = None,
+    newTaskId: Option[UUID] = None
+  )
+
+  private val actionParamsFlowGraph = Flow.fromGraph(GraphDSL.create() { implicit b =>
+
+    import GraphDSL.Implicits._
+    val bCast = b.add(Broadcast[TakeActionCmdRequest](2))
+    val zipTask = b.add(Zip[ActionParams, TaskDto])
+
+    val mapToGetPInstCmdRequest = Flow[TakeActionCmdRequest].map(req => GetPInstCmdRequest(req.pInstId))
+    val pInstance = processInstanceAggregateFlows.getPInst.map {
+
+      case res: GetPInstCmdSuccess => {
+        println(s"get PInstance  ${res.flowId} ")
+        GetWorkflowCmdRequest(res.flowId)
+      }
+    }
+
+    val fetchWorkflow = workflowAggregateFlows.getWorkflow.map {
+      case GetWorkflowCmdSuccess(workflow) => {
+        println(s"workflow ${workflow}")
+        workflow
+      }
+    }
+
+    val workflowResult = Flow[WFlow].map(flow => ActionParams(flow = flow) )
+
+    val mapToGetTaskReq = Flow[TakeActionCmdRequest].map(item => {
+      println(" mapToGetTaskReq ")
+      GetTaskCmdReq(item.participantId, AssignedTask(item.taskId, item.pInstId))
+    })
+
+    val fetchTask = processInstanceAggregateFlows.getTask.map {
+      case GetTaskCmdSuccess(dto) => {
+        println(s"get tasks ${dto}")
+        dto
+      }
+      case _ => {
+        println(s"get tasks Error")
+        throw new RuntimeException("Error -----------")
+      }
+    }
+
+    val taskResult =  Flow[(ActionParams, TaskDto)].map(f=> f._1.copy(task = Some(f._2)))
+
+    bCast.out(0) ~> mapToGetPInstCmdRequest ~> pInstance ~> fetchWorkflow ~> workflowResult ~> zipTask.in0
+
+    bCast.out(1) ~> mapToGetTaskReq ~> fetchTask  ~> zipTask.in1
+
+    val out =  zipTask.out ~> taskResult
+
+    FlowShape(bCast.in, out.outlet)
+
+  })
+
   private val takeActionFlowGraph = Flow.fromGraph(GraphDSL.create() { implicit b =>
 
     import GraphDSL.Implicits._
@@ -235,7 +296,7 @@ class ProcessInstanceAggregateUseCase(
 
     broadcast.out(0) ~> Flow[TakeActionCmdRequest].map(it => GetPInstCmdRequest(it.pInstId)) ~> processInstanceAggregateFlows.getPInst.map {
       case res: GetPInstCmdSuccess => {
-        println(s"get PInsta  ${res.flowId} ")
+        println(s"get PInstance  ${res.flowId} ")
         GetWorkflowCmdRequest(res.flowId)
       }
     } ~> workflowAggregateFlows.getWorkflow.map {
