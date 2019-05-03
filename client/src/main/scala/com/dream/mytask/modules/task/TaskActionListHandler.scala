@@ -60,7 +60,7 @@ class TakeActionHandler[M](modelRW: ModelRW[M, Pot[String]]) extends ActionHandl
 
   override protected def handle: PartialFunction[Any, ActionResult[M]] = {
     case action: TakeAction =>
-      val updateF = action.effect(AjaxClient[Api].takeAction(action.pInstId.get, action.taskId.get, action.accId.get, action.participantId.get, action.action.get, EditTicketPayloadJs() ).call())(identity _)
+      val updateF = action.effect(AjaxClient[Api].takeAction(action.pInstId.get, action.taskId.get, action.accId.get, action.participantId.get, action.action.get).call())(identity _)
       action.handleWith(this, updateF)(PotAction.handler())
   }
 }

@@ -21,7 +21,8 @@ object Router extends autowire.Server[ByteBuffer, Pickler, Pickler] {
 
 @Singleton
 class Application @Inject()(
-  cc: ControllerComponents,
+
+  cc: ControllerComponents
 
 )(implicit ec: ExecutionContext) extends AbstractController(cc) {
 

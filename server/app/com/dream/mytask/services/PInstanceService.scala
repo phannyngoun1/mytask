@@ -29,7 +29,9 @@ trait PInstanceService { this: ApiService =>
     }
   }
 
-  override def getPInstanceList(): Future[List[ProcessInstanceJson]] =
+  override def getPInstanceList(): Future[List[ProcessInstanceJson]] = {
     processInstance.list.map(_.map(item => ProcessInstanceJson(item.id.toString, item.folio)))
+  }
+
 
 }

@@ -1,6 +1,6 @@
 package com.dream.mytask.modules.item
 
-import com.dream.mytask.AppClient.Loc
+import com.dream.mytask.AppClient.{DashboardLoc, Loc}
 import com.dream.mytask.modules.item.ItemActionHandler._
 import com.dream.mytask.services.DataModel.ItemModel
 import com.dream.mytask.shared.data.ItemData.ItemJson
@@ -10,6 +10,7 @@ import diode.react.ReactPot._
 import japgolly.scalajs.react.extra.router.RouterCtl
 import japgolly.scalajs.react.vdom.html_<^._
 import japgolly.scalajs.react._
+
 import scala.language.postfixOps
 import scala.language.implicitConversions
 
@@ -31,6 +32,9 @@ object ItemComp {
       val message = p.proxy.connect(m=> m.message)
       val list = p.proxy.connect(_.itemList)
       <.div(
+        <.div(^.textAlign :="Right" ,
+          <.button("Back To Main", ^.onClick --> p.c.set(DashboardLoc))
+        ),
         <.h3("Item List:"),
         <.div(
           list(px => {

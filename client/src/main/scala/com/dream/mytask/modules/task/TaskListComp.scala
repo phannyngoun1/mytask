@@ -1,6 +1,6 @@
 package com.dream.mytask.modules.task
 
-import com.dream.mytask.AppClient.Loc
+import com.dream.mytask.AppClient.{DashboardLoc, Loc}
 import com.dream.mytask.modules.task.TaskActionListHandler.TaskListActions.{FetchTaskListAction, TakeAction}
 import com.dream.mytask.services.DataModel.TaskModel
 import com.dream.mytask.shared.data.{ActionItemJson, TaskItemJson}
@@ -31,6 +31,9 @@ object TaskListComp {
       val message = p.proxy.connect(_.message)
         <.div(
           <.div(
+            <.div(^.textAlign :="Right" ,
+              <.button("Back To Main", ^.onClick --> p.c.set(DashboardLoc))
+            ),
             <.label("Account Id: "),
             <.input(^.`type` := "text", ^.value := s.accountId.getOrElse(""), ^.onChange ==> { e: ReactEventFromInput =>
               val value = if (e.target.value.trim.isEmpty) None else Some(e.target.value)

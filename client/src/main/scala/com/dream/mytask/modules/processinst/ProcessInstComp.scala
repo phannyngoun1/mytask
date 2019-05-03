@@ -1,13 +1,13 @@
 package com.dream.mytask.modules.processinst
 
-import com.dream.mytask.AppClient.Loc
+import com.dream.mytask.AppClient.{DashboardLoc, Loc}
 import com.dream.mytask.modules.processinst.ProcessInstActionHandler._
 import com.dream.mytask.services.DataModel.ProcessInstanceModel
 import diode.react._
 import japgolly.scalajs.react.BackendScope
 import diode.react.ReactPot._
 import japgolly.scalajs.react.extra.router.RouterCtl
-import japgolly.scalajs.react.vdom.html_<^._
+import japgolly.scalajs.react.vdom.html_<^.{<, _}
 import japgolly.scalajs.react._
 
 
@@ -39,6 +39,9 @@ object ProcessInstComp {
 
       <.div(
         <.div(
+          <.div(^.textAlign :="Right" ,
+            <.button("Back To Main", ^.onClick --> p.c.set(DashboardLoc))
+          ),
           <.h4("Instance List"),
           <.div(
             listWrapper(px => {

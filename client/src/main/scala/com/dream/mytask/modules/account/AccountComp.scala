@@ -1,6 +1,6 @@
 package com.dream.mytask.modules.account
 
-import com.dream.mytask.AppClient.Loc
+import com.dream.mytask.AppClient.{DashboardLoc, Loc}
 import com.dream.mytask.modules.account.AccountActionHandler._
 import com.dream.mytask.services.DataModel.AccountModel
 import com.dream.mytask.shared.data.AccountData.{AccountJson, ParticipantJson}
@@ -40,6 +40,10 @@ object AccountComp {
       val listParticipant = p.proxy.connect(_.participantList)
 
       <.div(
+
+        <.div(^.textAlign :="Right" ,
+          <.button("Back To Main", ^.onClick --> p.c.set(DashboardLoc))
+        ),
         <.h3("User"),
         <.h2("Account List"),
         <.div(

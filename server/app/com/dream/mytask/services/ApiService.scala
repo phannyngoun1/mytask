@@ -22,6 +22,8 @@ import com.typesafe.config.ConfigFactory
 import slick.basic.DatabaseConfig
 import slick.jdbc.JdbcProfile
 import TicketPayloadConverter._
+import com.dream.common.NonePayload
+
 import scala.concurrent.{ExecutionContext, Future}
 
 
@@ -93,19 +95,20 @@ class ApiService(login: UUID)(implicit val ec: ExecutionContext, implicit val  s
 
     val uuId = UUID.fromString(accId)
 
-    accountUseCase.getTasks(GetTaskLisCmdReq(uuId)) map (_.map(f =>
+    accountUseCase.getTasks(GetTaskLisCmdReq(uuId)) map (_.map { f =>
+      println(f)
       TaskItemJson(f.id.toString, f.pInstId.toString, f.participantId.toString, f.activity.name, f.actions.map(a => ActionItemJson(a.name)))
-    ))
+    })
   }
 
-  override def takeAction(pInstId: String, taskId: String, accId: String, participantId: String, actionName: String, payLoad: PayloadJs): Future[String] = {
+  override def takeAction(pInstId: String, taskId: String, accId: String, participantId: String, actionName: String): Future[String] = {
 
     val pInstIdUUID = UUID.fromString(pInstId)
     val taskIdUUID = UUID.fromString(taskId)
     val participantUUI = UUID.fromString(participantId)
     val action = Action(actionName)
 
-    processInstance.takeAction(TakeActionCmdRequest(pInstIdUUID, taskIdUUID, action, participantUUI, convertPayload(payLoad) )).map {
+    processInstance.takeAction(TakeActionCmdRequest(pInstIdUUID, taskIdUUID, action, participantUUI, NonePayload() )).map {
       case _ => "Completed"
     }
   }

@@ -1,6 +1,6 @@
 package com.dream.mytask.modules.workflow
 
-import com.dream.mytask.AppClient.Loc
+import com.dream.mytask.AppClient.{DashboardLoc, Loc}
 import com.dream.mytask.modules.workflow.WorkflowHandler.{FetchFlowAction, FetchFlowListAction, NewFlowAction}
 import com.dream.mytask.services.DataModel.FlowModel
 import com.dream.mytask.shared.data.WorkflowData.FlowJson
@@ -35,6 +35,9 @@ object WorkflowComp {
       val fetchWrapper = p.proxy.connect(_.flow)
       val list = p.proxy.connect(_.flowList)
       <.div(
+        <.div(^.textAlign :="Right" ,
+          <.button("Back To Main", ^.onClick --> p.c.set(DashboardLoc))
+        ),
         <.h2("work flow"),
         <.div(
           <.h3("Flow list"),

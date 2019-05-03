@@ -7,6 +7,6 @@ object WorkflowData {
 
   sealed trait PayloadJs
 
-  case class EditTicketPayloadJs() extends PayloadJs
+  case class EditTicketPayloadJs(test: String) extends PayloadJs
 
 }

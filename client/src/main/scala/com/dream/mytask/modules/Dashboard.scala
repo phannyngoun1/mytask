@@ -1,6 +1,6 @@
 package com.dream.mytask.modules
 
-import com.dream.mytask.AppClient.Loc
+import com.dream.mytask.AppClient.{AccLoc, FlowLoc, ItemLoc, Loc, ProcessInstLoc, TaskListLoc}
 import com.dream.mytask.services.{FetchAccAction, MessageAction}
 import diode.data.Pot
 import diode.react._
@@ -17,14 +17,15 @@ object Dashboard {
 
   class Backend($: BackendScope[Props, State]) {
     def render(p: Props, s: State) = {
-      <.div("Hello",
-        <.div(
-          p.proxy().renderPending(_ > 500, _ => <.p("Loading...")),
-          p.proxy().renderFailed(ex => <.p("Failed to load")),
-          p.proxy().render(m => <.p(m))
-        ),
-        <.button(^.onClick --> p.proxy.dispatchCB(MessageAction()), "Update_----- 1"),
-        <.button(^.onClick --> p.proxy.dispatchCB(FetchAccAction()), "Fetch Account")
+      <.div("Menu",
+
+        <.ul(
+          <.li(<.a("Account", ^.src := "#", ^.onClick --> p.c.set(AccLoc))),
+          <.li(<.a("item", ^.src := "#", ^.onClick --> p.c.set(ItemLoc))),
+          <.li(<.a("flow", ^.src := "#",^.onClick --> p.c.set(FlowLoc))),
+          <.li(<.a("instance", ^.src := "#",^.onClick --> p.c.set(ProcessInstLoc))),
+          <.li(<.a("tasks", ^.src := "#",^.onClick --> p.c.set(TaskListLoc)))
+        )
       )
     }
   }
