@@ -4,7 +4,7 @@ import java.util.UUID
 
 import akka.actor.ActorSystem
 import com.dream.mytask.shared.Api
-import com.dream.mytask.shared.data.WorkflowData.PayloadJs
+import com.dream.mytask.shared.data.WorkflowData.{EditTicketPayloadJs, PayloadJs}
 import com.dream.mytask.shared.data.{ActionItemJson, TaskItemJson}
 import com.dream.workflow.adaptor.aggregate._
 import com.dream.workflow.adaptor.dao.account.AccountReadModelFlowImpl
@@ -101,7 +101,7 @@ class ApiService(login: UUID)(implicit val ec: ExecutionContext, implicit val  s
     })
   }
 
-  override def takeAction(pInstId: String, taskId: String, accId: String, participantId: String, actionName: String): Future[String] = {
+  override def takeAction(pInstId: String, taskId: String, accId: String, participantId: String, actionName: String, payload: EditTicketPayloadJs): Future[String] = {
 
     val pInstIdUUID = UUID.fromString(pInstId)
     val taskIdUUID = UUID.fromString(taskId)

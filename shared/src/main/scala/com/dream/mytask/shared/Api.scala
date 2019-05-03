@@ -6,7 +6,7 @@ import com.dream.mytask.shared.data.AccountData.{AccountJson, ParticipantJson}
 import com.dream.mytask.shared.data.ItemData.ItemJson
 import com.dream.mytask.shared.data.ProcessInstanceData.ProcessInstanceJson
 import com.dream.mytask.shared.data.TaskItemJson
-import com.dream.mytask.shared.data.WorkflowData.{FlowJson, PayloadJs}
+import com.dream.mytask.shared.data.WorkflowData.{EditTicketPayloadJs, FlowJson, PayloadJs}
 
 import scala.concurrent.Future
 
@@ -24,7 +24,7 @@ trait Api {
 
   def getTasks(accId: String): Future[List[TaskItemJson]]
 
-  def takeAction(pInstId: String, taskId: String, accId: String, participantId: String, action: String) : Future[String]
+  def takeAction(pInstId: String, taskId: String, accId: String, participantId: String, action: String, payload: EditTicketPayloadJs) : Future[String]
 
   def createProcessInstance(itemId: String, submitter: String): Future[String]
 
