@@ -3,7 +3,7 @@ package com.dream.mytask.services
 import com.dream.mytask.shared.data.AccountData.{AccountJson, ParticipantJson}
 import com.dream.mytask.shared.data.ItemData.ItemJson
 import com.dream.mytask.shared.data.ProcessInstanceData.ProcessInstanceJson
-import com.dream.mytask.shared.data.TaskItemJson
+import com.dream.mytask.shared.data.{ActionInfoJson, TaskItemJson}
 import com.dream.mytask.shared.data.WorkflowData.FlowJson
 import diode.data.Pot
 
@@ -21,9 +21,22 @@ object DataModel {
 
     accountModel: AccountModel = AccountModel(),
 
-    itemModel: ItemModel = ItemModel()
+    itemModel: ItemModel = ItemModel(),
+
+    formModel: FormModel = FormModel()
 
   )
+
+  case class FormModel(
+
+    ticketModel: TicketModel = TicketModel(),
+
+    actionInfo: Option[ActionInfoJson] = None
+
+  )
+
+
+  case class ActionJson()
 
   case class FlowModel(
     flowList: Pot[List[FlowJson]] = Pot.empty,
@@ -49,6 +62,8 @@ object DataModel {
     item: Pot[ItemJson] = Pot.empty,
     message: Pot[String] = Pot.empty
   )
+
+  case class TicketModel()
 
   case class ProcessInstanceModel(
     criteria: Option[ProcessInstanceCriteria] = None,

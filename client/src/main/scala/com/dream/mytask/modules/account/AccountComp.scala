@@ -1,6 +1,8 @@
 package com.dream.mytask.modules.account
 
-import com.dream.mytask.AppClient.{DashboardLoc, Loc}
+import java.util.UUID
+
+import com.dream.mytask.AppClient.{DashboardLoc, FetchTaskLoc, Loc}
 import com.dream.mytask.modules.account.AccountActionHandler._
 import com.dream.mytask.services.DataModel.AccountModel
 import com.dream.mytask.shared.data.AccountData.{AccountJson, ParticipantJson}
@@ -23,8 +25,9 @@ object AccountComp {
   class Backend($: BackendScope[Props, State]) {
 
 
-    implicit  def renderItem(item: AccountJson) = {
-      <.li(s"id: ${item.id}, name: ${item.name}")
+    implicit  def renderItem(item: AccountJson, goTo:TagMod) = {
+      <.li(<.a(^.href := "#", goTo , item.name), s",${item.id }")
+      //<.li(s"id: ${item.id}, name: ${item.name}")
     }
 
     implicit def renderParticipantItem(item: ParticipantJson) = {
@@ -52,7 +55,7 @@ object AccountComp {
             md().renderPending(_ > 500, _ => <.p("Loading...")),
             md().renderFailed(ex => <.p("Failed to load")),
             md().render(m => <.ol( ^.`type` := "1",
-              m toTagMod
+              m toTagMod(item => renderItem(item, p.c.setOnLinkClick(FetchTaskLoc(UUID.fromString(item.id)))))
             ))
           )})
         ),
@@ -63,9 +66,9 @@ object AccountComp {
             <.div(
               md().renderPending(_ > 500, _ => <.p("Loading...")),
               md().renderFailed(ex => <.p("Failed to load")),
-              md().render(m => <.ol( ^.`type` := "1",
-                m toTagMod
-              ))
+              md().render { m =>
+                <.ol(^.`type` := "1", m toTagMod renderParticipantItem)
+              }
             )})
         ),
 
@@ -157,8 +160,7 @@ object AccountComp {
   private val component = ScalaComponent.builder[Props]("AccountComp")
     .initialStateFromProps(p => State())
     .renderBackend[Backend]
-    .componentDidMount(_.props.proxy.dispatchCB(FetchAccListAction()))
-    .componentDidMount(_.props.proxy.dispatchCB(FetchParticipantListAction()))
+    .componentDidMount(proxy => proxy.props.proxy.dispatchCB(FetchAccListAction())  >> proxy.props.proxy.dispatchCB(FetchParticipantListAction())   )
     .build
 
   def apply(proxy: ModelProxy[AccountModel], c: RouterCtl[Loc]) = component(Props(proxy, c))

@@ -1,6 +1,10 @@
 package com.dream.mytask.modules.task
 
-import com.dream.mytask.AppClient.{DashboardLoc, Loc}
+import java.util.UUID
+
+import com.dream.mytask.AppClient
+import com.dream.mytask.AppClient.{DashboardLoc, Loc, PerformTaskLoc}
+import com.dream.mytask.modules.form.FormActionHandler.PerformTaskAction
 import com.dream.mytask.modules.task.TaskActionListHandler.TaskListActions.{FetchTaskListAction, TakeAction}
 import com.dream.mytask.services.DataModel.TaskModel
 import com.dream.mytask.shared.data.{ActionItemJson, TaskItemJson}
@@ -13,7 +17,7 @@ import japgolly.scalajs.react._
 
 object TaskListComp {
 
-  case class Props(proxy: ModelProxy[TaskModel], c: RouterCtl[Loc])
+  case class Props(proxy: ModelProxy[TaskModel], c: RouterCtl[Loc], id: Option[UUID])
 
   case class State(searchVal: Option[String] = None, accountId: Option[String] = None)
 
@@ -22,9 +26,11 @@ object TaskListComp {
 
       implicit  def renderItem(task: TaskItemJson, action: ActionItemJson, accId: String) = {
 
-        <.div(
-          <.button(action.name, ^.onClick --> p.proxy.dispatchCB(TakeAction(Some(task.pInstId), Some(task.id), Some(accId), Some(task.participantId), Some(action.name))))
+        val info = PerformTaskAction(
+          task.activityName, action.name , UUID.fromString(task.id), UUID.fromString(task.pInstId), p.id.get, UUID.fromString(task.participantId)
         )
+
+        <.button(action.name ,  ^.onClick --> (p.proxy.dispatchCB(info) >> p.c.set(PerformTaskLoc)) )
       }
 
       val wrapper = p.proxy.connect(_.taskList)
@@ -63,7 +69,10 @@ object TaskListComp {
                 px().render(m => <.ol( ^.`type` := "1",
                   m toTagMod { item =>
                     <.li( s"P inst: ${item.pInstId}, task Id: ${item.id}, participantId: ${item.participantId}, activity: ${item.activityName}",
-                      item.actions toTagMod(action => renderItem(item, action, s.accountId.get))
+                      <.div(" Actions: ",
+                        item.actions toTagMod(action => renderItem(item, action, s.accountId.get))
+                      )
+
                     )
                   }
                 ))
@@ -75,10 +84,13 @@ object TaskListComp {
   }
 
   private val component = ScalaComponent.builder[Props]("DashboardModule")
-    .initialStateFromProps(p => State())
+    .initialStateFromProps(p => State(accountId= p.id.map(_.toString)))
     .renderBackend[Backend]
+    .componentDidMount( sc => {
+      Callback.when(sc.props.id.isDefined) (sc.props.proxy.dispatchCB(FetchTaskListAction(sc.props.id.map(_.toString))))
+    })
     .build
 
-  def apply(proxy: ModelProxy[TaskModel], c: RouterCtl[Loc]) = component(Props(proxy, c))
+  def apply(proxy: ModelProxy[TaskModel], c: RouterCtl[Loc], id: Option[UUID] = None) = component(Props(proxy, c, id))
 
 }

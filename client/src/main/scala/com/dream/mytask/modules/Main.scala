@@ -16,7 +16,6 @@ object Main {
     def render(p: Props, s: State) = {
       <.div(p.r.render())
     }
-
   }
 
   private val component = ScalaComponent.builder[Props]("DashboardModule")

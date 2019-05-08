@@ -7,6 +7,7 @@ import diode.react.ReactConnector
 import diode.util._
 import boopickle.Default._
 import com.dream.mytask.modules.account.AccountActionHandler
+import com.dream.mytask.modules.form.FormActionHandler
 import com.dream.mytask.modules.item.ItemActionHandler
 import com.dream.mytask.modules.processinst.ProcessInstActionHandler
 import com.dream.mytask.modules.task.TaskActionListHandler
@@ -56,7 +57,8 @@ object AppCircuit extends Circuit[RootModel] with ReactConnector[RootModel] {
     ItemActionHandler(this),
     WorkflowHandler(this),
     AccountActionHandler(this),
-    ProcessInstActionHandler(this)
+    ProcessInstActionHandler(this),
+    FormActionHandler(this)
   )
 
 
