@@ -106,9 +106,8 @@ class ApiService(login: UUID)(implicit val ec: ExecutionContext, implicit val  s
     val pInstIdUUID = UUID.fromString(pInstId)
     val taskIdUUID = UUID.fromString(taskId)
     val participantUUI = UUID.fromString(participantId)
-    val action = Action(actionName)
 
-    processInstance.takeAction(TakeActionCmdRequest(pInstIdUUID, taskIdUUID, action, participantUUI, NonePayload() )).map {
+    processInstance.takeAction(TakeActionCmdRequest(pInstIdUUID, taskIdUUID, actionName, participantUUI, NonePayload(), None )).map {
       case _ => "Completed"
     }
   }

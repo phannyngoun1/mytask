@@ -60,7 +60,7 @@ object ProcessInstanceAggregateUseCase {
     case class GetTaskCmdFailed(error: ResponseError) extends GetTaskCmdRes
 
     case class TakeActionCmdRequest(
-      pInstId: UUID, taskId: UUID, action: BaseAction, participantId: UUID, payLoad: Payload, comment: Option[String]
+      pInstId: UUID, taskId: UUID, action: String, participantId: UUID, payLoad: Payload, comment: Option[String]
     ) extends ProcessInstanceCmdRequest
 
     trait TakeActionCmdResponse extends ProcessInstanceCmdResponse
@@ -91,7 +91,7 @@ object ProcessInstanceAggregateUseCase {
       actionPerformed: UUID,
       pInstId: UUID,
       taskId: UUID,
-      action: BaseAction,
+      action: String,
       activity: BaseActivity,
       payLoad: Payload,
       processBy: UUID
@@ -202,7 +202,7 @@ class ProcessInstanceAggregateUseCase(
     val createPrepareB = b.add(Broadcast[CreateInst](3))
     val convertToTaskCmdRequestFlow = Flow[CreateInst].map(p =>
       //TODO: consider more how to handler action performed ID.
-      PerformTaskCmdReq(p.id , p.id, p.task.id, StartAction(), p.task.activity, p.payLoad, p.createdBy)
+      PerformTaskCmdReq(p.id , p.id, p.task.id, StartAction().name, p.task.activity, p.payLoad, p.createdBy)
     )
 
     //TODO: adding real tasks
