@@ -50,7 +50,7 @@ class ProcessInstanceEntity extends PersistentActor
       println(s"replay event: $event")
       state = mapState(_.createTask(event.task, event.participantId)).toSomeOrThrow
     case event: ActionCommitted =>
-      state = mapState(_.commitTask(event.taskId, event.participantId, event.action, event.processAt)).toSomeOrThrow
+      state = mapState(_.commitTask(event.actionPerformedId, event.taskId, event.participantId, event.action, event.processAt, event.comment)).toSomeOrThrow
     case RecoveryCompleted =>
       println(s"Recovery completed: $persistenceId")
     case _ => log.debug("Other")
@@ -91,10 +91,10 @@ class ProcessInstanceEntity extends PersistentActor
         }
       }
 
-    case CommitActionCmdReq(id, taskId, participantId, action, processAt) if equalsId(id)(state, _.id.equals(id)) =>
-      foreachState(_.commitTask(taskId, participantId, action, processAt) match {
+    case CommitActionCmdReq(id, actionPerformed, taskId, participantId, action, processAt, comment) if equalsId(id)(state, _.id.equals(id)) =>
+      foreachState(_.commitTask(actionPerformed, taskId, participantId, action, processAt, comment) match {
         case Left(error) => sender() ! CmdResponseFailed( ResponseError(Some(id), error.message))
-        case Right(newState) => persist(ActionCommitted(id, taskId, participantId, action, processAt)) { event =>
+        case Right(newState) => persist(ActionCommitted(id, actionPerformed,  taskId, participantId, action, processAt, comment)) { event =>
           log.info(s"--------instance state------- ${newState}")
           state = Some(newState)
           sender() ! CommitActionCmdSuccess(event.id)

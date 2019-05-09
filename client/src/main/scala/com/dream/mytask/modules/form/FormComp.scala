@@ -3,6 +3,7 @@ package com.dream.mytask.modules.form
 import java.util.UUID
 
 import com.dream.mytask.AppClient.{FetchTaskLoc, Loc}
+import com.dream.mytask.modules.ticketform.TicketMainFormComp
 import com.dream.mytask.services.DataModel.{AccountModel, FormModel}
 import diode.react._
 import diode.react.ReactPot._
@@ -22,15 +23,21 @@ object FormComp {
 
       val actionInfo = p.proxy.connect(_.actionInfo)
 
-      actionInfo(item =>
+      actionInfo { item =>
+        val data = item().get
         <.div(
-          <.div(^.textAlign :="Right" ,
-            <.button("Task List" , ^.onClick --> p.c.set(FetchTaskLoc(item().get.accountId))
+          <.div(^.textAlign := "Right",
+            <.button("Task List", ^.onClick --> p.c.set(FetchTaskLoc(data.accountId))
             )
           ),
-          "Taking action"
+
+          data.activity match {
+            case "Ticketing" =>
+              TicketMainFormComp(data.action)
+            case _ => <.div("No form available.")
+          }
         )
-      )
+      }
     }
   }
 

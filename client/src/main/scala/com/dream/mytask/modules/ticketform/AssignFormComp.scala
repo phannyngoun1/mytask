@@ -11,17 +11,14 @@ import japgolly.scalajs.react._
 
 object AssignFormComp {
 
-  case class Props(accId: UUID, c: RouterCtl[Loc])
+  case class Props()
 
   case class State()
 
   class Backend($: BackendScope[Props, State]) {
     def render(p: Props, s: State) = {
       <.div(
-        <.div(^.textAlign :="Right" ,
-          <.button("Task List", ^.onClick --> p.c.set(FetchTaskLoc(p.accId)))
-        ),
-        "Taking action"
+        "Assign form"
       )
     }
   }
@@ -31,6 +28,6 @@ object AssignFormComp {
     .renderBackend[Backend]
     .build
 
-  def apply(accId: UUID, c: RouterCtl[Loc]) = component(Props( accId ,c))
+  def apply() = component(Props())
 
 }

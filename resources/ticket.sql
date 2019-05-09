@@ -31,6 +31,17 @@ CREATE TABLE `account` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
+/*Table structure for table `flag` */
+
+DROP TABLE IF EXISTS `flag`;
+
+CREATE TABLE `flag` (
+  `id` varchar(50) NOT NULL,
+  `code` varchar(50) NOT NULL,
+  `val` bigint(20) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
 /*Table structure for table `item` */
 
 DROP TABLE IF EXISTS `item`;

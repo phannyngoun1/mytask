@@ -24,7 +24,7 @@ trait FlowService {  this: ApiService =>
 
     val startActionFlow = ActionFlow(
       action = StartAction(),
-      activity = ticketActivity
+      activity = Some(ticketActivity)
     )
 
     val startActivityFlow = ActivityFlow(
@@ -35,23 +35,23 @@ trait FlowService {  this: ApiService =>
 
 
     val editTicketActionFlow = ActionFlow(
-      action = FAction("Edit"),
-      activity = CurrActivity()
+      action = FAction("Edit", "HANDLING"),
+      None
     )
 
     val closeTicketActionFlow = ActionFlow(
-      action = FAction("Close"),
-      activity = DoneActivity()
+      action = FAction("Close", "COMPLETED"),
+      activity = Some(DoneActivity())
     )
 
     val assignTicketActionFlow = ActionFlow(
-      action = FAction("Assign"),
-      activity = CurrActivity()
+      action = FAction("Assign", "HANDLED"),
+      activity = None
     )
 
     val addCommentActionFlow = ActionFlow(
-      action = FAction("Comment"),
-      activity = CurrActivity()
+      action = FAction("Comment", "HANDLING"),
+      activity = None
     )
 
     val ticketActivityFlow = ActivityFlow(

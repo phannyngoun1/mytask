@@ -19,13 +19,28 @@ case class Task(
   activity: BaseActivity,
   actions: List[BaseAction],
   destinations: List[TaskDestination],
+  actionPerformed: List[ActionPerformed] = List.empty,
   dateCreated: Instant = Instant.now(),
   active: Boolean = true
 )
 
-case class TaskDestination(participantId: UUID, action: Option[BaseAction] = None, actionDate: Option[Instant] = None)
+case class ActionPerformed(
+  id: UUID,
+  participantId: UUID,
+  action: BaseAction,
+  actionDate: Instant,
+  comment: Option[String]
+)
+
+case class TaskDestination(participantId: UUID, isActive: Boolean = true)
 
 case class AssignedTask(
   taskId: UUID,
   pInstId: UUID
 )
+
+trait TaskStatus
+
+case object CompletedTaskStatus extends TaskStatus
+case object HandledTaskStatus extends TaskStatus
+case object HandlingTaskStatus extends TaskStatus

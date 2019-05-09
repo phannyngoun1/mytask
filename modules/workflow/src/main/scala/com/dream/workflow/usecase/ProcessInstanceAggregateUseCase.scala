@@ -60,7 +60,7 @@ object ProcessInstanceAggregateUseCase {
     case class GetTaskCmdFailed(error: ResponseError) extends GetTaskCmdRes
 
     case class TakeActionCmdRequest(
-      pInstId: UUID, taskId: UUID, action: BaseAction, participantId: UUID, payLoad: Payload
+      pInstId: UUID, taskId: UUID, action: BaseAction, participantId: UUID, payLoad: Payload, comment: Option[String]
     ) extends ProcessInstanceCmdRequest
 
     trait TakeActionCmdResponse extends ProcessInstanceCmdResponse
@@ -88,6 +88,7 @@ object ProcessInstanceAggregateUseCase {
 
 
     case class PerformTaskCmdReq(
+      actionPerformed: UUID,
       pInstId: UUID,
       taskId: UUID,
       action: BaseAction,
@@ -103,7 +104,7 @@ object ProcessInstanceAggregateUseCase {
     case class PerformTaskFailed(error: ResponseError) extends PerformTaskCmdRes
 
     case class CommitActionCmdReq(
-      id: UUID, taskId: UUID, participantId: UUID, action: BaseAction, processAt: Instant
+      id: UUID, actionPerformedId: UUID, taskId: UUID, participantId: UUID, action: BaseAction, processAt: Instant, comment: Option[String]
     ) extends ProcessInstanceCmdRequest
 
     sealed trait CommitActionCmdRes extends ProcessInstanceCmdResponse
@@ -169,9 +170,9 @@ class ProcessInstanceAggregateUseCase(
         val nextFlow = flow.nextActivity(startAction, startActivity, ParticipantAccess(req.by), false) match {
           case Right(flow) => flow
         }
-
+        val pInstId = UUID.randomUUID()
         CreateInst(
-          id = UUID.randomUUID(),
+          id =pInstId,
           createdBy = req.by,
           flowId = flow.id,
           folio = "test",
@@ -182,7 +183,8 @@ class ProcessInstanceAggregateUseCase(
             id = UUID.randomUUID(),
             activity = nextFlow.activity,
             actions = nextFlow.actionFlows.map(_.action),
-            nextFlow.participants.map(TaskDestination(_))
+            nextFlow.participants.map(TaskDestination(_)),
+            actionPerformed = List(ActionPerformed(pInstId, req.by, startAction, Instant.now(), None))
           ),
           DefaultPayLoad("New ticket")
         )
@@ -199,7 +201,8 @@ class ProcessInstanceAggregateUseCase(
 
     val createPrepareB = b.add(Broadcast[CreateInst](3))
     val convertToTaskCmdRequestFlow = Flow[CreateInst].map(p =>
-      PerformTaskCmdReq(p.id, p.task.id, StartAction(), p.task.activity, p.payLoad, p.createdBy)
+      //TODO: consider more how to handler action performed ID.
+      PerformTaskCmdReq(p.id , p.id, p.task.id, StartAction(), p.task.activity, p.payLoad, p.createdBy)
     )
 
     //TODO: adding real tasks
@@ -228,6 +231,7 @@ class ProcessInstanceAggregateUseCase(
     flow: Option[WFlow] = None,
     task: Option[TaskDto] = None,
     actionDate: Instant = Instant.now(),
+    actionPerformedId: UUID = UUID.randomUUID(),
     nexActivity: Option[BaseActivityFlow] = None,
     newTaskId: Option[UUID] = None
   )
@@ -303,6 +307,7 @@ class ProcessInstanceAggregateUseCase(
 
     val mapToPerformTaskCmdReq = Flow[ActionParams].map(f =>
       PerformTaskCmdReq(
+        f.actionPerformedId,
         f.action.pInstId,
         f.action.taskId,
         f.action.action,
@@ -313,7 +318,7 @@ class ProcessInstanceAggregateUseCase(
     )
 
     val mapToCommitActionCmdReq = Flow[ActionParams].map(f =>
-      CommitActionCmdReq(f.action.pInstId, f.action.taskId, f.action.participantId, f.action.action, f.actionDate)
+      CommitActionCmdReq(f.action.pInstId, f.actionPerformedId , f.action.taskId, f.action.participantId, f.action.action, f.actionDate, f.action.comment)
     )
 
     val fi = Flow[(PerformTaskCmdRes, CommitActionCmdRes)].map {

@@ -7,23 +7,36 @@ import japgolly.scalajs.react.extra.router.RouterCtl
 import japgolly.scalajs.react.vdom.html_<^._
 import japgolly.scalajs.react._
 
-object TicketFormComp {
-  case class Props()
+object TicketMainFormComp {
+
+  case class Props(action: String)
 
   case class State()
 
   class Backend($: BackendScope[Props, State]) {
     def render(p: Props, s: State) = {
       <.div(
-        "Ticker data form"
+        <.h3("Ticket Form"),
+        p.action match {
+          case  "Assign" =>
+            AssignFormComp()
+          case "Close" =>
+            CloseFormComp()
+          case "Edit" =>
+            TicketFormComp()
+          case v: String => <.div(s"No action form available form ${v}")
+        }
       )
     }
   }
 
   private val component = ScalaComponent.builder[Props]("TicketFormComp")
-    .initialStateFromProps(p => State())
+    .initialStateFromProps(_ => State())
     .renderBackend[Backend]
     .build
 
-  def apply() = component(Props())
+  def apply(action: String) = component(Props(action))
+
+
+
 }

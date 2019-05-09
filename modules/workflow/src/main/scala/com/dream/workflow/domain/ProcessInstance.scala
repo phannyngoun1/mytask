@@ -47,10 +47,12 @@ object ProcessInstance {
 
   case class ActionCommitted(
     id: UUID,
+    actionPerformedId: UUID,
     taskId: UUID,
     participantId: UUID,
     action: BaseAction,
-    processAt: Instant
+    processAt: Instant,
+    comment: Option[String]
   )
 
 }
@@ -75,15 +77,16 @@ case class ProcessInstance(
     Right(copy(tasks = task :: tasks))
   }
 
-  def commitTask(taskId: UUID, participantId: UUID, action: BaseAction, actionDate: Instant): Either[InstError, ProcessInstance] = {
+  def commitTask(id: UUID,taskId: UUID, participantId: UUID, action: BaseAction, actionDate: Instant, comment: Option[String]): Either[InstError, ProcessInstance] = {
     Right(
       copy(tasks = tasks.map(task =>
         if(task.id.equals(taskId))
           task.copy(
-            active = false,
+            active = !action.actionType.equals("COMPLETED"),
             destinations = task.destinations.map { dest =>
-              if (dest.participantId.equals(participantId)) dest.copy(action = Some(action), actionDate = Some(actionDate)) else dest
-            }
+              if (dest.participantId.equals(participantId)) dest.copy(isActive = action.actionType.equals("HANDLING")) else dest
+            },
+            actionPerformed = ActionPerformed(id, participantId, action, actionDate, comment ) :: task.actionPerformed
           )
         else
           task

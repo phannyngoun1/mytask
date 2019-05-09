@@ -1,7 +1,14 @@
 package com.dream.common
 
+/**
+  * Action Type:
+  * #COMPLETED: To complete task
+  * #HANDLING: Still working on the task
+  * #HANDLED: Task is still in progress but hand to another
+  */
 trait BaseAction {
   def name: String
+  def actionType: String = "COMPLETED"
 }
 
 trait Payload

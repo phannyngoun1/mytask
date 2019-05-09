@@ -66,7 +66,7 @@ class ProcessInstanceAggregateFlowsImpl(aggregateRef: ActorRef) extends ProcessI
 
   override def commitAction: Flow[Protocol.CommitActionCmdReq, Protocol.CommitActionCmdRes, NotUsed] =
     Flow[Protocol.CommitActionCmdReq]
-      .map(req => CommitActionCmdReq(req.id, req.taskId, req.participantId, req.action, req.processAt))
+      .map(req => CommitActionCmdReq(req.id, req.actionPerformedId, req.taskId, req.participantId, req.action, req.processAt, req.comment))
       .mapAsync(1)(aggregateRef ? _)
       .map {
         case CommitActionCmdSuccess(id) => Protocol.CommitActionCmdSuccess(id)

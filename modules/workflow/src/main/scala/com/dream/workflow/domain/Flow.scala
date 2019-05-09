@@ -50,7 +50,7 @@ case class ActivityHis(
 )
 
 
-case class ActionFlow(action: BaseAction, activity: BaseActivity )
+case class ActionFlow(action: BaseAction, activity: Option[BaseActivity]  )
 
 case class ActivityFlow(activity: BaseActivity, participants: List[UUID], actionFlows: List[ActionFlow]) extends BaseActivityFlow
 
@@ -95,9 +95,6 @@ case class NaActivityFlow() extends AbstractActivityFlow {
 
 }
 
-case class StayStillActivityFlow() extends AbstractActivityFlow {
-  override def activity: BaseActivity = CurrActivity()
-}
 
 
 case class DoneActivityFlow() extends AbstractActivityFlow {
@@ -112,7 +109,7 @@ object Activity {
 
 
 
-case class Action(name: String) extends BaseAction
+case class Action(name: String, override val actionType: String) extends BaseAction
 
 object Action {
   implicit val format: Format[Action] = Json.format
@@ -177,14 +174,13 @@ case class Flow(
     currActivityFlow match {
       case act: ActivityFlow =>
         act.actionFlows.find(_.action == action) match {
-          case Some(ActionFlow(_, _: CurrActivity)) => Right(currActivityFlow)
-        case Some(af: ActionFlow) => workflowList.find(_.activity == af.activity) match {
+          case Some(ActionFlow(_, None)) => Right(currActivityFlow)
+        case Some(af: ActionFlow) => workflowList.find(_.activity == af.activity.getOrElse(None)) match {
           case Some(value) => Right(value)
           case _  => Left(ActivityNotFoundError(s"1.Next activity cannot found by action: ${action.name}; current activity ${currActivityFlow.activity.name}"))
         }
         case _ => Left(ActivityNotFoundError(s"2.Next activity cannot found by action: ${action.name}; current activity ${currActivityFlow.activity.name}"))
       }
-      case act: StayStillActivityFlow => Right(act)
       case  _ => Left(ActivityNotFoundError(""))
     }
   }
