@@ -63,6 +63,10 @@ case class DoneAction() extends BaseAction {
   override val name: String = "Done"
 }
 
+case class NaAction() extends BaseAction {
+  override val name: String = "N/A"
+}
+
 case class StartActivity() extends BaseActivity() {
   override val name: String = "Start"
 }
@@ -79,6 +83,7 @@ case class NaActivity() extends BaseActivity {
 case class DoneActivity() extends BaseActivity {
   override val name: String = "Done"
 }
+
 
 /**
   * Predefined activity flows
@@ -157,13 +162,13 @@ case class Flow(
   def nextActivity(action: BaseAction, onActivity: BaseActivity, by: ParticipantAccess, noneParticipantAllowed: Boolean = false): Either[WorkflowError, BaseActivityFlow ] = {
 
     for {
-      currAct <- checkCurrentActivity(onActivity)
+      currAct <- findCurrentActivity(onActivity)
       nextAct <- nextActivity(by, action)(currAct)
     } yield nextAct
 
   }
 
-  private def checkCurrentActivity(activity: BaseActivity) : Either[WorkflowError, BaseActivityFlow] =
+    def findCurrentActivity(activity: BaseActivity) : Either[WorkflowError, BaseActivityFlow] =
 
     workflowList.find(_.activity == activity ) match {
       case None => Left(ActivityNotFoundError(s"Current activity: ${activity.name} can't be found"))

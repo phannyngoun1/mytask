@@ -9,7 +9,7 @@ import akka.stream.scaladsl.{Flow, _}
 import com.dream.common.Protocol.TaskPerformCmdRequest
 import com.dream.common._
 import com.dream.common.domain.ResponseError
-import com.dream.workflow.domain.{Flow => WFlow, _}
+import com.dream.workflow.domain.{BaseActivityFlow, Flow => WFlow, _}
 import com.dream.workflow.entity.processinstance.ProcessInstanceProtocol.{CreatePInstCmdRequest => CreateInst}
 import com.dream.workflow.usecase.ItemAggregateUseCase.Protocol.{GetItemCmdRequest, GetItemCmdSuccess}
 import com.dream.workflow.usecase.ParticipantAggregateUseCase.Protocol.{AssignTaskCmdReq, AssignTaskCmdSuccess}
@@ -142,16 +142,16 @@ class ProcessInstanceAggregateUseCase(
       .withSupervisionStrategy(decider)
   )
 
-  private val getWorflowByItem =
-    Flow[UUID].map(GetItemCmdRequest)
-      .via(itemAggregateFlows.getItem)
-      .map {
-        case res: GetItemCmdSuccess => GetWorkflowCmdRequest(res.workflowId)
-      }
-      .via(workflowAggregateFlows.getWorkflow)
-      .map {
-        case GetWorkflowCmdSuccess(workflow) => workflow
-      }
+//  private val getWorflowByItem =
+//    Flow[UUID].map(GetItemCmdRequest)
+//      .via(itemAggregateFlows.getItem)
+//      .map {
+//        case res: GetItemCmdSuccess => GetWorkflowCmdRequest(res.workflowId)
+//      }
+//      .via(workflowAggregateFlows.getWorkflow)
+//      .map {
+//        case GetWorkflowCmdSuccess(workflow) => workflow
+//      }
 
 
   //TODO: workaround, need to be fixed
@@ -228,6 +228,7 @@ class ProcessInstanceAggregateUseCase(
 
   private case class ActionParams(
     action: TakeActionCmdRequest,
+    curAction: Option[BaseAction] = None,
     flow: Option[WFlow] = None,
     task: Option[TaskDto] = None,
     actionDate: Instant = Instant.now(),
@@ -281,7 +282,16 @@ class ProcessInstanceAggregateUseCase(
       }
     }
 
-    val taskResult = Flow[(ActionParams, TaskDto)].map(f => f._1.copy(task = Some(f._2)))
+    val taskResult = Flow[(ActionParams, TaskDto)].map{ f =>
+      val action = f._1.flow.get.findCurrentActivity(f._1.task.get.activity) match {
+        case Right(flow) => flow.actionFlows.find(_.action.name == f._1.action.action).map(_.action).getOrElse(NaAction())
+        case _ => NaAction()
+      }
+      f._1.copy(
+        task = Some(f._2),
+        curAction = Some(action)
+      )
+    }
 
     bCast.out(0) ~> mapToActionParam ~> zipFlow.in0
 
@@ -303,7 +313,7 @@ class ProcessInstanceAggregateUseCase(
     import GraphDSL.Implicits._
     val bCast = b.add(Broadcast[ActionParams](3))
 
-    val performTaskZip = b.add(ZipWith[ActionCompleted, ActionCompleted, ActionCompleted, ActionCompleted]((a, b, c) => a))
+    val performTaskZip = b.add(ZipWith[ActionCompleted, ActionCompleted, ActionCompleted, ActionCompleted]((a, _, _) => a))
 
     val mapToPerformTaskCmdReq = Flow[ActionParams].map(f =>
       PerformTaskCmdReq(
@@ -318,7 +328,7 @@ class ProcessInstanceAggregateUseCase(
     )
 
     val mapToCommitActionCmdReq = Flow[ActionParams].map(f =>
-      CommitActionCmdReq(f.action.pInstId, f.actionPerformedId , f.action.taskId, f.action.participantId, f.action.action, f.actionDate, f.action.comment)
+      CommitActionCmdReq(f.action.pInstId, f.actionPerformedId , f.action.taskId, f.action.participantId, f.curAction.get, f.actionDate, f.action.comment)
     )
 
     val fi = Flow[(PerformTaskCmdRes, CommitActionCmdRes)].map {
@@ -337,7 +347,8 @@ class ProcessInstanceAggregateUseCase(
     }
 
     val nexFlow = Flow[ActionParams].map { f =>
-      f.flow.get.nextActivity(f.action.action, f.task.get.activity, ParticipantAccess(f.action.participantId)) match {
+
+      f.flow.get.nextActivity(f.curAction.get, f.task.get.activity, ParticipantAccess(f.action.participantId)) match {
         case Right(activity) => f.copy(nexActivity = Some(activity), newTaskId = Some(UUID.randomUUID()))
       }
     }
