@@ -1,5 +1,7 @@
 package com.dream.mytask.shared.data
 
+import com.dream.mytask.shared.data.AccountData.ParticipantJson
+
 
 object WorkflowData {
 
@@ -8,5 +10,10 @@ object WorkflowData {
   sealed trait PayloadJs
 
   case class EditTicketPayloadJs(test: String) extends PayloadJs
+
+  case class FlowInitDataJs(
+    list: List[FlowJson],
+    pcpList: List[ParticipantJson]
+  )
 
 }

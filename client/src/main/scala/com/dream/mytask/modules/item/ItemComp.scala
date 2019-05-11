@@ -30,7 +30,7 @@ object ItemComp {
     def render(p: Props, s: State) = {
       val wrapper = p.proxy.connect(_.item)
       val message = p.proxy.connect(m=> m.message)
-      val list = p.proxy.connect(_.itemList)
+      val list = p.proxy.connect(_.initData)
       <.div(
         <.div(^.textAlign :="Right" ,
           <.button("Back To Main", ^.onClick --> p.c.set(DashboardLoc))
@@ -41,9 +41,47 @@ object ItemComp {
             <.div(
               px().renderPending(_ > 500, _ => <.p("Loading...")),
               px().renderFailed(ex => <.p("Failed to load")),
-              px().render(m => <.ol( ^.`type` := "1",
-               m toTagMod
-              ))
+              px().render(m =>
+
+                <.div(
+                  <.ol( ^.`type` := "1",
+                    m.list toTagMod
+                  ),
+                  <.div(
+                    <.div(
+                      <.div(
+                        <.label("name:"),
+                        <.input(^.`type` := "text", ^.value := s.itemName.getOrElse(""), ^.onChange ==> { e: ReactEventFromInput =>
+                          val value = if (e.target.value.trim.isEmpty) None else Some(e.target.value)
+                          $.modState(_.copy(itemName = value))
+                        })),
+                      <.div(
+                        <.label("Flow ID:"),
+                        <.select(
+                          ^.value := s.flowId.getOrElse(""),
+                          ^.onChange ==> { e: ReactEventFromInput =>
+                            val value = if (e.target.value.trim.isEmpty) None else Some(e.target.value)
+                            $.modState(_.copy(flowId = value))
+                          },
+                          <.option(^.default := true),
+                          m.flowList.toTagMod { item =>
+                            <.option(^.value := item.id, item.name)
+                          }
+                        )),
+                      <.div(
+                        <.label("description:"),
+                        <.input(^.`type` := "text", ^.value := s.desc.getOrElse(""), ^.onChange ==> { e: ReactEventFromInput =>
+                          val value = if (e.target.value.trim.isEmpty) None else Some(e.target.value)
+                          $.modState(_.copy(desc = value))
+                        }))
+                    ),
+
+                    <.button("Create Item", ^.onClick --> Callback.when(s.itemName.isDefined && s.desc.isDefined)(
+                      p.proxy.dispatchCB(NewItemAction(s.itemName, s.flowId, s.desc)) >>  p.proxy.dispatchCB(FetchItemListAction())
+                    ))
+                  )
+                )
+              )
             )
           })
         ),
@@ -68,32 +106,6 @@ object ItemComp {
         )),
         <.div(
           <.div(
-            <.div(
-              <.div(
-                <.label("name:"),
-                <.input(^.`type` := "text", ^.value := s.itemName.getOrElse(""), ^.onChange ==> { e: ReactEventFromInput =>
-                  val value = if (e.target.value.trim.isEmpty) None else Some(e.target.value)
-                  $.modState(_.copy(itemName = value))
-                })),
-              <.div(
-                <.label("Flow ID:"),
-                <.input(^.`type` := "text", ^.value := s.flowId.getOrElse(""), ^.onChange ==> { e: ReactEventFromInput =>
-                  val value = if (e.target.value.trim.isEmpty) None else Some(e.target.value)
-                  $.modState(_.copy(flowId = value))
-                })),
-              <.div(
-                <.label("description:"),
-                <.input(^.`type` := "text", ^.value := s.desc.getOrElse(""), ^.onChange ==> { e: ReactEventFromInput =>
-                  val value = if (e.target.value.trim.isEmpty) None else Some(e.target.value)
-                  $.modState(_.copy(desc = value))
-                }))
-            ),
-
-            <.button("Create Item", ^.onClick --> Callback.when(s.itemName.isDefined && s.desc.isDefined)(
-              p.proxy.dispatchCB(NewItemAction(s.itemName, s.flowId, s.desc)) >>  p.proxy.dispatchCB(FetchItemListAction())
-            ))
-          ),
-          <.div(
             <.h3("new item:"),
             <.div(
               message(px => {
@@ -113,7 +125,7 @@ object ItemComp {
   private val component = ScalaComponent.builder[Props]("ItemComp")
     .initialStateFromProps(p => State())
     .renderBackend[Backend]
-    .componentDidMount(_.props.proxy.dispatchCB(FetchItemListAction()))
+    .componentDidMount(_.props.proxy.dispatchCB(InitItemDataAction()))
     .build
 
   def apply(proxy: ModelProxy[ItemModel], c: RouterCtl[Loc]) = component(Props(proxy, c))

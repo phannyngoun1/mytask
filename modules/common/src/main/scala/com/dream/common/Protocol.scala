@@ -12,7 +12,7 @@ object Protocol {
 
   trait TaskPerformCmdRequest {
     def taskId: UUID
-    def action: String
+    def action: BaseAction
     def activity: BaseActivity
     def payLoad: Payload
   }

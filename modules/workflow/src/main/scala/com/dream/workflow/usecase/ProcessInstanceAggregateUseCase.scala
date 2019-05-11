@@ -91,7 +91,7 @@ object ProcessInstanceAggregateUseCase {
       actionPerformed: UUID,
       pInstId: UUID,
       taskId: UUID,
-      action: String,
+      action: BaseAction,
       activity: BaseActivity,
       payLoad: Payload,
       processBy: UUID
@@ -163,15 +163,19 @@ class ProcessInstanceAggregateUseCase(
     val convertToGetItem = Flow[CreatePInstCmdRequest].map(r => GetItemCmdRequest(r.itemID))
     val convertToCreatePInstCmdReq = Flow[(WFlow, CreatePInstCmdRequest)].map(
       f => {
+
+        println(s"create process instance ${f}")
+
         val flow = f._1
         val req = f._2
         val startAction = StartAction()
         val startActivity = StartActivity()
         val nextFlow = flow.nextActivity(startAction, startActivity, ParticipantAccess(req.by), false) match {
           case Right(flow) => flow
+          case _ => throw new RuntimeException("Flow not found")
         }
         val pInstId = UUID.randomUUID()
-        CreateInst(
+        val reqCmd = CreateInst(
           id =pInstId,
           createdBy = req.by,
           flowId = flow.id,
@@ -188,13 +192,21 @@ class ProcessInstanceAggregateUseCase(
           ),
           DefaultPayLoad("New ticket")
         )
+
+        println(req)
+        reqCmd
       }
     )
 
     broadcast.out(0) ~> convertToGetItem ~> itemAggregateFlows.getItem.map {
-      case res: GetItemCmdSuccess => GetWorkflowCmdRequest(res.workflowId)
+      case res: GetItemCmdSuccess => {
+        println(s"Receive item fetched ${res}")
+        GetWorkflowCmdRequest(res.workflowId)
+      }
+      case _ => throw new RuntimeException(s"Failed to fetch item")
     } ~> workflowAggregateFlows.getWorkflow.map {
       case GetWorkflowCmdSuccess(workflow) => workflow
+      case _ => throw new RuntimeException(s"Failed to fetch workflow")
     } ~> createInstZip.in0
 
     broadcast.out(1) ~> createInstZip.in1
@@ -202,7 +214,7 @@ class ProcessInstanceAggregateUseCase(
     val createPrepareB = b.add(Broadcast[CreateInst](3))
     val convertToTaskCmdRequestFlow = Flow[CreateInst].map(p =>
       //TODO: consider more how to handler action performed ID.
-      PerformTaskCmdReq(p.id , p.id, p.task.id, StartAction().name, p.task.activity, p.payLoad, p.createdBy)
+      PerformTaskCmdReq(p.id , p.id, p.task.id, StartAction(), p.task.activity, p.payLoad, p.createdBy)
     )
 
     //TODO: adding real tasks
@@ -320,7 +332,7 @@ class ProcessInstanceAggregateUseCase(
         f.actionPerformedId,
         f.action.pInstId,
         f.action.taskId,
-        f.action.action,
+        f.curAction.get,
         f.task.get.activity,
         f.action.payLoad,
         f.action.participantId

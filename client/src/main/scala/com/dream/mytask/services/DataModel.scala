@@ -1,10 +1,10 @@
 package com.dream.mytask.services
 
 import com.dream.mytask.shared.data.AccountData.{AccountJson, ParticipantJson}
-import com.dream.mytask.shared.data.ItemData.ItemJson
-import com.dream.mytask.shared.data.ProcessInstanceData.ProcessInstanceJson
+import com.dream.mytask.shared.data.ItemData.{ItemInitDataJs, ItemJson}
+import com.dream.mytask.shared.data.ProcessInstanceData.{PInstInitDataJson, ProcessInstanceJson}
 import com.dream.mytask.shared.data.{ActionInfoJson, TaskItemJson}
-import com.dream.mytask.shared.data.WorkflowData.FlowJson
+import com.dream.mytask.shared.data.WorkflowData.{FlowInitDataJs, FlowJson}
 import diode.data.Pot
 
 object DataModel {
@@ -41,7 +41,9 @@ object DataModel {
   case class FlowModel(
     flowList: Pot[List[FlowJson]] = Pot.empty,
     flow: Pot[FlowJson] = Pot.empty,
-    message: Pot[String] = Pot.empty
+    message: Pot[String] = Pot.empty,
+    initData: Pot[FlowInitDataJs] = Pot.empty
+
   )
 
   case class TaskModel(
@@ -60,7 +62,8 @@ object DataModel {
   case class ItemModel(
     itemList: Pot[List[ItemJson]]  = Pot.empty,
     item: Pot[ItemJson] = Pot.empty,
-    message: Pot[String] = Pot.empty
+    message: Pot[String] = Pot.empty,
+    initData: Pot[ItemInitDataJs] = Pot.empty
   )
 
   case class TicketModel()
@@ -69,7 +72,8 @@ object DataModel {
     criteria: Option[ProcessInstanceCriteria] = None,
     list: Pot[List[ProcessInstanceJson]] = Pot.empty,
     item: Pot[ProcessInstanceJson] = Pot.empty,
-    data: Pot[ProcessInstanceResult] = Pot.empty
+    data: Pot[ProcessInstanceResult] = Pot.empty,
+    initData: Pot[PInstInitDataJson] = Pot.empty
   )
 
   case class ProcessInstanceCriteria(

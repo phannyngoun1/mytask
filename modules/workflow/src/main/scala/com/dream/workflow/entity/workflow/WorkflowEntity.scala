@@ -60,6 +60,7 @@ class WorkflowEntity extends PersistentActor with ActorLogging with EntityState[
     case SaveSnapshotFailure(metadata, reason) ⇒
       log.info(s"SaveSnapshotFailure: SaveSnapshotSuccess failed: $metadata, ${reason}")
     case event: FlowCreated =>
+      log.info(s"Replay workflow event: ${event}")
       state = applyState(event).toSomeOrThrow
     case RecoveryCompleted =>
       log.info(s"Recovery completed: $persistenceId")
@@ -73,6 +74,7 @@ class WorkflowEntity extends PersistentActor with ActorLogging with EntityState[
     }
     case cmd: GetWorkflowCmdRequest  => {
       foreachState { state =>
+       log.info(s"Do fetching workflow ${cmd}")
         sender() ! GetWorkflowCmdSuccess(state)
       }
     }

@@ -2,8 +2,9 @@ package com.dream.mytask.services
 
 import java.util.UUID
 
+import com.dream.mytask.shared.data.AccountData.ParticipantJson
 import com.dream.mytask.shared.data.WorkflowData
-import com.dream.mytask.shared.data.WorkflowData.FlowJson
+import com.dream.mytask.shared.data.WorkflowData.{FlowInitDataJs, FlowJson}
 import com.dream.workflow.domain.{Action => FAction, _}
 import com.dream.workflow.domain._
 import com.dream.workflow.usecase.WorkflowAggregateUseCase.Protocol.{CreateWorkflowCmdRequest, CreateWorkflowCmdSuccess, GetWorkflowCmdRequest, GetWorkflowCmdSuccess}
@@ -11,6 +12,20 @@ import com.dream.workflow.usecase.WorkflowAggregateUseCase.Protocol.{CreateWorkf
 import scala.concurrent.Future
 
 trait FlowService {  this: ApiService =>
+
+  override def getFlowInitData(): Future[FlowInitDataJs] = {
+    val data = for {
+      list <- getFlowList()
+      pcpList <- getParticipantList()
+    } yield (list, pcpList)
+
+    data.map { item =>
+      FlowInitDataJs(
+        item._1.map(flow => FlowJson(flow.id, flow.name)),
+        item._2.map(pcp => ParticipantJson(pcp.id, pcp.accountId, pcp.tasks) )
+      )
+    }
+  }
 
   override def getFlow(id: String): Future[WorkflowData.FlowJson] =
     workflowAggregateUseCase.getWorkflow(GetWorkflowCmdRequest(UUID.fromString(id))) map {

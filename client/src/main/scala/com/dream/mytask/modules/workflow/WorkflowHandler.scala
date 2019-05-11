@@ -6,13 +6,17 @@ import diode.util.RunAfterJS
 import boopickle.Default._
 import autowire._
 import com.dream.mytask.services.DataModel.RootModel
-import com.dream.mytask.shared.data.WorkflowData.FlowJson
+import com.dream.mytask.shared.data.WorkflowData.{FlowInitDataJs, FlowJson}
 import com.dream.mytask.services._
 import com.dream.mytask.shared.Api
 import com.dream.mytask.services.AppCircuit.zoomRW
 
 object WorkflowHandler {
 
+
+  case class InitFlowDataAction( potResult: Pot[FlowInitDataJs] = Empty) extends PotAction[FlowInitDataJs, InitFlowDataAction] {
+    override def next(newResult: Pot[FlowInitDataJs]): InitFlowDataAction = InitFlowDataAction(newResult)
+  }
 
   case class FetchFlowListAction( potResult: Pot[List[FlowJson]] = Empty) extends PotAction[List[FlowJson], FetchFlowListAction] {
     override def next(newResult: Pot[List[FlowJson]]): FetchFlowListAction = FetchFlowListAction(newResult)
@@ -30,8 +34,20 @@ object WorkflowHandler {
     new FetchFlowListActionHandler(zoomRW(_.flowModel.flowList)((m, v) => m.copy(flowModel = m.flowModel.copy(flowList= v)))),
     new FetchFlowActionHandler(zoomRW(_.flowModel.flow)((m, v) => m.copy(flowModel = m.flowModel.copy(flow= v)))),
     new NewFlowActionHandler(zoomRW(_.flowModel.message)((m, v) => m.copy(flowModel = m.flowModel.copy(message = v)))),
-
+    new InitFlowDataActionHandler(zoomRW(_.flowModel.initData)((m, v) => m.copy(flowModel = m.flowModel.copy(initData = v))))
   )
+}
+
+class InitFlowDataActionHandler[M](modelRW: ModelRW[M, Pot[FlowInitDataJs]]) extends ActionHandler(modelRW) {
+  import WorkflowHandler._
+  implicit val runner = new RunAfterJS
+  import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
+
+  override protected def handle: PartialFunction[Any, ActionResult[M]] = {
+    case action: InitFlowDataAction =>
+      val updateF = action.effect(AjaxClient[Api].getFlowInitData().call())(identity _ )
+      action.handleWith(this, updateF)(PotAction.handler())
+  }
 }
 
 class FetchFlowListActionHandler[M](modelRW: ModelRW[M, Pot[List[FlowJson]]]) extends ActionHandler(modelRW) {
@@ -42,13 +58,12 @@ class FetchFlowListActionHandler[M](modelRW: ModelRW[M, Pot[List[FlowJson]]]) ex
 
   override protected def handle: PartialFunction[Any, ActionResult[M]] = {
     case action: FetchFlowListAction =>
-
-      print("gggg")
-
       val updateF = action.effect(AjaxClient[Api].getFlowList().call())(identity _ )
       action.handleWith(this, updateF)(PotAction.handler())
   }
 }
+
+
 
 class FetchFlowActionHandler[M](modelRW: ModelRW[M, Pot[FlowJson]]) extends ActionHandler(modelRW) {
 

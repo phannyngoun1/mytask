@@ -3,10 +3,10 @@ package com.dream.mytask.shared
 import java.util.UUID
 
 import com.dream.mytask.shared.data.AccountData.{AccountJson, ParticipantJson}
-import com.dream.mytask.shared.data.ItemData.ItemJson
-import com.dream.mytask.shared.data.ProcessInstanceData.ProcessInstanceJson
+import com.dream.mytask.shared.data.ItemData.{ItemInitDataJs, ItemJson}
+import com.dream.mytask.shared.data.ProcessInstanceData.{PInstInitDataJson, ProcessInstanceJson}
 import com.dream.mytask.shared.data.TaskItemJson
-import com.dream.mytask.shared.data.WorkflowData.{EditTicketPayloadJs, FlowJson, PayloadJs}
+import com.dream.mytask.shared.data.WorkflowData.{EditTicketPayloadJs, FlowInitDataJs, FlowJson, PayloadJs}
 
 import scala.concurrent.Future
 
@@ -15,6 +15,8 @@ trait Api {
   def welcomeMessage(smg: String):  Future[String]
 
   def getUser(id: String): Future[String]
+
+  def getItemInitData(): Future[ItemInitDataJs]
 
   def newItem(name: String, flowId: String, desc: String): Future[String]
 
@@ -28,6 +30,8 @@ trait Api {
 
   def createProcessInstance(itemId: String, submitter: String): Future[String]
 
+  def getPInstInitDat(): Future[PInstInitDataJson]
+
   def getPInstanceList(): Future[List[ProcessInstanceJson]]
 
   def getProcessInstance(id: String): Future[String]
@@ -35,6 +39,8 @@ trait Api {
   def getFlow(id: String): Future[FlowJson]
 
   def newFlow(name: String,  participants: List[String]): Future[String]
+
+  def getFlowInitData(): Future[FlowInitDataJs]
 
   def getFlowList(): Future[List[FlowJson]]
 

@@ -2,12 +2,28 @@ package com.dream.mytask.services
 
 import java.util.UUID
 
+import com.dream.mytask.shared.data.ItemData
 import com.dream.mytask.shared.data.ItemData._
+import com.dream.mytask.shared.data.WorkflowData.FlowJson
 import com.dream.workflow.usecase.ItemAggregateUseCase.Protocol._
 
 import scala.concurrent.Future
 
 trait ItemService { this: ApiService =>
+
+  override def getItemInitData(): Future[ItemInitDataJs] = {
+    val data = for {
+      list <- getItemList()
+      flowList <- getFlowList()
+    } yield (list, flowList)
+
+    data.map { item =>
+      ItemInitDataJs(
+        item._1.map(it => ItemJson(it.id, it.name)),
+        item._2.map(flow => FlowJson(flow.id, flow.name))
+      )
+    }
+  }
 
   override def getItem(id: String): Future[ItemJson] = {
 

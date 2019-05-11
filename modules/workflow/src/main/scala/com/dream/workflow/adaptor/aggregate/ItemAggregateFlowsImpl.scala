@@ -35,8 +35,18 @@ class ItemAggregateFlowsImpl(aggregateRef: ActorRef) extends ItemAggregateFlows 
       .map(req => GetItemCmdRequest(req.id))
       .mapAsync(1)(aggregateRef ? _)
       .map {
-        case res: GetItemCmdSuccess => Protocol.GetItemCmdSuccess(res.id, res.name, res.desc, res.workflowId)
-        case CmdResponseFailed(message) => Protocol.GetItemCmdFailed(ResponseError(message))
+        case res: GetItemCmdSuccess => {
+          println(s"item fetched ${res}")
+          Protocol.GetItemCmdSuccess(res.id, res.name, res.desc, res.workflowId)
+        }
+        case CmdResponseFailed(message) => {
+          println(s"item fetched failed ${message}")
+          Protocol.GetItemCmdFailed(ResponseError(message))
+        }
+        case _ => {
+          println("unhandled fetch item")
+          throw  new RuntimeException("unhandled fetch item")
+        }
       }
 
   override def getWorkflowId: Flow[Protocol.GetWorkflowIdCmdRequest, Protocol.GetWorkflowIdCmdResponse, NotUsed] =

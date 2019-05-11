@@ -32,8 +32,18 @@ class WorkflowAggregateFlowsImpl(aggregateRef: ActorRef) extends WorkflowAggrega
       .map(req => GetWorkflowCmdRequest(req.id))
       .mapAsync(1)(aggregateRef ? _)
       .map {
-        case res: GetWorkflowCmdSuccess => Protocol.GetWorkflowCmdSuccess(res.workflow)
-        case CmdResponseFailed(message) => Protocol.GetWorkflowCmdFailed(ResponseError(message))
+        case res: GetWorkflowCmdSuccess => {
+          println(s"Workflow fetched ${res.workflow}")
+          Protocol.GetWorkflowCmdSuccess(res.workflow)
+        }
+        case CmdResponseFailed(message) => {
+          println("Failed to fetch workflow")
+          Protocol.GetWorkflowCmdFailed(ResponseError(message))
+        }
+        case _ => {
+          println("unhandled fetch item")
+          throw  new RuntimeException("unhandled fetch workflow")
+        }
       }
 
 }
