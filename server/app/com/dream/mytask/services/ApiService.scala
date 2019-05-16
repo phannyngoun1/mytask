@@ -77,6 +77,7 @@ class ApiService(login: UUID)(implicit val ec: ExecutionContext, implicit val  s
   ex.execute
 
   sys.addShutdownHook {
+    dbConfig.db.close()
     system.terminate()
   }
 
@@ -101,7 +102,7 @@ class ApiService(login: UUID)(implicit val ec: ExecutionContext, implicit val  s
     })
   }
 
-  override def takeAction(pInstId: String, taskId: String, accId: String, participantId: String, actionName: String, payload: EditTicketPayloadJs): Future[String] = {
+  override def takeAction(pInstId: String, taskId: String, accId: String, participantId: String, actionName: String, payload: PayloadJs): Future[String] = {
 
     val pInstIdUUID = UUID.fromString(pInstId)
     val taskIdUUID = UUID.fromString(taskId)

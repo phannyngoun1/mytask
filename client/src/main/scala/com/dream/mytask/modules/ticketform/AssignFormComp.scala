@@ -18,7 +18,24 @@ object AssignFormComp {
   class Backend($: BackendScope[Props, State]) {
     def render(p: Props, s: State) = {
       <.div(
-        "Assign form"
+        "Assign form",
+        <.div(
+          <.div(
+            <.label("User:"),
+            <.br(),
+            <.select(
+            )
+          ),
+          <.div(
+            <.label("Comment:"),
+            <.br(),
+            <.textarea(^.cols := 60, ^.rows := 3)
+          ),
+          <.div(
+            <.button("Submit"),
+            <.button("Cancel")
+          )
+        )
       )
     }
   }

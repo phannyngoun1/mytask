@@ -68,11 +68,11 @@ object TaskListComp {
                 px().renderFailed(ex => <.p("Failed to load")),
                 px().render(m => <.ol( ^.`type` := "1",
                   m toTagMod { item =>
-                    <.li( s"P inst: ${item.pInstId}, task Id: ${item.id}, participantId: ${item.participantId}, activity: ${item.activityName}",
+                    <.li( s"task Id: ${item.id}, P inst: ${item.pInstId},  participantId: ${item.participantId}, activity: ${item.activityName}",
                       <.div(" Actions: ",
+                        renderItem(item, ActionItemJson("View"), s.accountId.get),
                         item.actions toTagMod(action => renderItem(item, action, s.accountId.get))
                       )
-
                     )
                   }
                 ))

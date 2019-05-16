@@ -279,7 +279,7 @@ class ProcessInstanceAggregateUseCase(
     val mapZipFlowToActionParam = Flow[(ActionParams, WFlow)].map(f => f._1.copy(flow = Some(f._2)))
 
     val mapToGetTaskReq = Flow[TakeActionCmdRequest].map(item => {
-      println(" mapToGetTaskReq ")
+      println(s" mapToGetTaskReq  ---- ${item}")
       GetTaskCmdReq(item.participantId, AssignedTask(item.taskId, item.pInstId))
     })
 
@@ -295,10 +295,16 @@ class ProcessInstanceAggregateUseCase(
     }
 
     val taskResult = Flow[(ActionParams, TaskDto)].map{ f =>
-      val action = f._1.flow.get.findCurrentActivity(f._1.task.get.activity) match {
+
+      println(s"Result ---------------------${f}----------- ")
+
+      val action = f._1.flow.get.findCurrentActivity(f._2.activity) match {
         case Right(flow) => flow.actionFlows.find(_.action.name == f._1.action.action).map(_.action).getOrElse(NaAction())
         case _ => NaAction()
       }
+
+      println(s"findCurrentActivity -------- ${action}------------------------ ")
+
       f._1.copy(
         task = Some(f._2),
         curAction = Some(action)
@@ -313,7 +319,7 @@ class ProcessInstanceAggregateUseCase(
 
     bCast.out(2) ~> mapToGetTaskReq ~> fetchTask ~> zipTask.in1
 
-    val out = zipTask.out ~> taskResult
+    val out = zipTask.out ~>  taskResult
 
     FlowShape(bCast.in, out.outlet)
 
@@ -327,7 +333,10 @@ class ProcessInstanceAggregateUseCase(
 
     val performTaskZip = b.add(ZipWith[ActionCompleted, ActionCompleted, ActionCompleted, ActionCompleted]((a, _, _) => a))
 
-    val mapToPerformTaskCmdReq = Flow[ActionParams].map(f =>
+    val mapToPerformTaskCmdReq = Flow[ActionParams].map { f =>
+
+      println(" mapToPerformTaskCmdReq  ----------------- ")
+
       PerformTaskCmdReq(
         f.actionPerformedId,
         f.action.pInstId,
@@ -337,11 +346,12 @@ class ProcessInstanceAggregateUseCase(
         f.action.payLoad,
         f.action.participantId
       )
-    )
+    }
 
-    val mapToCommitActionCmdReq = Flow[ActionParams].map(f =>
-      CommitActionCmdReq(f.action.pInstId, f.actionPerformedId , f.action.taskId, f.action.participantId, f.curAction.get, f.actionDate, f.action.comment)
-    )
+    val mapToCommitActionCmdReq = Flow[ActionParams].map { f =>
+      println(" mapToCommitActionCmdReq  ----------------- ")
+      CommitActionCmdReq(f.action.pInstId, f.actionPerformedId, f.action.taskId, f.action.participantId, f.curAction.get, f.actionDate, f.action.comment)
+    }
 
     val fi = Flow[(PerformTaskCmdRes, CommitActionCmdRes)].map {
       case (a: PerformTaskSuccess, b: CommitActionCmdSuccess) =>
@@ -349,6 +359,9 @@ class ProcessInstanceAggregateUseCase(
     }
 
     val mapToCreateNewTaskCmdRequest = Flow[ActionParams].map { item =>
+
+      println(" mapToCreateNewTaskCmdRequest  ----------------- ")
+
       val param = item
       val newActivity = param.nexActivity.get
       CreateNewTaskCmdRequest(

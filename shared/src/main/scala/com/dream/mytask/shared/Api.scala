@@ -26,7 +26,7 @@ trait Api {
 
   def getTasks(accId: String): Future[List[TaskItemJson]]
 
-  def takeAction(pInstId: String, taskId: String, accId: String, participantId: String, action: String, payload: EditTicketPayloadJs) : Future[String]
+  def takeAction(pInstId: String, taskId: String, accId: String, participantId: String, action: String, payload: PayloadJs) : Future[String]
 
   def createProcessInstance(itemId: String, submitter: String): Future[String]
 

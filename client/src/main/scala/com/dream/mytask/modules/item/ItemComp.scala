@@ -18,7 +18,7 @@ object ItemComp {
 
   case class Props(proxy: ModelProxy[ItemModel], c: RouterCtl[Loc])
 
-  case class State(id: Option[String] = None, flowId: Option[String] = None, itemName: Option[String] = None, desc: Option[String] = None )
+  case class State(id: Option[String] = None)
 
   class Backend($: BackendScope[Props, State]) {
 
@@ -47,39 +47,7 @@ object ItemComp {
                   <.ol( ^.`type` := "1",
                     m.list toTagMod
                   ),
-                  <.div(
-                    <.div(
-                      <.div(
-                        <.label("name:"),
-                        <.input(^.`type` := "text", ^.value := s.itemName.getOrElse(""), ^.onChange ==> { e: ReactEventFromInput =>
-                          val value = if (e.target.value.trim.isEmpty) None else Some(e.target.value)
-                          $.modState(_.copy(itemName = value))
-                        })),
-                      <.div(
-                        <.label("Flow ID:"),
-                        <.select(
-                          ^.value := s.flowId.getOrElse(""),
-                          ^.onChange ==> { e: ReactEventFromInput =>
-                            val value = if (e.target.value.trim.isEmpty) None else Some(e.target.value)
-                            $.modState(_.copy(flowId = value))
-                          },
-                          <.option(^.default := true),
-                          m.flowList.toTagMod { item =>
-                            <.option(^.value := item.id, item.name)
-                          }
-                        )),
-                      <.div(
-                        <.label("description:"),
-                        <.input(^.`type` := "text", ^.value := s.desc.getOrElse(""), ^.onChange ==> { e: ReactEventFromInput =>
-                          val value = if (e.target.value.trim.isEmpty) None else Some(e.target.value)
-                          $.modState(_.copy(desc = value))
-                        }))
-                    ),
-
-                    <.button("Create Item", ^.onClick --> Callback.when(s.itemName.isDefined && s.desc.isDefined)(
-                      p.proxy.dispatchCB(NewItemAction(s.itemName, s.flowId, s.desc)) >>  p.proxy.dispatchCB(FetchItemListAction())
-                    ))
-                  )
+                  ItemFormComp(p.proxy, p.c, m)
                 )
               )
             )
@@ -92,7 +60,7 @@ object ItemComp {
             $.modState(_.copy(id = id))
           })
         ),
-          <.button("Fetch Item", ^.onClick --> p.proxy.dispatchCB(FetchItemAction(s.id))),
+        <.button("Fetch Item", ^.onClick --> p.proxy.dispatchCB(FetchItemAction(s.id))),
         <.div(
           <.h3("Result"),
           <.div(

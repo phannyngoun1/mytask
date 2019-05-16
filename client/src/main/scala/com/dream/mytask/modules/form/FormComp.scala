@@ -33,7 +33,7 @@ object FormComp {
 
           data.activity match {
             case "Ticketing" =>
-              TicketMainFormComp(data.action)
+              TicketMainFormComp(p.proxy, p.c, data)
             case _ => <.div("No form available.")
           }
         )

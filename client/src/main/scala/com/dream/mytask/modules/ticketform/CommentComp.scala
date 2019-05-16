@@ -7,7 +7,8 @@ import japgolly.scalajs.react.extra.router.RouterCtl
 import japgolly.scalajs.react.vdom.html_<^._
 import japgolly.scalajs.react._
 
-object TicketFormComp {
+object CommentComp {
+
   case class Props()
 
   case class State()
@@ -15,7 +16,6 @@ object TicketFormComp {
   class Backend($: BackendScope[Props, State]) {
     def render(p: Props, s: State) = {
       <.div(
-        "Ticker data form",
         <.div(
           <.label("Comment:"),
           <.br(),
@@ -29,7 +29,7 @@ object TicketFormComp {
     }
   }
 
-  private val component = ScalaComponent.builder[Props]("TicketFormComp")
+  private val component = ScalaComponent.builder[Props]("CommentComp")
     .initialStateFromProps(p => State())
     .renderBackend[Backend]
     .build

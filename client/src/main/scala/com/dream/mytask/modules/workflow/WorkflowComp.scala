@@ -51,43 +51,8 @@ object WorkflowComp {
                     <.ol(^.`type` := "1",
                       m.list toTagMod
                     ),
-
                     <.div(
-                      <.h3("Creation"),
-                      <.div(
-                        <.label("Name")
-                      ),
-                      <.div(<.input(^.`type` := "text", ^.value := s.name.getOrElse(""), ^.onChange ==> { e: ReactEventFromInput =>
-                        val value = if (e.target.value.trim.isEmpty) None else Some(e.target.value)
-                        $.modState(_.copy(name = value))
-                      })),
-                      <.div(
-                        <.label("Participants"),
-                        <.ol(^.`type` := "1",
-                          s.participants toTagMod(item =>
-                            <.li(item)
-                            )
-                        ),
-                        <.div(
-                          <.select(
-                            ^.value := s.participantId.getOrElse(""),
-                            <.option(^.default := true),
-                            ^.onChange ==> { e: ReactEventFromInput =>
-                              val value = if (e.target.value.trim.isEmpty) None else Some(e.target.value)
-                              $.modState(_.copy(participantId = value))
-                            },
-                            m.pcpList.toTagMod{ item =>
-                              <.option(^.value := item.id, item.id)
-                            }
-                          ),
-                          <.input(^.`type` := "text", ^.value := s.participantId.getOrElse("")),
-                          <.button("Add", ^.onClick --> $.modState(m => m.copy(participants = s.participantId.get :: m.participants, participantId = None)))
-                        )
-                      ),
-
-                      <.div(
-                        <.button("New", ^.onClick --> Callback.when(s.name.isDefined && !s.participants.isEmpty)(p.proxy.dispatchCB(NewFlowAction(s.name, Some(s.participants)))))
-                      ),
+                      WorkflowFormComp(p.proxy, p.c, m) ,
                       <.div(
                         <.h3("New Flow"),
                         <.div(
@@ -99,10 +64,8 @@ object WorkflowComp {
                             )
                           })
                         )
-
                       )
                     ),
-
                   )
                 )
               )
@@ -132,11 +95,8 @@ object WorkflowComp {
               )
             })
           )
-
         )
-
       )
-
     }
   }
 

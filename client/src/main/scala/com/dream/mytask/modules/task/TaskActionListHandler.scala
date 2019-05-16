@@ -10,7 +10,7 @@ import TaskActionListHandler.TaskListActions.{FetchTaskListAction, _}
 import com.dream.mytask.services.AjaxClient
 import com.dream.mytask.services.DataModel.RootModel
 import com.dream.mytask.shared.Api
-import com.dream.mytask.shared.data.WorkflowData.EditTicketPayloadJs
+import com.dream.mytask.shared.data.WorkflowData.{EditTicketPayloadJs, PayloadJs}
 
 import scala.util.{Failure, Try}
 
@@ -38,8 +38,16 @@ object TaskActionListHandler {
 
   object TaskListActions {
 
-    case class TakeAction(pInstId: Option[String], taskId: Option[String], accId: Option[String], participantId: Option[String], action: Option[String], potResult: Pot[String] = Empty )  extends PotAction[String, TakeAction] {
-      override def next(newResult: Pot[String]): TakeAction = TakeAction(None, None, None, None, None, newResult)
+    case class TakeAction(
+      pInstId: Option[String],
+      taskId: Option[String],
+      accId: Option[String],
+      participantId: Option[String],
+      action: Option[String],
+      payLoad: Option[PayloadJs],
+      potResult: Pot[String] = Empty )
+      extends PotAction[String, TakeAction] {
+      override def next(newResult: Pot[String]): TakeAction = TakeAction(None, None, None, None, None, None, newResult)
     }
 
     case class FetchTaskListAction(accId: Option[String], potResult: Pot[List[TaskItemJson]] = Empty) extends PotAction[List[TaskItemJson], FetchTaskListAction] {
@@ -60,7 +68,7 @@ class TakeActionHandler[M](modelRW: ModelRW[M, Pot[String]]) extends ActionHandl
 
   override protected def handle: PartialFunction[Any, ActionResult[M]] = {
     case action: TakeAction =>
-      val updateF = action.effect(AjaxClient[Api].takeAction(action.pInstId.get, action.taskId.get, action.accId.get, action.participantId.get, action.action.get, EditTicketPayloadJs("test")).call())(identity _)
+      val updateF = action.effect(AjaxClient[Api].takeAction(action.pInstId.get, action.taskId.get, action.accId.get, action.participantId.get, action.action.get, action.payLoad.get).call())(identity _)
       action.handleWith(this, updateF)(PotAction.handler())
   }
 }
