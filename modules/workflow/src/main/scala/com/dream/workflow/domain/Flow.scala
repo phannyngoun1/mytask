@@ -184,8 +184,9 @@ case class Flow(
     currActivityFlow match {
       case act: ActivityFlow =>
         act.actionFlows.find(_.action == action) match {
+
           case Some(ActionFlow(_, None)) => Right(currActivityFlow)
-        case Some(af: ActionFlow) => workflowList.find(_.activity == af.activity.getOrElse(None)) match {
+          case Some(af: ActionFlow) => workflowList.find(_.activity == af.activity.getOrElse(None)) match {
           case Some(value) => Right(value)
           case _  => Left(ActivityNotFoundError(s"1.Next activity cannot found by action: ${action.name}; current activity ${currActivityFlow.activity.name}"))
         }

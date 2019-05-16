@@ -416,9 +416,6 @@ class ProcessInstanceAggregateUseCase(
     bCast.out(2) ~> Flow[Int].flatMapConcat(f => Source(List(f, 2, 3, 4, 5))).map { t =>
       println(s"process ${t}")
       t
-    }.fold(0)(_ + _).map { f =>
-      println(s"after fold ${f}")
-      f
     } ~> Sink.ignore
 
     FlowShape(bCast.in, zipFlow.out.map(f => f._2 + f._1).outlet)
