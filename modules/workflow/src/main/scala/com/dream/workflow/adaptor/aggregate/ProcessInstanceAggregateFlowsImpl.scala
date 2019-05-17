@@ -43,7 +43,7 @@ class ProcessInstanceAggregateFlowsImpl(aggregateRef: ActorRef) extends ProcessI
       .map(req => GetPInstCmdRequest(req.id))
       .mapAsync(1)(aggregateRef ? _)
       .map {
-        case GetPInstCmdSuccess(pInst) => Protocol.GetPInstCmdSuccess(pInst.id, pInst.flowId, pInst.folio,pInst.tasks )
+        case GetPInstCmdSuccess(pInst) => Protocol.GetPInstCmdSuccess(pInst.id, pInst.flowId, pInst.folio,pInst.tasks, pInst.isActive )
         case CmdResponseFailed(message) => Protocol.GetPInstCmdFailed(ResponseError(message))
       }
 

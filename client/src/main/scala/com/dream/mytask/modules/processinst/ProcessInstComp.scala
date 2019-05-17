@@ -1,6 +1,8 @@
 package com.dream.mytask.modules.processinst
 
-import com.dream.mytask.AppClient.{DashboardLoc, Loc}
+import java.util.UUID
+
+import com.dream.mytask.AppClient.{DashboardLoc, Loc, ViewPInstLoc}
 import com.dream.mytask.modules.processinst.ProcessInstActionHandler._
 import com.dream.mytask.services.DataModel.ProcessInstanceModel
 import diode.react.ReactPot._
@@ -54,7 +56,7 @@ object ProcessInstComp {
                     <.div(
                       <.ol(^.`type` := "1",
                         m.list toTagMod { item =>
-                          <.li(s"id: ${item.id}, Folio: ${item.folio}")
+                          <.li(<.a(p.c.setOnClick(ViewPInstLoc(UUID.fromString(item.id))), ^.href := "#", s"${item.id}"), s" : Folio: ${item.folio}")
                         }
                       ),
                       <.div(
@@ -78,7 +80,6 @@ object ProcessInstComp {
                               )
                             }
                           )
-//                          <.input(^.`type` := "text", ^.value := s.itemId.getOrElse(""), )
                         ),
 
                         <.div(
@@ -98,13 +99,6 @@ object ProcessInstComp {
                               )
                             },
                           )
-//                          <.input(^.`type` := "text", ^.value := s.participantId.getOrElse(""), ^.onChange ==> { e: ReactEventFromInput =>
-//                            val value = if (e.target.value.trim.isEmpty) None else Some(e.target.value)
-//                            $.modState(_.copy(participantId = value))
-//                          })
-                        ),
-                        <.div(
-                          <.button(^.onClick -->  (Callback(println(s"state: ${s.itemId}, ${s.participantId}")) >> Callback.when(s.itemId.isDefined && s.participantId.isDefined)(p.proxy.dispatchCB(CreateProcessInstAction(s.itemId, s.participantId)))), "Create")
                         )
                       )
 
@@ -113,24 +107,12 @@ object ProcessInstComp {
                 )
               )
             })
+          ),
+          <.div(
+            <.button(^.onClick -->  (Callback(println(s"state: ${s.itemId}, ${s.participantId}")) >>
+              Callback.when(s.itemId.isDefined && s.participantId.isDefined)(p.proxy.dispatchCB(CreateProcessInstAction(s.itemId, s.participantId)) >> p.proxy.dispatchCB(InitPInstAction()))), "Create")
           )
 
-        ),
-        <.div(
-          <.h4("Fetch process instance"),
-          <.div(
-            <.label("P instance Id: "),
-            <.input(^.`type` := "text", ^.value := s.pInstId.getOrElse(""), ^.onChange ==> setValue)
-          ),
-          <.button(^.onClick --> p.proxy.dispatchCB(FetchPInstAction(s.pInstId)), "Fetch"),
-
-          wrapper(proxy => {
-            <.div(
-              proxy().data.renderPending(_ > 500, _ => <.p("Loading...")),
-              proxy().data.renderFailed(ex => <.p("Failed to load")),
-              proxy().data.render(m => <.p(m.value))
-            )
-          })
         )
       )
     }

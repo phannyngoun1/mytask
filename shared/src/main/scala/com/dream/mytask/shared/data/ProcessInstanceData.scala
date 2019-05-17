@@ -1,5 +1,7 @@
 package com.dream.mytask.shared.data
 
+import java.util.UUID
+
 import com.dream.mytask.shared.data.AccountData.ParticipantJson
 import com.dream.mytask.shared.data.ItemData.ItemJson
 
@@ -16,6 +18,17 @@ object ProcessInstanceData {
     id: String,
     folio: String
   )
+
+  case class PInstInitDataInfoJs(
+    pInstId: UUID,
+    flowId: UUID,
+    folio: String,
+    contentType: String,
+    description: String,
+    active: Boolean,
+    tasks: List[TaskInfoJs]
+  )
+
 }
 
 case class CreateProcessIns(

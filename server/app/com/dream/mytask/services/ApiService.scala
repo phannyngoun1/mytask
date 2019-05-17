@@ -37,12 +37,13 @@ class ApiService(login: UUID)(implicit val ec: ExecutionContext, implicit val  s
 
   val rootConfig = ConfigFactory.load()
   val dbConfig = DatabaseConfig.forConfig[JdbcProfile](path = "slickR", rootConfig)
-  val readSideFlow = new ItemReadModelFlowImpl(dbConfig.profile, dbConfig.db)
-  val flowReadModelFlow = new FlowReadModelFlowImpl(dbConfig.profile, dbConfig.db)
-  val accountReadModelFlow = new AccountReadModelFlowImpl(dbConfig.profile, dbConfig.db)
-  val participantReadModelFlows = new ParticipantReadModelFlowImpl(dbConfig.profile, dbConfig.db)
-  val pInstanceReadModelFlows = new PInstanceReadModelFlowImpl(dbConfig.profile, dbConfig.db)
-  val flagReadModelFlows = new FlagReadModelFlowImpl(dbConfig.profile, dbConfig.db)
+  val db = dbConfig.db
+  val readSideFlow = new ItemReadModelFlowImpl(dbConfig.profile, db)
+  val flowReadModelFlow = new FlowReadModelFlowImpl(dbConfig.profile, db)
+  val accountReadModelFlow = new AccountReadModelFlowImpl(dbConfig.profile, db)
+  val participantReadModelFlows = new ParticipantReadModelFlowImpl(dbConfig.profile, db)
+  val pInstanceReadModelFlows = new PInstanceReadModelFlowImpl(dbConfig.profile, db)
+  val flagReadModelFlows = new FlagReadModelFlowImpl(dbConfig.profile, db)
 
 
   val localEntityAggregates = system.actorOf(LocalEntityAggregates.props, LocalEntityAggregates.name)
@@ -68,16 +69,11 @@ class ApiService(login: UUID)(implicit val ec: ExecutionContext, implicit val  s
     new JournalReaderImpl(system)
   )
 
-//  ex.executeItem
-//  ex.executeFlow
-//  ex.executeAcc
-//  ex.executeParticipant
-//  ex.executePInst
-
   ex.execute
 
   sys.addShutdownHook {
-    dbConfig.db.close()
+    db.close()
+    db.shutdown
     system.terminate()
   }
 
@@ -108,9 +104,8 @@ class ApiService(login: UUID)(implicit val ec: ExecutionContext, implicit val  s
     val taskIdUUID = UUID.fromString(taskId)
     val participantUUI = UUID.fromString(participantId)
 
-    processInstance.takeAction(TakeActionCmdRequest(pInstIdUUID, taskIdUUID, actionName, participantUUI, NonePayload(), None )).map {
+    processInstance.takeAction(TakeActionCmdRequest(pInstIdUUID, taskIdUUID, actionName, participantUUI, NonePayload(), payload.comment )).map {
       case _ => "Completed"
     }
   }
-
 }

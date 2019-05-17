@@ -18,13 +18,11 @@ object Dashboard {
   class Backend($: BackendScope[Props, State]) {
     def render(p: Props, s: State) = {
       <.div("Menu",
-
         <.ul(
-          <.li(<.a("Account", ^.src := "#", ^.onClick --> p.c.set(AccLoc))),
-          <.li(<.a("item", ^.src := "#", ^.onClick --> p.c.set(ItemLoc))),
-          <.li(<.a("flow", ^.src := "#",^.onClick --> p.c.set(FlowLoc))),
-          <.li(<.a("instance", ^.src := "#",^.onClick --> p.c.set(ProcessInstLoc))),
-          <.li(<.a("tasks", ^.src := "#",^.onClick --> p.c.set(TaskListLoc)))
+          <.li(<.a("Account", ^.href := "#", p.c.setOnClick(AccLoc))),
+          <.li(<.a("item", ^.href  := "#", p.c.setOnClick(AccLoc))),
+          <.li(<.a("flow", ^.href  := "#", p.c.setOnClick(AccLoc))),
+          <.li(<.a("instance", ^.href := "#",  p.c.setOnClick(ProcessInstLoc)))
         )
       )
     }
@@ -34,7 +32,6 @@ object Dashboard {
     .initialStateFromProps(p => State(p.proxy.connect(m => m)))
     .renderBackend[Backend]
     .componentDidMount(scope =>
-      // update only if Motd is empty
       scope.props.proxy.dispatchCB(MessageAction())
     )
     .build

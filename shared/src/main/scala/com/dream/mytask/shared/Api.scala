@@ -4,8 +4,8 @@ import java.util.UUID
 
 import com.dream.mytask.shared.data.AccountData.{AccountJson, ParticipantJson}
 import com.dream.mytask.shared.data.ItemData.{ItemInitDataJs, ItemJson}
-import com.dream.mytask.shared.data.ProcessInstanceData.{PInstInitDataJson, ProcessInstanceJson}
-import com.dream.mytask.shared.data.TaskItemJson
+import com.dream.mytask.shared.data.ProcessInstanceData.{PInstInitDataInfoJs, PInstInitDataJson, ProcessInstanceJson}
+import com.dream.mytask.shared.data.{TaskItemJson}
 import com.dream.mytask.shared.data.WorkflowData.{EditTicketPayloadJs, FlowInitDataJs, FlowJson, PayloadJs}
 
 import scala.concurrent.Future
@@ -34,6 +34,8 @@ trait Api {
 
   def getPInstanceList(): Future[List[ProcessInstanceJson]]
 
+  def getPInstDetail(pInstId: UUID, taskId: UUID, accId: UUID, participantId: UUID): Future[PInstInitDataInfoJs]
+
   def getProcessInstance(id: String): Future[String]
 
   def getFlow(id: String): Future[FlowJson]
@@ -55,6 +57,9 @@ trait Api {
   def newParticipant(accId: String): Future[String]
 
   def getParticipantList(): Future[List[ParticipantJson]]
+
+
+
 
 
 }

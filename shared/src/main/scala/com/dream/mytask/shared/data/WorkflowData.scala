@@ -9,11 +9,13 @@ object WorkflowData {
 
   case class FlowJson(id: String, name: String)
 
-  sealed trait PayloadJs
+  sealed trait PayloadJs {
+    def comment: Option[String]
+  }
 
-  case class EditTicketPayloadJs(test: String) extends PayloadJs
+  case class EditTicketPayloadJs(test: String, override val comment: Option[String]) extends PayloadJs
 
-  case class AssignTicketPayloadJs(participantId: UUID, status: String,  comment: Option[String]) extends PayloadJs
+  case class AssignTicketPayloadJs(participantId: UUID, status: String,  override val comment: Option[String]) extends PayloadJs
 
   case class FlowInitDataJs(
     list: List[FlowJson],

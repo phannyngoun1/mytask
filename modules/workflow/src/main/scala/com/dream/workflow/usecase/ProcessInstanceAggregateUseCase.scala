@@ -47,7 +47,7 @@ object ProcessInstanceAggregateUseCase {
 
     sealed trait GetPInstCmdResponse extends ProcessInstanceCmdResponse
 
-    case class GetPInstCmdSuccess(id: UUID, flowId: UUID, folio: String, tasks: List[Task]) extends GetPInstCmdResponse
+    case class GetPInstCmdSuccess(id: UUID, flowId: UUID, folio: String, tasks: List[Task], active: Boolean) extends GetPInstCmdResponse
 
     case class GetPInstCmdFailed(error: ResponseError) extends GetPInstCmdResponse
 
@@ -331,7 +331,7 @@ class ProcessInstanceAggregateUseCase(
     import GraphDSL.Implicits._
     val bCast = b.add(Broadcast[ActionParams](3))
 
-    val performTaskZip = b.add(ZipWith[ActionCompleted, ActionCompleted, ActionCompleted, ActionCompleted]((a, _, _) => a))
+    val performTaskZip = b.add(ZipWith[ActionCompleted, ActionCompleted, ActionCompleted]((a, _) => a))
 
     val mapToPerformTaskCmdReq = Flow[ActionParams].map { f =>
 
@@ -357,6 +357,19 @@ class ProcessInstanceAggregateUseCase(
       case (a: PerformTaskSuccess, b: CommitActionCmdSuccess) =>
         ActionCompleted()
     }
+
+    val validActivityFilter  = Flow[ActionParams].filter(item => item.nexActivity match {
+      case Some(_: DoneActivityFlow) =>
+        println("--------Filter with DoneActivityFlow--------")
+        false
+      case  Some(_: NaActivityFlow) =>
+        println("--------Filter with NaActivityFlow--------")
+        false
+      case Some(_) =>
+        true
+      case None =>
+        false
+    })
 
     val mapToCreateNewTaskCmdRequest = Flow[ActionParams].map { item =>
 
@@ -392,9 +405,9 @@ class ProcessInstanceAggregateUseCase(
     } ~> performTaskZip.in1
 
 
-    bCast.out(2) ~> nexFlow ~> mapToCreateNewTaskCmdRequest ~> createNewTask ~> participantAggregateFlows.assignTask.map {
-      case a: AssignTaskCmdSuccess => ActionCompleted()
-    } ~> performTaskZip.in2
+    bCast.out(2) ~> nexFlow ~>  validActivityFilter ~>  mapToCreateNewTaskCmdRequest ~> createNewTask ~> participantAggregateFlows.assignTask.map {
+      case _ : AssignTaskCmdSuccess => ActionCompleted()
+    } ~> Sink.ignore
 
 
     FlowShape(bCast.in, performTaskZip.out)

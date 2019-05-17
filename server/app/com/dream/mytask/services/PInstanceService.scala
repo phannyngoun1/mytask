@@ -2,8 +2,7 @@ package com.dream.mytask.services
 
 import java.util.UUID
 
-import com.dream.mytask.shared.data.ProcessInstanceData
-import com.dream.mytask.shared.data.ProcessInstanceData.{PInstInitDataJson, ProcessInstanceJson}
+import com.dream.mytask.shared.data.ProcessInstanceData._
 import com.dream.workflow.usecase.ProcessInstanceAggregateUseCase.Protocol.{CreatePInstCmdRequest, CreatePInstCmdSuccess, GetPInstCmdRequest, GetPInstCmdSuccess}
 
 import scala.concurrent.Future
@@ -37,13 +36,29 @@ trait PInstanceService { this: ApiService =>
   override def getPInstInitDat(): Future[PInstInitDataJson] = {
 
     val data = for {
-      pcpList <- getParticipantList()
-      itemList <- getItemList()
       pInstList <- getPInstanceList()
+      itemList <- getItemList()
+      pcpList <- getParticipantList()
     } yield (pcpList, itemList, pInstList)
 
     data.map {f  =>
       PInstInitDataJson(f._3, f._2 , f._1)
+    }
+  }
+
+  override def getPInstDetail(pInstId: UUID, taskId: UUID, accId: UUID, participantId: UUID): Future[PInstInitDataInfoJs] = {
+    processInstance.getPInst(GetPInstCmdRequest(pInstId))  map {
+      case res: GetPInstCmdSuccess =>
+        PInstInitDataInfoJs(
+          pInstId = res.id ,
+          flowId = res.flowId,
+          folio = res.folio,
+          contentType = "",
+          description = "",
+          active = res.active,
+          tasks = List.empty
+        )
+      case _ => throw new RuntimeException("failed")
     }
   }
 
