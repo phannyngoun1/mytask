@@ -62,7 +62,10 @@ class ProcessInstanceAggregateFlowsImpl(aggregateRef: ActorRef) extends ProcessI
       .map {
         case GetTaskCmdRes(pInstId, participantId, task) =>
           println(s"retrieve task ${pInstId}, ${participantId}")
-          Protocol.GetTaskCmdSuccess(TaskDto(task.id, pInstId, participantId, task.activity, task.actions, task.active))
+          Protocol.GetTaskCmdSuccess(TaskDto(task.id, pInstId, participantId, task.activity,
+            task.actions, task.active,
+            task.destinations.exists(task => task.participantId.equals(participantId) && task.isActive == true)
+          ))
         case CmdResponseFailed(message) => Protocol.GetTaskCmdFailed(ResponseError(message))
         case _ =>
           println(s"retrieve task other")

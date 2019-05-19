@@ -120,7 +120,7 @@ class AccountAggregateUseCase(
         case _ => TaskDto(UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID() , Activity("test"), List.empty, false)
       })
 
-  private val foldTasks = Sink.fold[List[TaskDto], TaskDto](List.empty[TaskDto])( (m ,e) => if(e.active)  e :: m else m )
+  private val foldTasks = Sink.fold[List[TaskDto], TaskDto](List.empty[TaskDto])( (m ,e) => if(e.active && e.isOwner)  e :: m else m )
 
   def getTasks(req: GetTaskLisCmdReq)(implicit ec: ExecutionContext): Future[List[TaskDto]]  =
     Source.single(req).via(getTaskFlow).toMat(foldTasks)(Keep.right).run()

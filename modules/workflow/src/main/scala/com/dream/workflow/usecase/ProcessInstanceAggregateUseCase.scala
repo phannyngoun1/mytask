@@ -355,6 +355,7 @@ class ProcessInstanceAggregateUseCase(
 
     val taskCast = b.add(Broadcast[ActionParams](2))
 
+
     val performTaskZip = b.add(ZipWith[ActionCompleted, ActionCompleted, ActionCompleted]((a, _) => a))
 
     val mapToPerformTaskCmdReq = Flow[ActionParams].map { f =>
@@ -449,11 +450,10 @@ class ProcessInstanceAggregateUseCase(
     } ~> Sink.ignore
 
     taskCast.out(1)  ~> reRouteTaskFilter ~> mapToReRouteTaskCmdRequest ~> processInstanceAggregateFlows.reRoute.map {
-      case ReRouteCmdSuccess(id, taskId, participantId) =>
-        ActionCompleted()
-      case _ =>
-        ActionCompleted()
-    }  ~> Sink.ignore
+      case ReRouteCmdSuccess(id, taskId, participantId) => AssignTaskCmdReq( participantId, taskId, id)
+    }  ~>  participantAggregateFlows.assignTask.map {
+      case _ : AssignTaskCmdSuccess => ActionCompleted()
+    } ~> Sink.ignore 
 
 
     FlowShape(bCast.in, performTaskZip.out)

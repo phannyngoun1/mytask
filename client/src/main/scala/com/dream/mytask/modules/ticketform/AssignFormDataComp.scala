@@ -26,6 +26,9 @@ object AssignFormDataComp {
       <.div(
         <.div(
           <.div(
+
+            <.div(s"selected participant: ${s.participantId.map(_.toString).getOrElse("N/A")} "),
+
             <.label("User:"),
             <.br(),
             <.select(

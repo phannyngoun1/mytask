@@ -18,7 +18,7 @@ object AssignFormComp {
 
   case class Props(proxy: ModelProxy[FormModel], c: RouterCtl[Loc], data: ActionInfoJson)
 
-  case class State( participantId: Option[UUID] = None, comment: Option[String] = None )
+  case class State()
 
   class Backend($: BackendScope[Props, State]) {
     def render(p: Props, s: State) = {

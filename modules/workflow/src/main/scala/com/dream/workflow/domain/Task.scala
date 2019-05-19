@@ -11,7 +11,8 @@ case class TaskDto(
   participantId: UUID,
   activity: BaseActivity,
   actions: List[BaseAction],
-  active: Boolean
+  active: Boolean,
+  isOwner: Boolean = true
 )
 
 case class Task(

@@ -24,7 +24,7 @@ object AppClient {
     val itemRoute = staticRoute("#item", ItemLoc) ~> renderR( c => AppCircuit.wrap(_.itemModel)(proxy => ItemComp(proxy, c)))
     val accRoute = staticRoute("#account", AccLoc) ~> renderR( c => AppCircuit.wrap(_.accountModel)(proxy => AccountComp(proxy, c)))
     val flowRoute = staticRoute("#flow", FlowLoc) ~> renderR( c => AppCircuit.wrap(_.flowModel)(proxy => WorkflowComp(proxy, c)))
-    val fetchTaskRoute = dynamicRouteCT( ("#fetchTask" / uuid ).caseClass[FetchTaskLoc]  ) ~> dynRenderR( (p, c)=>{
+    val fetchTaskRoute = dynamicRouteCT( ("#taskList" / uuid ).caseClass[FetchTaskLoc]  ) ~> dynRenderR( (p, c)=>{
       val id = p match {
         case FetchTaskLoc(id) => Some(id)
         case _ => None
