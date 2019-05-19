@@ -33,7 +33,8 @@ class ApiService(login: UUID)(implicit val ec: ExecutionContext, implicit val  s
     with ItemService
     with FlowService
     with AccountService
-    with PInstanceService {
+    with PInstanceService
+    with TicketService {
 
   val rootConfig = ConfigFactory.load()
   val dbConfig = DatabaseConfig.forConfig[JdbcProfile](path = "slickR", rootConfig)
@@ -104,7 +105,7 @@ class ApiService(login: UUID)(implicit val ec: ExecutionContext, implicit val  s
     val taskIdUUID = UUID.fromString(taskId)
     val participantUUI = UUID.fromString(participantId)
 
-    processInstance.takeAction(TakeActionCmdRequest(pInstIdUUID, taskIdUUID, actionName, participantUUI, NonePayload(), payload.comment )).map {
+    processInstance.takeAction(TakeActionCmdRequest(pInstIdUUID, taskIdUUID, actionName, participantUUI, convertEditTicketPayload(payload), payload.comment )).map {
       case _ => "Completed"
     }
   }

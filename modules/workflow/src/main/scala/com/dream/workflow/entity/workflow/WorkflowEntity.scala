@@ -84,6 +84,6 @@ class WorkflowEntity extends PersistentActor with ActorLogging with EntityState[
 
   override def persistenceId: String = s"$AggregateName-${self.path.name}"
 
-  override protected def invaliStateError(id: Option[UUID]): WorkflowError =
+  override protected def invalidStateError(id: Option[UUID]): WorkflowError =
     InvalidWorkflowStateError(id)
 }

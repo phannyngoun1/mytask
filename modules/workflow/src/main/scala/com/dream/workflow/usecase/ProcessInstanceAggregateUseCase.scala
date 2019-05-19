@@ -4,11 +4,13 @@ import java.time.Instant
 import java.util.UUID
 
 import akka.actor.ActorSystem
+import akka.japi
 import akka.stream._
 import akka.stream.scaladsl.{Flow, _}
 import com.dream.common.Protocol.TaskPerformCmdRequest
 import com.dream.common._
 import com.dream.common.domain.ResponseError
+import com.dream.ticket.domain.TicketDomain.AssignTicketPayload
 import com.dream.workflow.domain.{BaseActivityFlow, Flow => WFlow, _}
 import com.dream.workflow.entity.processinstance.ProcessInstanceProtocol.{CreatePInstCmdRequest => CreateInst}
 import com.dream.workflow.usecase.ItemAggregateUseCase.Protocol.{GetItemCmdRequest, GetItemCmdSuccess}
@@ -235,7 +237,8 @@ class ProcessInstanceAggregateUseCase(
     action: TakeActionCmdRequest,
     actionDate: Instant = Instant.now(),
     nexActivity: Option[BaseActivityFlow] = None,
-    newTaskId: Option[UUID] = None
+    newTaskId: Option[UUID] = None,
+    newDestination: List[UUID] = List.empty
   )
 
   private case class ActionParams(
@@ -246,7 +249,8 @@ class ProcessInstanceAggregateUseCase(
     actionDate: Instant = Instant.now(),
     actionPerformedId: UUID = UUID.randomUUID(),
     nexActivity: Option[BaseActivityFlow] = None,
-    newTaskId: Option[UUID] = None
+    newTaskId: Option[UUID] = None,
+    newDestination: Option[List[UUID]] = None
   )
 
   private val actionParamsFlowGraph = Flow.fromGraph(GraphDSL.create() { implicit b =>
@@ -256,7 +260,14 @@ class ProcessInstanceAggregateUseCase(
     val zipFlow = b.add(Zip[ActionParams, WFlow])
     val zipTask = b.add(Zip[ActionParams, TaskDto])
 
-    val mapToActionParam = Flow[TakeActionCmdRequest].map(req => ActionParams(req))
+    val mapToActionParam = Flow[TakeActionCmdRequest].map {req =>
+      val newDest = req.payLoad match {
+        case payload: ReRoutePayload => Some(List(payload.participantId))
+        case _ => None
+      }
+
+      ActionParams(req, newDestination = newDest )
+    }
 
     val mapToGetPInstCmdRequest = Flow[TakeActionCmdRequest].map(req => GetPInstCmdRequest(req.pInstId))
     val pInstance = processInstanceAggregateFlows.getPInst.map {
@@ -449,7 +460,7 @@ class ProcessInstanceAggregateUseCase(
     .run()
 
   private val getPInstFlow: SourceQueueWithComplete[(GetPInstCmdRequest, Promise[GetPInstCmdResponse])] = Source
-    .queue[(GetPInstCmdRequest, Promise[GetPInstCmdResponse])](10, OverflowStrategy.dropNew)
+    .queue[(GetPInstCmdRequest, Promise[GetPInstCmdResponse])](100, OverflowStrategy.dropNew)
     .via(processInstanceAggregateFlows.getPInst.zipPromise)
     .toMat(completePromiseSink)(Keep.left)
     .run()

@@ -1,5 +1,7 @@
 package com.dream.common
 
+import java.util.UUID
+
 /**
   * Action Type:
   * #COMPLETED: To complete task
@@ -15,6 +17,10 @@ trait Payload
 
 
 case class NonePayload() extends Payload
+
+trait ReRoutePayload {
+  def participantId: UUID
+}
 
 case class DefaultPayLoad(
   value: String

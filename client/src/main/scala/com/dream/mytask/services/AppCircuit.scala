@@ -11,6 +11,7 @@ import com.dream.mytask.modules.form.FormActionHandler
 import com.dream.mytask.modules.item.ItemActionHandler
 import com.dream.mytask.modules.processinst.ProcessInstActionHandler
 import com.dream.mytask.modules.task.TaskActionListHandler
+import com.dream.mytask.modules.ticketform.TicketActionHandler
 import com.dream.mytask.modules.workflow.WorkflowHandler
 import com.dream.mytask.services.DataModel.RootModel
 import com.dream.mytask.shared.Api
@@ -58,7 +59,8 @@ object AppCircuit extends Circuit[RootModel] with ReactConnector[RootModel] {
     WorkflowHandler(this),
     AccountActionHandler(this),
     ProcessInstActionHandler(this),
-    FormActionHandler(this)
+    FormActionHandler(this),
+    TicketActionHandler(this)
   )
 
 

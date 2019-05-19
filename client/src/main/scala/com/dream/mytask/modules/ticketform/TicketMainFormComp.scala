@@ -21,13 +21,13 @@ object TicketMainFormComp {
         <.h3("Ticket Form"),
         p.data.action match {
           case  "Assign" =>
-            AssignFormComp()
+            AssignFormComp(p.proxy, p.c, p.data)
           case "Close" =>
             CloseFormComp(p.proxy, p.c, p.data)
           case "Edit" =>
-            TicketFormComp()
+            TicketFormComp(p.proxy, p.c, p.data)
           case "Comment" =>
-            CommentComp()
+            CommentComp(p.proxy, p.c, p.data)
           case "View" =>
             ViewFormComp(p.proxy, p.c, p.data)
           case v: String => <.div(s"No action form available form ${v}")

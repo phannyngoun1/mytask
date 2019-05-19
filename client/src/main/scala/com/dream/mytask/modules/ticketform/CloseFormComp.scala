@@ -5,7 +5,7 @@ import com.dream.mytask.modules.form.FormActionHandler.FormAction
 import com.dream.mytask.modules.task.TaskActionListHandler.TaskListActions.TakeAction
 import com.dream.mytask.services.DataModel.FormModel
 import com.dream.mytask.shared.data.ActionInfoJson
-import com.dream.mytask.shared.data.WorkflowData.{AssignTicketPayloadJs, EditTicketPayloadJs}
+import com.dream.mytask.shared.data.WorkflowData.{TicketStatusPayloadJs, EditTicketPayloadJs}
 import diode.react._
 import diode.react.ReactPot._
 import japgolly.scalajs.react.extra.router.RouterCtl
@@ -22,8 +22,6 @@ object CloseFormComp {
     def render(p: Props, s: State) = {
 
       val message = p.proxy.connect(_.message)
-
-
       <.div(
         "Close form",
         message(px => <.div(
@@ -49,10 +47,12 @@ object CloseFormComp {
           <.div(
             <.label("Comment:"),
             <.br(),
-            <.textarea(^.cols := 60, ^.rows := 3, ^.value := s.comment.getOrElse(""), ^.onChange ==> { e: ReactEventFromInput =>
-              val value = if (e.target.value.trim.isEmpty) None else Some(e.target.value)
+            <.textarea(^.cols := 60, ^.rows := 3,
+              ^.value := s.comment.getOrElse(""),
+              ^.onChange ==> { e: ReactEventFromInput =>
+                val value = if (e.target.value.trim.isEmpty) None else Some(e.target.value)
               $.modState(_.copy(comment = value))
-            })
+            } )
           ),
           <.div(
             <.button("Submit",
@@ -62,7 +62,7 @@ object CloseFormComp {
                 accId         = Some(p.data.accountId.toString),
                 participantId = Some(p.data.participantId.toString),
                 action        = Some(p.data.action),
-                payLoad       = Some(AssignTicketPayloadJs(p.data.participantId, s.status.get, s.comment))
+                payLoad       = Some(TicketStatusPayloadJs(s.status.get, s.comment))
               ))),
             <.button("Cancel")
           )

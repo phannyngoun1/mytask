@@ -9,7 +9,6 @@ import boopickle.Default._
 import autowire._
 import com.dream.mytask.modules.form.FormActionHandler.{FetchPInstDataInfoAction, FormAction, PerformTaskAction}
 import com.dream.mytask.services.AjaxClient
-import com.dream.mytask.services.AppCircuit.zoomRW
 import com.dream.mytask.services.DataModel.{FormModel, RootModel}
 import com.dream.mytask.shared.Api
 import com.dream.mytask.shared.data.ActionInfoJson

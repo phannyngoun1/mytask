@@ -2,7 +2,7 @@ package com.dream.mytask.modules.ticketform
 
 import com.dream.mytask.AppClient.{FetchTaskLoc, Loc}
 import com.dream.mytask.services.DataModel.FormModel
-import com.dream.mytask.shared.data.ActionInfoJson
+import com.dream.mytask.shared.data.{ActionInfoJson, TaskInfoJs}
 import com.dream.mytask.shared.data.ProcessInstanceData.PInstInitDataInfoJs
 import diode.react._
 import diode.react.ReactPot._
@@ -19,6 +19,34 @@ object ViewTicketDataDetailComp {
 
   class Backend($: BackendScope[Props, State]) {
 
+
+    def renderTask(taskInfoJs: TaskInfoJs) = {
+      <.li( s"Activity: ${taskInfoJs.activity}, Created Date: ${taskInfoJs.dateCreated} , Active: ${taskInfoJs.active} ",
+
+        <.table( ^.border := "2px",
+          <.thead(
+            <.tr(
+              <.th("Action"),
+              <.th("Date Performed"),
+              <.th("Participant"),
+              <.th("Comment")
+            ),
+          ),
+          <.tbody(
+            taskInfoJs.actionPerformed.toTagMod { item =>
+              <.tr(
+                <.td(item.action.name),
+                <.td(item.actionDate),
+                <.td(item.participantId.toString),
+                <.td(s"${item.comment.getOrElse("")}")
+              )
+
+            }
+          )
+        )
+      )
+    }
+
     def render(p: Props, s: State) = {
 
       val m = p.data
@@ -34,7 +62,21 @@ object ViewTicketDataDetailComp {
               <.td("Is Active"), <.td(<.input(^.value := s"${m.active }", ^.readOnly := true))
             )
           )
+        ),
+
+        <.ol(
+          m.tasks.toTagMod (renderTask  )
         )
+//        <.table(
+//          <.tbody(
+//            m.tasks.toTagMod{ task =>
+//              <.tr(
+//                <.td(task.)
+//              )
+//            }
+//          )
+//        )
+
       )
     }
 

@@ -121,6 +121,6 @@ class ParticipantEntity extends PersistentActor with ActorLogging with EntitySta
 
   override def persistenceId: String = s"$AggregateName-${self.path.name}"
 
-  override protected def invaliStateError(id: Option[UUID]): ParticipantError =
+  override protected def invalidStateError(id: Option[UUID]): ParticipantError =
     InvalidParticipantStateError(id)
 }

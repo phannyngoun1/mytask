@@ -116,6 +116,6 @@ class AccountEntity extends PersistentActor with ActorLogging with EntityState[A
       foreachState(saveSnapshot)
     }
 
-  override protected def invaliStateError(id: Option[UUID]): AccountError =
+  override protected def invalidStateError(id: Option[UUID]): AccountError =
     InvalidAccountStateError(id)
 }

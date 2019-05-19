@@ -3,6 +3,7 @@ package com.dream.mytask.services
 import java.util.UUID
 
 import com.dream.mytask.shared.data.ProcessInstanceData._
+import com.dream.mytask.shared.data.{ActionInfoJs, ActionItemJson, TaskInfoJs}
 import com.dream.workflow.usecase.ProcessInstanceAggregateUseCase.Protocol.{CreatePInstCmdRequest, CreatePInstCmdSuccess, GetPInstCmdRequest, GetPInstCmdSuccess}
 
 import scala.concurrent.Future
@@ -56,11 +57,26 @@ trait PInstanceService { this: ApiService =>
           contentType = "",
           description = "",
           active = res.active,
-          tasks = List.empty
+          tasks = res.tasks.map{ task=>
+            TaskInfoJs(
+              id =  task.id,
+              activity = task.activity.name,
+              actions = task.actions.map(action => ActionItemJson(action.name)),
+              actionPerformed = task.actionPerformed.map { action =>
+                ActionInfoJs(
+                  id = action.id,
+                  participantId = action.participantId,
+                  action =  ActionItemJson(action.action.name),
+                  actionDate = action.actionDate.toEpochMilli,
+                  comment = action.comment
+                )
+              },
+              dateCreated = task.dateCreated.toEpochMilli ,
+              active=task.active
+            )
+          }
         )
       case _ => throw new RuntimeException("failed")
     }
   }
-
-
 }

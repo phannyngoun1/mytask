@@ -10,7 +10,7 @@ import com.dream.mytask.shared.data.WorkflowData.{EditTicketPayloadJs, FlowInitD
 
 import scala.concurrent.Future
 
-trait Api {
+trait Api extends TicketApi{
 
   def welcomeMessage(smg: String):  Future[String]
 
@@ -57,9 +57,6 @@ trait Api {
   def newParticipant(accId: String): Future[String]
 
   def getParticipantList(): Future[List[ParticipantJson]]
-
-
-
 
 
 }

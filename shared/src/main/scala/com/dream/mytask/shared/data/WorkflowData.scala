@@ -15,7 +15,11 @@ object WorkflowData {
 
   case class EditTicketPayloadJs(test: String, override val comment: Option[String]) extends PayloadJs
 
-  case class AssignTicketPayloadJs(participantId: UUID, status: String,  override val comment: Option[String]) extends PayloadJs
+  case class TicketStatusPayloadJs(status: String,  override val comment: Option[String]) extends PayloadJs
+
+  case class AssignTicketPayloadJs(participantId: UUID, override val comment: Option[String]) extends PayloadJs
+
+  case class CommentPayloadJs(override val comment: Option[String]) extends PayloadJs
 
   case class FlowInitDataJs(
     list: List[FlowJson],

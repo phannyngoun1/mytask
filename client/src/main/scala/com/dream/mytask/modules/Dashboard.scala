@@ -20,8 +20,8 @@ object Dashboard {
       <.div("Menu",
         <.ul(
           <.li(<.a("Account", ^.href := "#", p.c.setOnClick(AccLoc))),
-          <.li(<.a("item", ^.href  := "#", p.c.setOnClick(AccLoc))),
-          <.li(<.a("flow", ^.href  := "#", p.c.setOnClick(AccLoc))),
+          <.li(<.a("item", ^.href  := "#", p.c.setOnClick(ItemLoc))),
+          <.li(<.a("flow", ^.href  := "#", p.c.setOnClick(FlowLoc))),
           <.li(<.a("instance", ^.href := "#",  p.c.setOnClick(ProcessInstLoc)))
         )
       )

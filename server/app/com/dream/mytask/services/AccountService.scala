@@ -27,7 +27,6 @@ trait AccountService { this: ApiService =>
   }
 
   override def getAccountList(): Future[List[AccountJson]] =
-//    Future.successful(List(AccountJson("sss", "sss")))
     accountUseCase.list.map(_.map(acc=> AccountJson(acc.id.toString, acc.name, None)))
 
   override def getParticipant(id: String): Future[ParticipantJson] = {
@@ -55,6 +54,4 @@ trait AccountService { this: ApiService =>
 
     participantUseCase.list.map(_.map(item => ParticipantJson(item.id.toString, item.accountId.toString, List())))
   }
-
-
 }

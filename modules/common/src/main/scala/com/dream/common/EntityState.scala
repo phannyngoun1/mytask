@@ -13,7 +13,7 @@ trait EntityState[E <: ErrorMessage ,T] { this: Actor =>
   protected def equalsId(id: UUID)(state: Option[T], f: (T) => Boolean): Boolean =
     state match {
       case None =>
-        sender() !  CmdResponseFailed(invaliStateError(Some(id)))
+        sender() !  CmdResponseFailed(invalidStateError(Some(id)))
         false
       case Some(state) =>
         f(state)
@@ -24,5 +24,5 @@ trait EntityState[E <: ErrorMessage ,T] { this: Actor =>
   ): Either[E, T]
 
 
-  protected def invaliStateError(id: Option[UUID]) : E
+  protected def invalidStateError(id: Option[UUID]) : E
 }

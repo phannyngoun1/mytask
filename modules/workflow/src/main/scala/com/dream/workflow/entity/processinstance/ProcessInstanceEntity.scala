@@ -47,9 +47,10 @@ class ProcessInstanceEntity extends PersistentActor
       println(s"replay event: $event")
       state = applyState(event).toSomeOrThrow
     case event: NewTaskCreated =>
-      println(s"replay event: $event")
+      println(s"replay event NewTaskCreated : $event")
       state = mapState(_.createTask(event.task, event.participantId)).toSomeOrThrow
     case event: ActionCommitted =>
+      println(s"replay event ActionCommitted : $event")
       state = mapState(_.commitTask(event.actionPerformedId, event.taskId, event.participantId, event.action, event.processAt, event.comment)).toSomeOrThrow
     case RecoveryCompleted =>
       println(s"Recovery completed: $persistenceId")
@@ -73,8 +74,11 @@ class ProcessInstanceEntity extends PersistentActor
       sender() ! CreatePInstCmdSuccess(event.id)
     }
 
-    case GetPInstCmdRequest(id) if equalsId(id)(state, _.id.equals(id)) =>
+    case GetPInstCmdRequest(id) =>
+      //if equalsId(id)(state, _.id.equals(id))
+      println(s"GetPInstCmdRequest ${id}")
       foreachState { state =>
+        log.info(s" curr state ${state} ")
         sender() ! GetPInstCmdSuccess(state)
       }
     case GetTaskCmdReq(id, taskId, participantId) => // if equalsId(id)(state, _.id.equals(id)) =>
@@ -137,5 +141,5 @@ class ProcessInstanceEntity extends PersistentActor
       newState <- f(state)
     } yield newState
 
-  override protected def invaliStateError(id: Option[UUID]): InstError =  InvalidInstStateError(id)
+  override protected def invalidStateError(id: Option[UUID]): InstError =  InvalidInstStateError(id)
 }
