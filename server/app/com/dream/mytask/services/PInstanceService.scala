@@ -3,7 +3,7 @@ package com.dream.mytask.services
 import java.util.UUID
 
 import com.dream.mytask.shared.data.ProcessInstanceData._
-import com.dream.mytask.shared.data.{ActionInfoJs, ActionItemJson, TaskInfoJs}
+import com.dream.mytask.shared.data.{ActionInfoJs, ActionItemJson, TaskDestinationJs, TaskInfoJs}
 import com.dream.workflow.usecase.ProcessInstanceAggregateUseCase.Protocol.{CreatePInstCmdRequest, CreatePInstCmdSuccess, GetPInstCmdRequest, GetPInstCmdSuccess}
 
 import scala.concurrent.Future
@@ -62,6 +62,7 @@ trait PInstanceService { this: ApiService =>
               id =  task.id,
               activity = task.activity.name,
               actions = task.actions.map(action => ActionItemJson(action.name)),
+              destinations = task.destinations.map(dest => TaskDestinationJs(dest.participantId, dest.isActive)),
               actionPerformed = task.actionPerformed.map { action =>
                 ActionInfoJs(
                   id = action.id,

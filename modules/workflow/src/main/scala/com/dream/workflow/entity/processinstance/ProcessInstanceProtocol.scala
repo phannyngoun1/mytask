@@ -65,5 +65,7 @@ object ProcessInstanceProtocol {
   case class CommitActionCmdReq(id: UUID, actionPerformId: UUID, taskId: UUID, participantId: UUID, action: BaseAction,  processAt: Instant, comment: Option[String]) extends ProcessInstanceCmdRequest
   case class CommitActionCmdSuccess(id: UUID) extends ProcessInstanceCmdResponse
 
+  case class ReRouteCmdReq(id: UUID, taskId: UUID,newParticipantId: UUID) extends ProcessInstanceCmdRequest
+  case class ReRouteCmdSuccess(id: UUID, taskId: UUID, participantId: UUID) extends ProcessInstanceCmdResponse
 
 }

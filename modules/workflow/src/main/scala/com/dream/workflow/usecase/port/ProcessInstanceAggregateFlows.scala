@@ -19,5 +19,7 @@ trait ProcessInstanceAggregateFlows {
 
   def getTask: Flow[Protocol.GetTaskCmdReq, Protocol.GetTaskCmdRes, NotUsed]
 
+  def reRoute: Flow[Protocol.ReRouteCmdReq, Protocol.ReRouteCmdRes, NotUsed]
+
 
 }

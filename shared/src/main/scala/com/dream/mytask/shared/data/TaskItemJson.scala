@@ -1,9 +1,6 @@
 package com.dream.mytask.shared.data
 
-import java.time.Instant
 import java.util.UUID
-
-import com.dream.mytask.shared.data.ProcessInstanceData.PInstInitDataInfoJs
 
 case class TaskItemJson(
   id: String,
@@ -18,7 +15,7 @@ case class TaskInfoJs(
   id: UUID,
   activity: String,
   actions: List[ActionItemJson],
-//  destinations: List[TaskDestination],
+  destinations: List[TaskDestinationJs],
   actionPerformed: List[ActionInfoJs] = List.empty,
   dateCreated: Long ,
   active: Boolean
@@ -32,6 +29,9 @@ case class ActionInfoJs(
   comment: Option[String]
 )
 
+case class TaskDestinationJs(
+  participantId: UUID, active: Boolean
+)
 
 
 case class ActionItemJson(

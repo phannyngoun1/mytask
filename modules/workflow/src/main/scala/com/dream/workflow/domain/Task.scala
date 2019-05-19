@@ -32,7 +32,7 @@ case class ActionPerformed(
   comment: Option[String]
 )
 
-case class TaskDestination(participantId: UUID, isActive: Boolean = true)
+case class TaskDestination(participantId: UUID, dateCreated: Instant = Instant.now() , isActive: Boolean = true)
 
 case class AssignedTask(
   taskId: UUID,

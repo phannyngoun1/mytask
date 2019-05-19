@@ -29,7 +29,6 @@ class ProcessInstanceAggregateFlowsImpl(aggregateRef: ActorRef) extends ProcessI
         case CmdResponseFailed(message) => Protocol.CreatePInstCmdFailed(ResponseError(message))
       }
 
-
   override def performTask: Flow[Protocol.PerformTaskCmdReq, Protocol.PerformTaskCmdRes, NotUsed] =
     Flow[Protocol.PerformTaskCmdReq]
       .mapAsync(1)(aggregateRef ? _)
@@ -77,6 +76,8 @@ class ProcessInstanceAggregateFlowsImpl(aggregateRef: ActorRef) extends ProcessI
       .map {
         case CommitActionCmdSuccess(id) => Protocol.CommitActionCmdSuccess(id)
         case CmdResponseFailed(message) => Protocol.CommitActionCmdFailed(ResponseError(message))
+        case _ => println("unhandled re route response cmd")
+          throw  new RuntimeException("unhandled re route")
       }
 
   override def createNewTask: Flow[Protocol.CreateNewTaskCmdRequest, Protocol.CreateNewTaskCmdResponse, NotUsed] =
@@ -89,4 +90,13 @@ class ProcessInstanceAggregateFlowsImpl(aggregateRef: ActorRef) extends ProcessI
           Protocol.CreateNewTaskCmdSuccess(id, taskId, dest)
         case CmdResponseFailed(message) => Protocol.CreateNewTaskCmdFailed(ResponseError(message))
       }
+
+  override def reRoute: Flow[Protocol.ReRouteCmdReq, Protocol.ReRouteCmdRes, NotUsed] =
+    Flow[Protocol.ReRouteCmdReq]
+    .map(req => ReRouteCmdReq(req.id, taskId = req.taskId, req.newParticipantId) )
+    .mapAsync(1)(aggregateRef ? _)
+    .map {
+      case ReRouteCmdSuccess(id, taskId, participantId) => Protocol.ReRouteCmdSuccess(id, taskId, participantId)
+      case CmdResponseFailed(message) => Protocol.ReRouteCmdFailed(ResponseError(message))
+    }
 }

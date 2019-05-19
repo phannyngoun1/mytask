@@ -53,7 +53,12 @@ object ProcessInstance {
     action: BaseAction,
     processAt: Instant,
     comment: Option[String]
-  )
+  ) extends ProcessInstanceEvent
+
+  case class TaskReassigned(
+    taskId: UUID,
+    newParticipantId: UUID
+  ) extends ProcessInstanceEvent
 
 }
 
@@ -77,7 +82,7 @@ case class ProcessInstance(
     Right(copy(tasks = task :: tasks))
   }
 
-  def commitTask(id: UUID,taskId: UUID, participantId: UUID, action: BaseAction, actionDate: Instant, comment: Option[String]): Either[InstError, ProcessInstance] = {
+  def commitTask(actionPerformedId: UUID,taskId: UUID, participantId: UUID, action: BaseAction, actionDate: Instant, comment: Option[String]): Either[InstError, ProcessInstance] = {
     Right(
       copy(tasks = tasks.map(task =>
         if(task.id.equals(taskId))
@@ -86,12 +91,25 @@ case class ProcessInstance(
             destinations = task.destinations.map { dest =>
               if (dest.participantId.equals(participantId)) dest.copy(isActive = action.actionType.equals("HANDLING")) else dest
             },
-            actionPerformed = ActionPerformed(id, participantId, action, actionDate, comment ) :: task.actionPerformed
+            actionPerformed = ActionPerformed(actionPerformedId, participantId, action, actionDate, comment ) :: task.actionPerformed
           )
         else
           task
       ))
     )
   }
+
+  def reRoute(taskId: UUID, newParticipantId: UUID) : Either[InstError, ProcessInstance] =
+    Right(copy(
+      tasks = tasks.map(task =>
+        if(task.id.equals(taskId))
+          task.copy(
+            destinations = TaskDestination(newParticipantId) :: task.destinations
+          )
+        else
+          task
+      )
+    ))
+
 
 }

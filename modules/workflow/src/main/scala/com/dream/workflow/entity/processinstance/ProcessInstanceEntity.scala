@@ -23,7 +23,6 @@ object ProcessInstanceEntity {
   implicit class EitherOps(val self: Either[InstError, ProcessInstance]) {
     def toSomeOrThrow: Option[ProcessInstance] = self.fold(error => throw new IllegalStateException(error.message), Some(_))
   }
-
 }
 
 class ProcessInstanceEntity extends PersistentActor
@@ -52,6 +51,9 @@ class ProcessInstanceEntity extends PersistentActor
     case event: ActionCommitted =>
       println(s"replay event ActionCommitted : $event")
       state = mapState(_.commitTask(event.actionPerformedId, event.taskId, event.participantId, event.action, event.processAt, event.comment)).toSomeOrThrow
+    case event: TaskReassigned =>
+      println(s"replay event TaskReassigned : $event")
+      state = mapState(_.reRoute(event.taskId, event.newParticipantId)).toSomeOrThrow
     case RecoveryCompleted =>
       println(s"Recovery completed: $persistenceId")
     case _ => log.debug("Other")
@@ -117,6 +119,19 @@ class ProcessInstanceEntity extends PersistentActor
       })
     case SaveSnapshotSuccess(metadata) =>
       log.debug(s"receiveCommand: SaveSnapshotSuccess succeeded: $metadata")
+
+
+    case ReRouteCmdReq(id, taskId, newParticipantId) if equalsId(id)(state, _.id.equals(id)) =>
+      foreachState(_.reRoute(taskId, newParticipantId) match {
+        case Left(error) => sender() ! CmdResponseFailed( ResponseError(Some(id), error.message))
+        case Right(newStart) => persist(TaskReassigned(taskId: UUID, newParticipantId: UUID)) { event =>
+          state = Some(newStart)
+          sender() ! ReRouteCmdSuccess(id, event.taskId, event.newParticipantId)
+
+        }
+
+
+      })
   }
 
   override protected def foreachState(f: ProcessInstance => Unit): Unit =

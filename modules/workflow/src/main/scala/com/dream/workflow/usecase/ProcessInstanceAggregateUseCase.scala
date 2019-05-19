@@ -10,7 +10,6 @@ import akka.stream.scaladsl.{Flow, _}
 import com.dream.common.Protocol.TaskPerformCmdRequest
 import com.dream.common._
 import com.dream.common.domain.ResponseError
-import com.dream.ticket.domain.TicketDomain.AssignTicketPayload
 import com.dream.workflow.domain.{BaseActivityFlow, Flow => WFlow, _}
 import com.dream.workflow.entity.processinstance.ProcessInstanceProtocol.{CreatePInstCmdRequest => CreateInst}
 import com.dream.workflow.usecase.ItemAggregateUseCase.Protocol.{GetItemCmdRequest, GetItemCmdSuccess}
@@ -114,6 +113,14 @@ object ProcessInstanceAggregateUseCase {
     case class CommitActionCmdSuccess(id: UUID) extends CommitActionCmdRes
 
     case class CommitActionCmdFailed(error: ResponseError) extends CommitActionCmdRes
+
+
+
+    case class ReRouteCmdReq(id: UUID, taskId: UUID,newParticipantId: UUID) extends ProcessInstanceCmdRequest
+    sealed trait ReRouteCmdRes extends ProcessInstanceCmdResponse
+
+    case class ReRouteCmdSuccess(id: UUID, taskId: UUID, participantId: UUID) extends ReRouteCmdRes
+    case class ReRouteCmdFailed(error: ResponseError) extends ReRouteCmdRes
 
     case class ActionCompleted()
 
@@ -250,7 +257,7 @@ class ProcessInstanceAggregateUseCase(
     actionPerformedId: UUID = UUID.randomUUID(),
     nexActivity: Option[BaseActivityFlow] = None,
     newTaskId: Option[UUID] = None,
-    newDestination: Option[List[UUID]] = None
+    newDestination: Option[UUID] = None
   )
 
   private val actionParamsFlowGraph = Flow.fromGraph(GraphDSL.create() { implicit b =>
@@ -262,7 +269,7 @@ class ProcessInstanceAggregateUseCase(
 
     val mapToActionParam = Flow[TakeActionCmdRequest].map {req =>
       val newDest = req.payLoad match {
-        case payload: ReRoutePayload => Some(List(payload.participantId))
+        case payload: ReRoutePayload => Some(payload.participantId)
         case _ => None
       }
 
@@ -287,7 +294,11 @@ class ProcessInstanceAggregateUseCase(
 
     // val workflowResult = Flow[WFlow].map(flow => ActionParams(flow = flow) )
 
-    val mapZipFlowToActionParam = Flow[(ActionParams, WFlow)].map(f => f._1.copy(flow = Some(f._2)))
+    val mapZipFlowToActionParam = Flow[(ActionParams, WFlow)].map(f =>
+      f._1.copy(
+        flow = Some(f._2),
+      )
+    )
 
     val mapToGetTaskReq = Flow[TakeActionCmdRequest].map(item => {
       println(s" mapToGetTaskReq  ---- ${item}")
@@ -342,6 +353,8 @@ class ProcessInstanceAggregateUseCase(
     import GraphDSL.Implicits._
     val bCast = b.add(Broadcast[ActionParams](3))
 
+    val taskCast = b.add(Broadcast[ActionParams](2))
+
     val performTaskZip = b.add(ZipWith[ActionCompleted, ActionCompleted, ActionCompleted]((a, _) => a))
 
     val mapToPerformTaskCmdReq = Flow[ActionParams].map { f =>
@@ -369,7 +382,7 @@ class ProcessInstanceAggregateUseCase(
         ActionCompleted()
     }
 
-    val validActivityFilter  = Flow[ActionParams].filter(item => item.nexActivity match {
+    val newTaskFilter  = Flow[ActionParams].filter(item => item.nexActivity match {
       case Some(_: DoneActivityFlow) =>
         println("--------Filter with DoneActivityFlow--------")
         false
@@ -380,6 +393,13 @@ class ProcessInstanceAggregateUseCase(
         true
       case None =>
         false
+    })
+
+    val reRouteTaskFilter = Flow[ActionParams].filter(item => item.nexActivity match {
+      case  Some(_: NaActivityFlow) =>
+        if(item.action.action.equalsIgnoreCase("Assign") && item.newDestination.isDefined ) true
+        else false
+      case _ => false
     })
 
     val mapToCreateNewTaskCmdRequest = Flow[ActionParams].map { item =>
@@ -395,6 +415,10 @@ class ProcessInstanceAggregateUseCase(
       )
     }
 
+    val mapToReRouteTaskCmdRequest = Flow[ActionParams].map{ param =>
+      ReRouteCmdReq(param.action.pInstId, param.action.taskId, param.newDestination.get)
+    }
+
     val nexFlow = Flow[ActionParams].map { f =>
 
       f.flow.get.nextActivity(f.curAction.get, f.task.get.activity, ParticipantAccess(f.action.participantId)) match {
@@ -403,7 +427,7 @@ class ProcessInstanceAggregateUseCase(
     }
 
     val createNewTask = processInstanceAggregateFlows.createNewTask.map {
-      case CreateNewTaskCmdSuccess(pInstId, taskId, dests) => dests.map(AssignTaskCmdReq(_, taskId, pInstId))
+      case CreateNewTaskCmdSuccess(pInstId, taskId, destList) => destList.map(AssignTaskCmdReq(_, taskId, pInstId))
     }.flatMapConcat(Source(_))
 
 
@@ -416,9 +440,20 @@ class ProcessInstanceAggregateUseCase(
     } ~> performTaskZip.in1
 
 
-    bCast.out(2) ~> nexFlow ~>  validActivityFilter ~>  mapToCreateNewTaskCmdRequest ~> createNewTask ~> participantAggregateFlows.assignTask.map {
+    //Next Task
+
+    bCast.out(2) ~> nexFlow ~> taskCast.in
+
+    taskCast.out(0) ~>    newTaskFilter ~>  mapToCreateNewTaskCmdRequest ~> createNewTask ~> participantAggregateFlows.assignTask.map {
       case _ : AssignTaskCmdSuccess => ActionCompleted()
     } ~> Sink.ignore
+
+    taskCast.out(1)  ~> reRouteTaskFilter ~> mapToReRouteTaskCmdRequest ~> processInstanceAggregateFlows.reRoute.map {
+      case ReRouteCmdSuccess(id, taskId, participantId) =>
+        ActionCompleted()
+      case _ =>
+        ActionCompleted()
+    }  ~> Sink.ignore
 
 
     FlowShape(bCast.in, performTaskZip.out)
