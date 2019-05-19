@@ -23,7 +23,7 @@ object ViewFormComp {
       val pInstInfo = p.proxy.connect(_.ticketModel.pInstDataInfo)
 
       <.div(
-        "View Ticker data form",
+        <.b("View Ticket data detail") ,
         <.div(
           pInstInfo(px => {
             <.div(

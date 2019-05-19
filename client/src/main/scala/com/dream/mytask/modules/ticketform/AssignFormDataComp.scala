@@ -38,7 +38,7 @@ object AssignFormDataComp {
                 val value = if (e.target.value.trim.isEmpty) None else Some(e.target.value)
                 $.modState(_.copy(participantId = value.map(UUID.fromString _)))
               },
-              p.initData.participantList.toTagMod{ item =>
+              p.initData.participantList.filter(!_.id.equals(p.data.participantId.toString)).toTagMod{ item =>
                 <.option(^.value := item.id, item.id)
               }
             )
