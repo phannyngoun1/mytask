@@ -34,6 +34,23 @@ sealed trait BaseActivityFlow {
 //  implicit val jsonFormat: OFormat[BaseActivityFlow] = derived.oformat[BaseActivityFlow]()
 //}
 
+/**
+  *
+  * @param participantId
+  * @param acceptedPolicy: Policy is used to reduce contribution repeated authorize configuration. Empty = None policy is accepted.
+  * @param payloadAuthCode: being used to restrict payload accessible data. * = not restrict
+  * @param contributeType Direct assign. Sharable, Assignable, Pickup,  Empy = any types.
+  * @param accessibleActions: Empty = Any actions.
+  */
+case class Contribution(
+  participantId: UUID,
+  acceptedPolicy: List[UUID] = List.empty,
+  payloadAuthCode: String = "*",
+  contributeType: List[String] = List.empty,
+  accessibleActions: List[BaseAction] = List.empty
+)
+
+// Originate,
 
 case class ActionHis(
   participantId: UUID,

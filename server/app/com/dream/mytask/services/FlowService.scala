@@ -72,6 +72,7 @@ trait FlowService {  this: ApiService =>
     val ticketActivityFlow = ActivityFlow(
       activity = ticketActivity,
       participants = participants.map(UUID.fromString),
+
       actionFlows = List(
         editTicketActionFlow,
         closeTicketActionFlow,
