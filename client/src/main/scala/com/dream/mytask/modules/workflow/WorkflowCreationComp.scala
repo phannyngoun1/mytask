@@ -3,10 +3,8 @@ package com.dream.mytask.modules.workflow
 import java.util.UUID
 
 import com.dream.mytask.AppClient.Loc
-import com.dream.mytask.modules.workflow.WorkflowHandler.{FetchWorkflowTemplateAction, NewFlowAction}
+import com.dream.mytask.modules.workflow.WorkflowHandler.{FetchWorkflowTemplateAction}
 import com.dream.mytask.services.DataModel.FlowModel
-import com.dream.mytask.shared.data.WorkflowData.{FlowInitDataJs, WorkflowTemplateJs}
-import diode.data.Pot
 import diode.react.ReactPot._
 import diode.react._
 import japgolly.scalajs.react.{BackendScope, _}

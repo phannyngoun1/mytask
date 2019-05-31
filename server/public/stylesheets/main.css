@@ -1,0 +1,16 @@
+table.bottomBorder {
+    border-collapse: collapse;
+}
+table.bottomBorder td,
+table.bottomBorder th {
+    border-bottom: 1px solid yellowgreen;
+    padding: 10px;
+    text-align: left;
+}
+
+.topnav {
+    background-color: #4CAF50;
+    color: #ffffff;
+    font-weight: bolder;
+}
+
