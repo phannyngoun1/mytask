@@ -23,7 +23,30 @@ object WorkflowData {
 
   case class FlowInitDataJs(
     list: List[FlowJson],
+    workflowTemplateList: List[WorkflowTemplateJs],
     pcpList: List[ParticipantJson]
+  )
+
+  case class ActionJs(name: String, actionType: String)
+  case class ActivityJs(name: String)
+  case class ActionFlowJs(action: ActionJs, activity: Option[ActivityJs])
+  case class ContributionJs(
+    participantId: UUID,
+    policyList: List[UUID] = List.empty,
+    payloadAuthCode: String = "*",
+    contributeTypeList: List[String] = List.empty,
+    accessibleActionList: List[ActionJs] = List.empty
+  )
+  case class ActivityFlowJs(
+    activityJs: ActivityJs,
+    contribution: List[ContributionJs],
+    actionFlow: List[ActionFlowJs]
+  )
+  case class WorkflowTemplateJs(
+    id: UUID,
+    name: String,
+    startActivity: ActivityJs,
+    activityFlowList: Seq[ActivityFlowJs]
   )
 
 }

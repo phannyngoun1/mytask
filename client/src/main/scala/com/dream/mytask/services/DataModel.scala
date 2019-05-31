@@ -4,7 +4,7 @@ import com.dream.mytask.shared.data.AccountData.{AccountJson, ParticipantJson}
 import com.dream.mytask.shared.data.ItemData.{ItemInitDataJs, ItemJson}
 import com.dream.mytask.shared.data.ProcessInstanceData.{PInstInitDataInfoJs, PInstInitDataJson, ProcessInstanceJson}
 import com.dream.mytask.shared.data.{ActionInfoJson, AssignFormInitDataJs, TaskItemJson}
-import com.dream.mytask.shared.data.WorkflowData.{FlowInitDataJs, FlowJson}
+import com.dream.mytask.shared.data.WorkflowData.{FlowInitDataJs, FlowJson, WorkflowTemplateJs}
 import diode.data.Pot
 
 object DataModel {
@@ -44,7 +44,8 @@ object DataModel {
     flowList: Pot[List[FlowJson]] = Pot.empty,
     flow: Pot[FlowJson] = Pot.empty,
     message: Pot[String] = Pot.empty,
-    initData: Pot[FlowInitDataJs] = Pot.empty
+    initData: Pot[FlowInitDataJs] = Pot.empty,
+    workflow: Pot[WorkflowTemplateJs] = Pot.empty
 
   )
 

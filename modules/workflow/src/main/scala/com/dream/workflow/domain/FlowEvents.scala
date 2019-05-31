@@ -2,7 +2,7 @@ package com.dream.workflow.domain
 
 import java.util.UUID
 
-import com.dream.common.BaseActivity
+import com.dream.common.{BaseActivity, BaseActivityFlow}
 
 
 object FlowEvents {

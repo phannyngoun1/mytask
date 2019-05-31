@@ -5,8 +5,8 @@ import java.util.UUID
 import com.dream.mytask.shared.data.AccountData.{AccountJson, ParticipantJson}
 import com.dream.mytask.shared.data.ItemData.{ItemInitDataJs, ItemJson}
 import com.dream.mytask.shared.data.ProcessInstanceData.{PInstInitDataInfoJs, PInstInitDataJson, ProcessInstanceJson}
-import com.dream.mytask.shared.data.{TaskItemJson}
-import com.dream.mytask.shared.data.WorkflowData.{EditTicketPayloadJs, FlowInitDataJs, FlowJson, PayloadJs}
+import com.dream.mytask.shared.data.TaskItemJson
+import com.dream.mytask.shared.data.WorkflowData.{EditTicketPayloadJs, FlowInitDataJs, FlowJson, PayloadJs, WorkflowTemplateJs}
 
 import scala.concurrent.Future
 
@@ -45,6 +45,8 @@ trait Api extends TicketApi{
   def getFlowInitData(): Future[FlowInitDataJs]
 
   def getFlowList(): Future[List[FlowJson]]
+
+  def getFlowTemplate(id: UUID): Future[WorkflowTemplateJs]
 
   def getAcc(id: String): Future[AccountJson]
 

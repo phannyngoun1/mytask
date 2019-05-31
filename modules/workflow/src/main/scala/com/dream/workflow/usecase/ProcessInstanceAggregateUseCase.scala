@@ -4,13 +4,12 @@ import java.time.Instant
 import java.util.UUID
 
 import akka.actor.ActorSystem
-import akka.japi
 import akka.stream._
 import akka.stream.scaladsl.{Flow, _}
 import com.dream.common.Protocol.TaskPerformCmdRequest
 import com.dream.common._
 import com.dream.common.domain.ResponseError
-import com.dream.workflow.domain.{BaseActivityFlow, Flow => WFlow, _}
+import com.dream.workflow.domain.{Flow => WFlow, _}
 import com.dream.workflow.entity.processinstance.ProcessInstanceProtocol.{CreatePInstCmdRequest => CreateInst}
 import com.dream.workflow.usecase.ItemAggregateUseCase.Protocol.{GetItemCmdRequest, GetItemCmdSuccess}
 import com.dream.workflow.usecase.ParticipantAggregateUseCase.Protocol.{AssignTaskCmdReq, AssignTaskCmdSuccess}
@@ -18,7 +17,6 @@ import com.dream.workflow.usecase.WorkflowAggregateUseCase.Protocol.{GetWorkflow
 import com.dream.workflow.usecase.port._
 
 import scala.concurrent.{ExecutionContext, Future, Promise}
-
 
 object ProcessInstanceAggregateUseCase {
 
@@ -61,7 +59,9 @@ object ProcessInstanceAggregateUseCase {
     case class GetTaskCmdFailed(error: ResponseError) extends GetTaskCmdRes
 
     case class TakeActionCmdRequest(
+
       pInstId: UUID, taskId: UUID, action: String, participantId: UUID, payLoad: Payload, comment: Option[String]
+
     ) extends ProcessInstanceCmdRequest
 
     trait TakeActionCmdResponse extends ProcessInstanceCmdResponse
@@ -69,7 +69,6 @@ object ProcessInstanceAggregateUseCase {
     case class TakeActionCmdSuccess() extends TakeActionCmdResponse
 
     case class TakeActionCmdFailed(error: ResponseError) extends TakeActionCmdResponse
-
 
     case class CreateNewTaskCmdRequest(
       id: UUID,
@@ -86,7 +85,6 @@ object ProcessInstanceAggregateUseCase {
     ) extends CreateNewTaskCmdResponse
 
     case class CreateNewTaskCmdFailed(error: ResponseError) extends CreateNewTaskCmdResponse
-
 
     case class PerformTaskCmdReq(
       actionPerformed: UUID,
@@ -113,8 +111,6 @@ object ProcessInstanceAggregateUseCase {
     case class CommitActionCmdSuccess(id: UUID) extends CommitActionCmdRes
 
     case class CommitActionCmdFailed(error: ResponseError) extends CommitActionCmdRes
-
-
 
     case class ReRouteCmdReq(id: UUID, taskId: UUID,newParticipantId: UUID) extends ProcessInstanceCmdRequest
     sealed trait ReRouteCmdRes extends ProcessInstanceCmdResponse

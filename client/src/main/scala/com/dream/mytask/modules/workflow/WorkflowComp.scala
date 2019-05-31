@@ -1,6 +1,6 @@
 package com.dream.mytask.modules.workflow
 
-import com.dream.mytask.AppClient.{DashboardLoc, Loc}
+import com.dream.mytask.AppClient.{DashboardLoc, Loc, WorkflowLoc}
 import com.dream.mytask.modules.workflow.WorkflowHandler.{FetchFlowAction, InitFlowDataAction, NewFlowAction}
 import com.dream.mytask.services.DataModel.FlowModel
 import com.dream.mytask.shared.data.WorkflowData.FlowJson
@@ -48,9 +48,19 @@ object WorkflowComp {
                 px().renderFailed(ex => <.p("Failed to load")),
                 px().render(m =>
                   <.div(
+
                     <.ol(^.`type` := "1",
                       m.list toTagMod
                     ),
+
+                    <.div("Flow Template"),
+
+                    <.ol(^.`type` := "1",
+                      m.workflowTemplateList toTagMod(item =>
+                        <.li(<.a(^.href := "#", p.c.setOnClick(WorkflowLoc(item.id)), item.name))
+                        )
+                    ),
+
                     <.div(
                       WorkflowFormComp(p.proxy, p.c, m) ,
                       <.div(
@@ -59,13 +69,13 @@ object WorkflowComp {
                           wrapper(px => {
                             <.div(
                               px().renderPending(_ > 500, _ => <.p("Loading...")),
-                              px().renderFailed(ex => <.p("Failed to load")),
+                              px().renderFailed(ex => <.p(s"Failed to load ${ex} ")),
                               px().render(m => <.p(s"hello ${m}"))
                             )
                           })
                         )
                       )
-                    ),
+                    )
                   )
                 )
               )

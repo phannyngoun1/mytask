@@ -4,9 +4,10 @@ import java.util.UUID
 
 import akka.NotUsed
 import akka.actor.ActorSystem
+import com.dream.common.Activity
 import com.dream.common.domain.ResponseError
 import com.dream.workflow.domain.Account.AccountDto
-import com.dream.workflow.domain.{Activity, AssignedTask, Task, TaskDto}
+import com.dream.workflow.domain.{AssignedTask, Task, TaskDto}
 import com.dream.workflow.usecase.ParticipantAggregateUseCase.Protocol.{GetAssignedTaskCmdReq, GetAssignedTaskCmdSuccess}
 import com.dream.workflow.usecase.ProcessInstanceAggregateUseCase.Protocol.{GetTaskCmdReq, GetTaskCmdSuccess}
 import com.dream.workflow.usecase.port.{AccountAggregateFlows, AccountReadModelFlow, ParticipantAggregateFlows, ProcessInstanceAggregateFlows}

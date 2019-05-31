@@ -14,7 +14,6 @@ import com.dream.workflow.adaptor.dao.item.ItemReadModelFlowImpl
 import com.dream.workflow.adaptor.dao.participant.ParticipantReadModelFlowImpl
 import com.dream.workflow.adaptor.dao.processinstance.PInstanceReadModelFlowImpl
 import com.dream.workflow.adaptor.journal.JournalReaderImpl
-import com.dream.workflow.domain.Action
 import com.dream.workflow.usecase.AccountAggregateUseCase.Protocol.{GetAccountCmdReq, GetAccountCmdSuccess, _}
 import com.dream.workflow.usecase.ProcessInstanceAggregateUseCase.Protocol.{ActionCompleted, TakeActionCmdRequest}
 import com.dream.workflow.usecase._
@@ -109,4 +108,5 @@ class ApiService(login: UUID)(implicit val ec: ExecutionContext, implicit val  s
       case _ => "Completed"
     }
   }
+
 }

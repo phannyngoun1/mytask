@@ -6,6 +6,7 @@ import com.dream.workflow.domain.FlowEvents.FlowEvent
 class FlowEventAdaptor extends WriteEventAdapter {
 
   private def withTag(event: Any, tag: String) = Tagged(event, Set(tag))
+
   private val tagName = classOf[FlowEvent].getName
 
   override def manifest(event: Any): String = ""

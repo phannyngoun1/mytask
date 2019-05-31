@@ -2,9 +2,9 @@ package com.dream.workflow.entity.workflow
 
 import java.util.UUID
 
-import com.dream.common.BaseActivity
+import com.dream.common._
 import com.dream.common.Protocol.{CmdRequest, CmdResponse}
-import com.dream.workflow.domain.{BaseActivityFlow, Flow}
+import com.dream.workflow.domain.{Flow}
 
 object WorkflowProtocol {
 

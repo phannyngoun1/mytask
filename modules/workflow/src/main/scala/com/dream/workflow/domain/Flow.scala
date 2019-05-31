@@ -3,10 +3,9 @@ package com.dream.workflow.domain
 import java.time.Instant
 import java.util.UUID
 
-import com.dream.common.{BaseAction, BaseActivity, Params}
+import com.dream.common._
 import com.dream.common.domain.ErrorMessage
 import org.sisioh.baseunits.scala.time.TimePoint
-import play.api.libs.json._
 
 sealed trait WorkflowError extends ErrorMessage
 
@@ -18,39 +17,9 @@ case class InvalidWorkflowStateError(override val id: Option[UUID] = None ) exte
   override val message: String = s"Invalid state${id.fold("")(id => s":id = ${id.toString}")}"
 }
 
-
 case object TestActivity extends BaseActivity {
   override def name: String = "test"
 }
-
-
-sealed trait BaseActivityFlow {
-  def activity: BaseActivity
-  def participants: List[UUID]
-  def actionFlows: List[ActionFlow]
-}
-
-//object BaseActivityFlow {
-//  implicit val jsonFormat: OFormat[BaseActivityFlow] = derived.oformat[BaseActivityFlow]()
-//}
-
-/**
-  *
-  * @param participantId
-  * @param acceptedPolicy: Policy is used to reduce contribution repeated authorize configuration. Empty = None policy is accepted.
-  * @param payloadAuthCode: being used to restrict payload accessible data. * = not restrict
-  * @param contributeType Direct assign. Sharable, Assignable, Pickup,  Empy = any types.
-  * @param accessibleActions: Empty = Any actions.
-  */
-case class Contribution(
-  participantId: UUID,
-  acceptedPolicy: List[UUID] = List.empty,
-  payloadAuthCode: String = "*",
-  contributeType: List[String] = List.empty,
-  accessibleActions: List[BaseAction] = List.empty
-)
-
-// Originate,
 
 case class ActionHis(
   participantId: UUID,
@@ -65,74 +34,6 @@ case class ActivityHis(
   description: String,
   actionDate: Instant = Instant.now()
 )
-
-
-case class ActionFlow(action: BaseAction, activity: Option[BaseActivity])
-
-case class ActivityFlow(activity: BaseActivity, participants: List[UUID], actionFlows: List[ActionFlow]) extends BaseActivityFlow
-
-case class StartAction() extends BaseAction {
-  override val name: String = "Start"
-}
-
-
-case class DoneAction() extends BaseAction {
-  override val name: String = "Done"
-}
-
-case class NaAction() extends BaseAction {
-  override val name: String = "N/A"
-}
-
-case class StartActivity() extends BaseActivity() {
-  override val name: String = "Start"
-}
-
-case class CurrActivity() extends BaseActivity {
-  override val name: String = "StayStill"
-}
-
-
-case class NaActivity() extends BaseActivity {
-  override val name: String = "NaActivity"
-}
-
-case class DoneActivity() extends BaseActivity {
-  override val name: String = "Done"
-}
-
-
-/**
-  * Predefined activity flows
-  */
-
-abstract class AbstractActivityFlow() extends BaseActivityFlow {
-  override def participants: List[UUID] = List.empty
-
-  override def actionFlows: List[ActionFlow] = List.empty
-}
-case class NaActivityFlow() extends AbstractActivityFlow {
-
-  override def activity: BaseActivity = NaActivity()
-
-}
-
-case class DoneActivityFlow() extends AbstractActivityFlow {
-  override def activity: BaseActivity = DoneActivity()
-}
-
-case class Activity(name: String) extends BaseActivity
-
-object Activity {
-  implicit val format: Format[Activity] = Json.format
-}
-
-
-case class Action(name: String, override val actionType: String) extends BaseAction
-
-object Action {
-  implicit val format: Format[Action] = Json.format
-}
 
 
 case class DoAction(

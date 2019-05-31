@@ -8,7 +8,7 @@ import com.dream.mytask.modules.item.ItemComp
 import com.dream.mytask.modules.processinst.{ProcessInstComp, ViewProcessInstComp}
 import com.dream.mytask.modules.task.TaskListComp
 import com.dream.mytask.modules.ticketform.AssignFormComp
-import com.dream.mytask.modules.workflow.WorkflowComp
+import com.dream.mytask.modules.workflow.{WorkflowComp, WorkflowCreationComp}
 import com.dream.mytask.modules.{Dashboard, Main}
 import com.dream.mytask.services.AppCircuit
 import japgolly.scalajs.react.extra.router._
@@ -32,6 +32,14 @@ object AppClient {
       AppCircuit.wrap(_.taskModel) (proxy => TaskListComp(proxy, c, id))
     })
 
+    val workflowRoute = dynamicRouteCT( ("#workflow" / uuid ).caseClass[WorkflowLoc]  ) ~> dynRenderR( (p, c)=>{
+      val id = p match {
+        case WorkflowLoc(id) => Some(id)
+        case _ => None
+      }
+      AppCircuit.wrap(_.flowModel) (proxy => WorkflowCreationComp(proxy, c, id))
+    })
+
     val takeAction = staticRoute("#task", PerformTaskLoc) ~> renderR( c => AppCircuit.wrap(_.formModel)(proxy => FormComp(proxy, c)))
 
     val viewPInstRoute = dynamicRouteCT( ("#view-instance" / uuid ).caseClass[ViewPInstLoc]  ) ~> dynRenderR( (p, c)=>{
@@ -50,6 +58,7 @@ object AppClient {
       | accRoute
       | flowRoute
       | fetchTaskRoute
+      | workflowRoute
       | takeAction
       | viewPInstRoute
       ).notFound(redirectToPage(DashboardLoc)(Redirect.Replace))
@@ -85,6 +94,8 @@ object AppClient {
   case object FlowLoc  extends Loc
 
   case object PerformTaskLoc extends Loc
+
+  case class WorkflowLoc(id: UUID) extends Loc
 
   case class ViewPInstLoc(pInstId: UUID) extends Loc
 
