@@ -13,7 +13,9 @@ import scala.util.Random
 
 object WorkflowItemComp {
   case class Props(proxy: ModelProxy[FlowModel], c: RouterCtl[Loc], data: WorkflowTemplateJs)
-  case class State(map: Map[ActivityFlowJs, List[ContributionJs]] = Map.empty, editingAct: Option[ActivityFlowJs] = None)
+  case class State(map: Map[ActivityFlowJs,
+    List[ContributionJs]] = Map.empty, editingAct: Option[ActivityFlowJs] = None, contribute: Option[ContributionJs] = None
+  )
 
   class Backend($: BackendScope[Props, State]) {
 
@@ -73,6 +75,70 @@ object WorkflowItemComp {
       )
     }
 
+    private  def entryForm(act: ActivityFlowJs) = {
+      <.tr(
+        <.td(^.textAlign := "top"  ,<.h3("Contribute Form")),
+        <.td(
+          <.table(
+            <.tbody(
+              <.tr(
+                <.td("Participant: "),
+                <.td(
+                  <.select(
+                    <.option("Hello")
+                  )
+                ),
+                <.td()
+              ),
+              <.tr(
+                <.td("Policy: "),
+                <.td(
+                  <.select(
+                    <.option("Hello")
+                  ),
+                  <.button(">>")
+                ),
+                <.td( "Policy list ----", <.a(^.href := "#", "Remove"))
+              ),
+              <.tr(
+                <.td("Payload Auth Code: "),
+                <.td(<.input()),
+                <.td()
+              ),
+              <.tr(
+                <.td("Contribute. Type: "),
+                <.td(
+                  <.select(
+                    <.option("Hello")
+                  ),
+                  <.button(">>")
+                ),
+                <.td( "Contribute. Type list ----", <.a(^.href := "#", "Remove"))
+              ),
+              <.tr(
+                <.td("Action: "),
+                <.td(
+                  <.select(
+                    <.option(^.default := true),
+                    act.actionFlow.toTagMod(act =>
+                      <.option(^.value := act.action.name , act.action.name)
+                    )
+                  ),
+                  <.button(">>")
+                ),
+                <.td( "Action list ----", <.a(^.href := "#", "Remove"))
+              ),
+              <.tr(
+                <.td( ^.colSpan := 3, ^.textAlign := "left",
+                  <.button("Add")
+                )
+              )
+            )
+          )
+        )
+      )
+    }
+
     def render(p: Props, s: State) = {
       <.div(
         <.table(
@@ -95,64 +161,8 @@ object WorkflowItemComp {
                 s.editingAct.map(editForm).getOrElse(<.div("No activity selected"))
               )
             ),
-            <.tr(
-              <.td(^.textAlign := "top"  ,<.h3("Contribute Form")),
-              <.td(
-                <.table(
-                  <.tbody(
-                    <.tr(
-                      <.td("Participant: "),
-                      <.td(
-                        <.select(
-                          <.option("Hello")
-                        )
-                      ),
-                      <.td()
-                    ),
-                    <.tr(
-                      <.td("Policy: "),
-                      <.td(
-                        <.select(
-                          <.option("Hello")
-                        ),
-                        <.button(">>")
-                      ),
-                      <.td( "Policy list ----", <.a(^.href := "#", "Remove"))
-                    ),
-                    <.tr(
-                      <.td("Payload Auth Code: "),
-                      <.td(<.input()),
-                      <.td()
-                    ),
-                    <.tr(
-                      <.td("Contribute. Type: "),
-                      <.td(
-                        <.select(
-                          <.option("Hello")
-                        ),
-                        <.button(">>")
-                      ),
-                      <.td( "Contribute. Type list ----", <.a(^.href := "#", "Remove"))
-                    ),
-                    <.tr(
-                      <.td("Action: "),
-                      <.td(
-                        <.select(
-                          <.option("Hello")
-                        ),
-                        <.button(">>")
-                      ),
-                      <.td( "Action list ----", <.a(^.href := "#", "Remove"))
-                    ),
-                    <.tr(
-                      <.td( ^.colSpan := 3, ^.textAlign := "left",
-                        <.button("Add")
-                      )
-                    )
-                  )
-                )
-              )
-            )
+
+            s.editingAct.map(entryForm).getOrElse(VdomArray.empty())
           )
         )
       )
