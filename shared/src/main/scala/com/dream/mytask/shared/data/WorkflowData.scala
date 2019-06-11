@@ -24,12 +24,16 @@ object WorkflowData {
   case class FlowInitDataJs(
     list: List[FlowJson],
     workflowTemplateList: List[WorkflowTemplateJs],
+    //contributeTypeList: List[ContributeTypeJs],
     pcpList: List[ParticipantJson]
   )
 
   case class ActionJs(name: String, actionType: String)
   case class ActivityJs(name: String)
   case class ActionFlowJs(action: ActionJs, activity: Option[ActivityJs])
+
+  case class ContributeTypeJs(code: String, name: String)
+
   case class ContributionJs(
     participantId: UUID,
     policyList: List[UUID] = List.empty,
@@ -39,6 +43,7 @@ object WorkflowData {
   )
   case class ActivityFlowJs(
     activityJs: ActivityJs,
+    contributeTypes: List[ContributeTypeJs],
     contribution: List[ContributionJs],
     actionFlow: List[ActionFlowJs]
   )
@@ -46,7 +51,10 @@ object WorkflowData {
     id: UUID,
     name: String,
     startActivity: ActivityJs,
-    activityFlowList: Seq[ActivityFlowJs]
+    activityFlowList: Seq[ActivityFlowJs],
+    flowInitDataJs: Option[FlowInitDataJs] = None
   )
+
+
 
 }

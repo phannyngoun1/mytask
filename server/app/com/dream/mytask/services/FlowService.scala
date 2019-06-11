@@ -5,7 +5,7 @@ import java.util.UUID
 import com.dream.common._
 import com.dream.mytask.shared.data.AccountData.ParticipantJson
 import com.dream.mytask.shared.data.WorkflowData
-import com.dream.mytask.shared.data.WorkflowData.{ActionFlowJs, ActionJs, ActivityFlowJs, ActivityJs, FlowInitDataJs, FlowJson, WorkflowTemplateJs}
+import com.dream.mytask.shared.data.WorkflowData.{ActionFlowJs, ActionJs, ActivityFlowJs, ActivityJs, ContributeTypeJs, FlowInitDataJs, FlowJson, WorkflowTemplateJs}
 import com.dream.ticket.flow.TicketFlowTemplate
 import com.dream.workflow.usecase.WorkflowAggregateUseCase.Protocol.{CreateWorkflowCmdRequest, CreateWorkflowCmdSuccess, GetWorkflowCmdRequest, GetWorkflowCmdSuccess}
 
@@ -22,6 +22,7 @@ trait FlowService {  this: ApiService =>
       activityFlowList = ticketWorkflowTemplate.activityFlowList.map(item =>
         ActivityFlowJs(
           ActivityJs(item.activity.name),
+          contributeTypes = item.contributeTypeList.map(ct => ContributeTypeJs(ct.code, ct.name)),
           contribution = List.empty,
           actionFlow = item.actionFlows.map(actFlow =>
             ActionFlowJs(ActionJs( actFlow.action.name, actFlow.action.actionType), actFlow.activity.map(activity => ActivityJs(activity.name)))
@@ -41,13 +42,16 @@ trait FlowService {  this: ApiService =>
       FlowInitDataJs(
         item._1.map(flow => FlowJson(flow.id, flow.name)),
         flowTemplateList,
+        //List(ContributeTypeJs("DirectAssign","Direct assign"), ContributeTypeJs("Sharable","Can be shared"), ContributeTypeJs("Assignable","Can be Assigned"), ContributeTypeJs("Pickup","Pickup")),
         item._2.map(pcp => ParticipantJson(pcp.id, pcp.accountId, pcp.tasks) )
       )
     }
   }
 
   override def getFlowTemplate(id: UUID): Future[WorkflowData.WorkflowTemplateJs] = {
-    Future.successful(flowTemplateList.find(_.id.equals(id)).get)
+    getFlowInitData().map{ item =>
+      flowTemplateList.find(_.id.equals(id)).map(_.copy(flowInitDataJs = Some(item))) .get
+    }
   }
 
   override def getFlow(id: String): Future[WorkflowData.FlowJson] =

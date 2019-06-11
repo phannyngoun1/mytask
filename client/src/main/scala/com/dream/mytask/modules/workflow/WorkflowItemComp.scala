@@ -1,20 +1,21 @@
 package com.dream.mytask.modules.workflow
 
 
+import java.util.UUID
+
 import com.dream.mytask.AppClient.Loc
 import com.dream.mytask.services.DataModel.FlowModel
-import com.dream.mytask.shared.data.WorkflowData.{ActivityFlowJs, ContributionJs, WorkflowTemplateJs}
+import com.dream.mytask.shared.data.WorkflowData.{ActivityFlowJs, ContributionJs, FlowInitDataJs, WorkflowTemplateJs}
 import diode.react._
-import japgolly.scalajs.react.{BackendScope, _}
 import japgolly.scalajs.react.extra.router.RouterCtl
 import japgolly.scalajs.react.vdom.html_<^._
+import japgolly.scalajs.react.{BackendScope, _}
 
 import scala.util.Random
 
 object WorkflowItemComp {
-  case class Props(proxy: ModelProxy[FlowModel], c: RouterCtl[Loc], data: WorkflowTemplateJs)
-  case class State(map: Map[ActivityFlowJs,
-    List[ContributionJs]] = Map.empty, editingAct: Option[ActivityFlowJs] = None, contribute: Option[ContributionJs] = None
+  case class Props(proxy: ModelProxy[FlowModel], c: RouterCtl[Loc],init: FlowInitDataJs, data: WorkflowTemplateJs)
+  case class State( data: WorkflowTemplateJs, name: String , editingAct: Option[ActivityFlowJs] = None, contribute: Option[ContributionJs] = None
   )
 
   class Backend($: BackendScope[Props, State]) {
@@ -25,12 +26,12 @@ object WorkflowItemComp {
 
     private def edit(activityFlow: ActivityFlowJs)(e: ReactEventFromInput) = {
       e.preventDefault()
-      $.modState(_.copy(editingAct = Some(activityFlow)))
+      $.modState(_.copy(editingAct = Some(activityFlow), contribute = None))
     }
 
     private def renderActivity(activityFlow: ActivityFlowJs, inx: Int) = {
       <.div(^.backgroundColor := s"${colors(inx)}",
-        <.h3(s"Activity Name: ${activityFlow.activityJs.name}   ###", <.a(^.href := "#", "Edit", ^.onClick ==> edit(activityFlow))),
+        <.h3(s"Activity Name: ${activityFlow.activityJs.name} ###", <.a(^.href := "#", "Edit", ^.onClick ==>   edit(activityFlow))),
         <.h3(s"Actions List:"),
         <.ol(
           activityFlow.actionFlow.toTagMod(item =>
@@ -43,9 +44,21 @@ object WorkflowItemComp {
       )
     }
 
-    private def editForm(act: ActivityFlowJs) = {
+    private def editForm(act: ActivityFlowJs, state: State) = {
       <.div(
-        <.div( ^.className := "topnav", act.activityJs.name , "-----", <.a(^.href := "#", "Commit")),
+        <.div( ^.className := "topnav", act.activityJs.name , "-----", <.a(
+          ^.href := "#", "Commit",
+          ^.onClick ==> { e: ReactEventFromInput =>
+            e.preventDefault()
+            Callback.when(state.editingAct.isDefined)(
+            $.modState(m => m.copy(data = m.data.copy(activityFlowList = m.data.activityFlowList.map(m => {
+              if(m.activityJs == act.activityJs)
+                state.editingAct.get
+              else m.copy()
+            }))))
+            )
+          }
+        )),
         <.div(
           <.table(^.className := "bottomBorder",
             <.thead(
@@ -66,7 +79,13 @@ object WorkflowItemComp {
                   <.td(item.payloadAuthCode),
                   <.td(item.contributeTypeList.mkString("; ")),
                   <.td(item.accessibleActionList.map(action => s"${action.name} |  ${action.actionType}" ).mkString("; ")),
-                  <.td(<.a(^.href := "#", "Remove"))
+                  <.td(<.a(
+                    ^.href := "#", "Remove",
+                    ^.onClick ==> { e: ReactEventFromInput =>
+                      e.preventDefault()
+                      $.modState(m => m.copy(editingAct = m.editingAct.map(act => act.copy(contribution = act.contribution.filter(f => f != item) ))))
+                    }
+                  ))
                 )
               })
             )
@@ -75,7 +94,15 @@ object WorkflowItemComp {
       )
     }
 
-    private  def entryForm(act: ActivityFlowJs) = {
+    private def removeActionList(e: ReactEventFromInput) = {
+      e.preventDefault()
+      $.modState(m => m.copy(contribute = m.contribute.map(item => item.copy(accessibleActionList = List.empty)) ))
+    }
+
+    private  def entryForm( act: ActivityFlowJs, p: Props, state: State) = {
+
+      val ppp = UUID.randomUUID().toString
+
       <.tr(
         <.td(^.textAlign := "top"  ,<.h3("Contribute Form")),
         <.td(
@@ -85,10 +112,19 @@ object WorkflowItemComp {
                 <.td("Participant: "),
                 <.td(
                   <.select(
-                    <.option("Hello")
+                    ^.value := state.contribute.map(_.participantId.toString).getOrElse("") ,
+                    ^.onChange ==> { e: ReactEventFromInput =>
+                      val value = if (e.target.value.trim.isEmpty) None else Some(e.target.value)
+                      value.map(v =>  $.modState(_.copy(contribute = Some(ContributionJs(UUID.fromString(v))))))
+                        .getOrElse($.modState(_.copy(contribute = None)))
+                    },
+                    <.option(^.default := true),
+                    p.init.pcpList
+                      .filter(pcp => !state.editingAct.map ( _.contribution.exists( _.participantId.toString.equals(pcp.id) )).getOrElse(false) )
+                      .toTagMod(item =>  <.option(^.value := item.id ,s"${item.id}-${item.accountId}"))
                   )
                 ),
-                <.td()
+                <.td(s"${state.contribute.map(_.participantId.toString).getOrElse("")}")
               ),
               <.tr(
                 <.td("Policy: "),
@@ -109,28 +145,69 @@ object WorkflowItemComp {
                 <.td("Contribute. Type: "),
                 <.td(
                   <.select(
-                    <.option("Hello")
-                  ),
-                  <.button(">>")
+                    ^.onChange ==> { e: ReactEventFromInput =>
+
+                      val value = if(e.target.value.trim.isEmpty) None else Some(e.target.value.trim)
+                      value
+                        .map(v =>$.modState(m => m.copy(contribute = m.contribute.map(item => item.copy(contributeTypeList =   v :: item.contributeTypeList)))))
+                        .getOrElse($.modState(_.copy()))
+                    },
+                    ^.value :="",
+                    <.option(^.default := true, "Add", ^.width := "200"),
+                    act.contributeTypes.filter(item => !state.contribute.map ( _.contributeTypeList.exists( _.equals(item.code) )).getOrElse(false))
+                      .toTagMod(t => <.option(^.value := t.code, ^.width := "200" , t.name))
+                  )
                 ),
-                <.td( "Contribute. Type list ----", <.a(^.href := "#", "Remove"))
+                <.td(
+                  s"${state.contribute.map(_.contributeTypeList.mkString("; " ) ).getOrElse("N/A")}",
+                  <.a(
+                    ^.href := "#", "Remove",
+                    ^.onClick ==> { e: ReactEventFromInput =>
+                      e.preventDefault()
+                      $.modState(m => m.copy(contribute = m.contribute.map(item => item.copy(contributeTypeList = List.empty)) ))
+                    }
+                  ))
               ),
               <.tr(
                 <.td("Action: "),
                 <.td(
                   <.select(
-                    <.option(^.default := true),
-                    act.actionFlow.toTagMod(act =>
-                      <.option(^.value := act.action.name , act.action.name)
-                    )
-                  ),
-                  <.button(">>")
+                    ^.value :="",
+                    <.option(^.default := true, "Add Action"),
+                    ^.onChange ==> { e: ReactEventFromInput =>
+                        act.actionFlow
+                          .find(_.action.name.equalsIgnoreCase(e.target.value.trim))
+                          .map(actionFlow => $.modState( m =>
+                            m.copy(contribute = m.contribute.map(item => item.copy(accessibleActionList =   actionFlow.action :: item.accessibleActionList))))
+                          )
+                          .getOrElse($.modState( _.copy()))
+                    },
+
+                    act.actionFlow.filter(item => !state.contribute.map ( _.accessibleActionList.exists( _.equals(item.action) )).getOrElse(false))
+                        .toTagMod(act => <.option(^.value := act.action.name , act.action.name))
+                  )
                 ),
-                <.td( "Action list ----", <.a(^.href := "#", "Remove"))
+                <.td(
+                  s"${state.contribute.map(_.accessibleActionList.mkString("; " ) ).getOrElse("N/A")}",
+                  <.a(
+                    ^.onClick ==>removeActionList,
+                    ^.href := "#", "Remove"
+                  )
+                )
               ),
               <.tr(
                 <.td( ^.colSpan := 3, ^.textAlign := "left",
-                  <.button("Add")
+                  <.button("Add",
+                    ^.onClick ==> { e: ReactEventFromInput =>
+                      e.preventDefault()
+                      Callback.when(state.contribute.isDefined)($.modState(m => m.copy(
+                        editingAct = m.editingAct.map(act=> act.copy(
+                          contribution = (m.contribute.get :: act.contribution)
+                        )),
+                        contribute = None
+                      )))
+                    }
+                  )
                 )
               )
             )
@@ -150,19 +227,33 @@ object WorkflowItemComp {
               <.td(^.textAlign := "top"  ,<.h3("Template Name")), <.td(p.data.name)
             ),
             <.tr(
+              <.td(^.textAlign := "top"  ,<.h3("New Flow Name")),
+              <.td(
+                <.input(^.`type` := "text", ^.value := s.name, ^.onChange ==> { e: ReactEventFromInput =>
+                  val value = e.target.value.trim
+                  $.modState(_.copy(name = value))
+                }),
+
+                <.a("Commit", ^.href := "#", ^.onClick ==> {  e: ReactEventFromInput =>
+                  e.preventDefault()
+                  Callback(println(" ------- Hello ------- "))
+                })
+              )
+            ),
+            <.tr(
               <.td(^.textAlign := "top"  ,  <.h3("Flows")),
               <.td(
-                p.data.activityFlowList.zipWithIndex.toTagMod ( f=> renderActivity(f._1, f._2))
+                s.data.activityFlowList.zipWithIndex.toTagMod ( f=> renderActivity(f._1, f._2))
               )
             ),
             <.tr(
               <.td(^.textAlign := "top"  ,<.h3("Edit Activity")),
               <.td(
-                s.editingAct.map(editForm).getOrElse(<.div("No activity selected"))
+                s.editingAct.map(editForm(_, s)).getOrElse(<.div("No activity selected"))
               )
             ),
 
-            s.editingAct.map(entryForm).getOrElse(VdomArray.empty())
+            s.editingAct.map(entryForm(_, p, s) ).getOrElse(VdomArray.empty())
           )
         )
       )
@@ -170,9 +261,10 @@ object WorkflowItemComp {
   }
 
   private val component = ScalaComponent.builder[Props]("WorkflowItemComp")
-    .initialStateFromProps(p => State())
+    .initialStateFromProps(p => State(data = p.data, name = p.data.name))
     .renderBackend[Backend]
     .build
 
-  def apply(proxy: ModelProxy[FlowModel], c: RouterCtl[Loc], data: WorkflowTemplateJs) = component(Props(proxy, c, data))
+  def apply(proxy: ModelProxy[FlowModel], c: RouterCtl[Loc], init: FlowInitDataJs, data: WorkflowTemplateJs)
+  = component(Props(proxy, c, init, data))
 }

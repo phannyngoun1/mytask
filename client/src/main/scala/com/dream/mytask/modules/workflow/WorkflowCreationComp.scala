@@ -3,7 +3,7 @@ package com.dream.mytask.modules.workflow
 import java.util.UUID
 
 import com.dream.mytask.AppClient.Loc
-import com.dream.mytask.modules.workflow.WorkflowHandler.{FetchWorkflowTemplateAction}
+import com.dream.mytask.modules.workflow.WorkflowHandler.FetchWorkflowTemplateAction
 import com.dream.mytask.services.DataModel.FlowModel
 import diode.react.ReactPot._
 import diode.react._
@@ -20,6 +20,9 @@ object WorkflowCreationComp {
 
     def render(p: Props, s: State) = {
 
+      //TODO: muck up
+     // val initFlow = FlowInitDataJs(List.empty, List.empty, List(ContributeTypeJs("DirectAssign","Direct assign"), ContributeTypeJs("Sharable","Can be shared"), ContributeTypeJs("Assignable","Can be Assigned"), ContributeTypeJs("Pickup","Pickup")), List(ParticipantJson(UUID.randomUUID().toString, UUID.randomUUID().toString , List.empty)))
+
       val conn = p.proxy.connect(_.workflow)
       <.div(
         conn(px =>
@@ -27,7 +30,7 @@ object WorkflowCreationComp {
             px().renderPending(_ > 500, _ => <.p("Loading...")),
             px().renderFailed(ex => <.p("Failed to load")),
             px().render(m =>
-              <.div(WorkflowItemComp(p.proxy, p.c, m))
+              <.div(WorkflowItemComp(p.proxy, p.c, m.flowInitDataJs.get, m))
             )
           )
         )

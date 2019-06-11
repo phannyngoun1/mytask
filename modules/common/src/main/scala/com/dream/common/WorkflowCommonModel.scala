@@ -43,6 +43,7 @@ trait BaseActivity {
 
 trait BaseActivityFlow {
   def activity: BaseActivity
+  def contributeTypeList: List[ContributeType]
   def participants: List[UUID]
   def actionFlows: List[ActionFlow]
 }
@@ -64,6 +65,7 @@ case class ActionFlow(action: BaseAction, activity: Option[BaseActivity])
 case class ActivityFlow(
   activity: BaseActivity,
   participants: List[UUID] = List.empty ,
+  contributeTypeList: List[ContributeType] = List.empty , // Direct assign - DirectAssign. Sharable, Assignable, Pickup,  Empty = any types.
   contribution: List[Contribution] = List.empty,
   actionFlows: List[ActionFlow]
 ) extends BaseActivityFlow
@@ -104,7 +106,7 @@ case class DoneActivity() extends BaseActivity {
 
 abstract class AbstractActivityFlow() extends BaseActivityFlow {
   override def participants: List[UUID] = List.empty
-
+  override def contributeTypeList: List[ContributeType] = List.empty
   override def actionFlows: List[ActionFlow] = List.empty
 }
 
@@ -122,15 +124,32 @@ case class DoneActivityFlow() extends AbstractActivityFlow {
   * @param participantId
   * @param policyList: Policy is used to reduce contribution repeated authorize configuration. Empty = None policy is accepted.
   * @param payloadAuthCode: being used to restrict payload accessible data. * = not restrict
-  * @param contributeTypeList  Direct assign. Sharable, Assignable, Pickup,  Empty = any types.
+  * @param contributeTypeList  Direct assign - DirectAssign. Sharable, Assignable, Pickup,  * = any types.
   * @param accessibleActionList: Empty = Any actions.
   */
 case class Contribution(
   participantId: UUID,
   policyList: List[UUID] = List.empty,
   payloadAuthCode: String = "*",
-  contributeTypeList: List[String] = List.empty,
+  contributeTypeList: List[ContributeType] = List.empty,
   accessibleActionList: List[BaseAction] = List.empty
+)
+
+
+object Contribution {
+  val directAssign = ContributeType("DirectAssign", "Direct assign")
+  val sharable = ContributeType("Sharable", "Can be shared")
+  val assignable = ContributeType("Assignable", "Can be assigned")
+  val pickup = ContributeType("Pickup", "Pickup")
+  val all = ContributeType("*", "*")
+}
+
+
+
+//Direct assign - DirectAssign. Sharable, Assignable, Pickup,  * = any types.
+case class ContributeType(
+  code: String,
+  name: String
 )
 
 case class FlowTemplate(

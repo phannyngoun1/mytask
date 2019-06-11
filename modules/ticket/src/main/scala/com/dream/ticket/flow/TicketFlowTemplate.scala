@@ -43,7 +43,7 @@ object TicketFlowTemplate{
 
     activity = ticketActivity,
     participants = List.empty, // to be replaced with participants
-
+    contributeTypeList = List(Contribution.directAssign, Contribution.assignable, Contribution.sharable, Contribution.pickup, Contribution.all ),
     actionFlows = List(
       editTicketActionFlow,
       closeTicketActionFlow,
