@@ -45,8 +45,9 @@ trait BaseActivityFlow {
   def activity: BaseActivity
   def contributeTypeList: List[String]
   def contribution: List[Contribution]
-  def participants: List[UUID]
   def actionFlows: List[ActionFlow]
+
+  def directAssigned: List[UUID] = contribution.filter(_.contributeTypeList.exists( item =>  item.equalsIgnoreCase("DirectAssign") || item.equalsIgnoreCase("*")  )).map(_.participantId)
 }
 
 case class Activity(name: String) extends BaseActivity
@@ -65,7 +66,6 @@ case class ActionFlow(action: BaseAction, activity: Option[BaseActivity])
 
 case class ActivityFlow(
   activity: BaseActivity,
-  participants: List[UUID] = List.empty ,
   contributeTypeList: List[String] = List.empty , // Direct assign - DirectAssign. Sharable, Assignable, Pickup,  Empty = any types.
   contribution: List[Contribution] = List.empty,
   actionFlows: List[ActionFlow]
@@ -106,7 +106,7 @@ case class DoneActivity() extends BaseActivity {
 
 
 abstract class AbstractActivityFlow() extends BaseActivityFlow {
-  override def participants: List[UUID] = List.empty
+//  override def participants: List[UUID] = List.empty
   override def contributeTypeList: List[String] = List.empty
   override def contribution: List[Contribution] = List.empty
   override def actionFlows: List[ActionFlow] = List.empty

@@ -239,10 +239,7 @@ object WorkflowItemComp {
 
                 <.a("==> Commit", ^.href := "#", ^.onClick ==> {  e: ReactEventFromInput =>
                   e.preventDefault()
-
                   p.proxy.dispatchCB(NewFlowAction(Some(s.data.copy(name = s.name))))
-
-                  Callback(println(" ------- Hello ------- "))
                 })
               )
             ),

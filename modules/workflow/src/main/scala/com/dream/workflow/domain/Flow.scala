@@ -87,7 +87,7 @@ case class Flow(
 
       println("findCurrentActivity")
 
-      workflowList.find(_.activity == activity ) match {
+      workflowList.find(_.activity.name.equalsIgnoreCase(activity.name)) match {
         case None => Left(ActivityNotFoundError(s"Current activity: ${activity.name} can't be found"))
         case Some(act: BaseActivityFlow )=> Right(act)
       }
@@ -98,7 +98,7 @@ case class Flow(
   private def nextActivity(participantAccess: ParticipantAccess, action: BaseAction)(currActivityFlow: BaseActivityFlow): Either[WorkflowError, BaseActivityFlow] = {
     currActivityFlow match {
       case act: ActivityFlow =>
-        act.actionFlows.find(_.action == action) match {
+        act.actionFlows.find(_.action.name.equalsIgnoreCase(action.name)) match {
 
           case Some(ActionFlow(_, None)) =>
             Right(NaActivityFlow())

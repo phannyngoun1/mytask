@@ -73,7 +73,6 @@ trait FlowService {  this: ApiService =>
     val startAct = Activity(workflow.startActivity.name)
     val actList =  workflow.activityFlowList.map(item => ActivityFlow(
       activity = Activity(item.activityJs.name),
-      participants = List.empty ,
       contributeTypeList = List.empty,
       contribution = item.contribution.map(toContribution),
       actionFlows = item.actionFlow.map(toActionFlow)

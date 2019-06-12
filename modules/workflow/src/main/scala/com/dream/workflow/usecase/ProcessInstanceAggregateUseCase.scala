@@ -147,17 +147,6 @@ class ProcessInstanceAggregateUseCase(
       .withSupervisionStrategy(decider)
   )
 
-//  private val getWorflowByItem =
-//    Flow[UUID].map(GetItemCmdRequest)
-//      .via(itemAggregateFlows.getItem)
-//      .map {
-//        case res: GetItemCmdSuccess => GetWorkflowCmdRequest(res.workflowId)
-//      }
-//      .via(workflowAggregateFlows.getWorkflow)
-//      .map {
-//        case GetWorkflowCmdSuccess(workflow) => workflow
-//      }
-
 
   //TODO: workaround, need to be fixed
   private val prepareCreateInst = Flow.fromGraph(GraphDSL.create() { implicit b =>
@@ -187,12 +176,12 @@ class ProcessInstanceAggregateUseCase(
           folio = "test",
           contentType = "ticket",
           description = "Test",
-          destIds = nextFlow.participants,
+          destIds = nextFlow.directAssigned,
           task = Task(
             id = UUID.randomUUID(),
             activity = nextFlow.activity,
             actions = nextFlow.actionFlows.map(_.action),
-            nextFlow.participants.map(TaskDestination(_)),
+            nextFlow.directAssigned.map(TaskDestination(_)),
             actionPerformed = List(ActionPerformed(pInstId, req.by, startAction, Instant.now(), None))
           ),
           DefaultPayLoad("New ticket")
@@ -407,7 +396,11 @@ class ProcessInstanceAggregateUseCase(
       val newActivity = param.nexActivity.get
       CreateNewTaskCmdRequest(
         param.action.pInstId,
-        Task(param.newTaskId.get, newActivity.activity, newActivity.actionFlows.map(_.action), newActivity.participants.map(TaskDestination(_))),
+        Task(
+          param.newTaskId.get,
+          newActivity.activity,
+          newActivity.actionFlows.map(_.action),
+          newActivity.directAssigned.map(TaskDestination(_))),
         param.action.participantId
       )
     }

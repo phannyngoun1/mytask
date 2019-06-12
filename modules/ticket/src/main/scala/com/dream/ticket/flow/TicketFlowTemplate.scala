@@ -14,7 +14,6 @@ object TicketFlowTemplate{
 
   val startActivityFlow = ActivityFlow(
     activity = StartActivity(),
-    participants = List.empty,
     actionFlows = List(startActionFlow)
   )
 
@@ -42,7 +41,6 @@ object TicketFlowTemplate{
   val ticketActivityFlow = ActivityFlow(
 
     activity = ticketActivity,
-    participants = List.empty, // to be replaced with participants
     contributeTypeList = List( "DirectAssign", "Sharable", "Assignable", "Pickup" , "*" ),
     actionFlows = List(
       editTicketActionFlow,
