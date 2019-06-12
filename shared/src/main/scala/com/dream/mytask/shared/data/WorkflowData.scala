@@ -34,6 +34,25 @@ object WorkflowData {
 
   case class ContributeTypeJs(code: String, name: String)
 
+
+  object ContributeTypeJs {
+
+    def find(code: String) =
+      code match {
+        case "DirectAssign"  => directAssign
+        case "Sharable" => sharable
+        case "Assignable" => assignable
+        case "Pickup" => pickup
+        case "*" => all
+      }
+
+    val directAssign = ContributeTypeJs("DirectAssign", "Direct assign")
+    val sharable = ContributeTypeJs("Sharable", "Can be shared")
+    val assignable = ContributeTypeJs("Assignable", "Can be assigned")
+    val pickup = ContributeTypeJs("Pickup", "Pickup")
+    val all = ContributeTypeJs("*", "*")
+  }
+
   case class ContributionJs(
     participantId: UUID,
     policyList: List[UUID] = List.empty,
@@ -41,12 +60,14 @@ object WorkflowData {
     contributeTypeList: List[String] = List.empty,
     accessibleActionList: List[ActionJs] = List.empty
   )
+
   case class ActivityFlowJs(
     activityJs: ActivityJs,
     contributeTypes: List[ContributeTypeJs],
     contribution: List[ContributionJs],
     actionFlow: List[ActionFlowJs]
   )
+
   case class WorkflowTemplateJs(
     id: UUID,
     name: String,

@@ -1,7 +1,9 @@
 package com.dream.mytask.modules.workflow
 
-import com.dream.mytask.AppClient.{DashboardLoc, Loc, WorkflowLoc}
-import com.dream.mytask.modules.workflow.WorkflowHandler.{FetchFlowAction, InitFlowDataAction, NewFlowAction}
+import java.util.UUID
+
+import com.dream.mytask.AppClient.{DashboardLoc, Loc, ViewWorkflowLoc, WorkflowLoc}
+import com.dream.mytask.modules.workflow.WorkflowHandler.InitFlowDataAction
 import com.dream.mytask.services.DataModel.FlowModel
 import com.dream.mytask.shared.data.WorkflowData.FlowJson
 import diode.react.ReactPot._
@@ -25,14 +27,12 @@ object WorkflowComp {
 
   class Backend($: BackendScope[Props, State]) {
 
-    implicit def renderItem(item: FlowJson) = {
-      <.li(s"id: ${item.id}, name: ${item.name}")
-    }
+
 
     def render(p: Props, s: State) = {
 
-      val wrapper = p.proxy.connect(_.message)
-      val fetchWrapper = p.proxy.connect(_.flow)
+//      val wrapper = p.proxy.connect(_.message)
+//      val fetchWrapper = p.proxy.connect(_.flow)
       val list = p.proxy.connect(_.initData)
       <.div(
         <.div(^.textAlign :="Right" ,
@@ -50,7 +50,9 @@ object WorkflowComp {
                   <.div(
 
                     <.ol(^.`type` := "1",
-                      m.list toTagMod
+                      m.list toTagMod { item =>
+                        <.li(s"name: ${item.name} ==> ",  <.a("View", ^.href := "#", p.c.setOnLinkClick(ViewWorkflowLoc(UUID.fromString(item.id)))) )
+                      }
                     ),
 
                     <.div("Flow Template"),
@@ -59,49 +61,9 @@ object WorkflowComp {
                       m.workflowTemplateList toTagMod(item =>
                         <.li(<.a(^.href := "#", p.c.setOnClick(WorkflowLoc(item.id)), item.name))
                         )
-                    ),
-
-                    <.div(
-                      WorkflowFormComp(p.proxy, p.c, m) ,
-                      <.div(
-                        <.h3("New Flow"),
-                        <.div(
-                          wrapper(px => {
-                            <.div(
-                              px().renderPending(_ > 500, _ => <.p("Loading...")),
-                              px().renderFailed(ex => <.p(s"Failed to load ${ex} ")),
-                              px().render(m => <.p(s"hello ${m}"))
-                            )
-                          })
-                        )
-                      )
                     )
                   )
                 )
-              )
-            })
-          )
-        ),
-
-        <.div(
-          <.h3("Fetch Flow"),
-          <.div(
-            <.label("Id"),
-            <.input(^.`type` := "text", ^.value := s.id.getOrElse(""), ^.onChange ==> { e: ReactEventFromInput =>
-              val value = if (e.target.value.trim.isEmpty) None else Some(e.target.value)
-              $.modState(_.copy(id = value))
-            })
-          ),
-          <.div(
-            <.button("Fetch", ^.onClick --> Callback.when(s.id.isDefined)(p.proxy.dispatchCB(FetchFlowAction(s.id))))
-          ),
-          <.h3("Result:"),
-          <.div(
-            fetchWrapper(px => {
-              <.div(
-                px().renderPending(_ > 500, _ => <.p("Loading...")),
-                px().renderFailed(ex => <.p("Failed to load")),
-                px().render(m => <.p(s"id: ${m.id}, name: ${m.name}"))
               )
             })
           )

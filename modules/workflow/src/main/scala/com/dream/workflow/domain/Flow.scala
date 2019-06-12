@@ -102,7 +102,7 @@ case class Flow(
 
           case Some(ActionFlow(_, None)) =>
             Right(NaActivityFlow())
-          case Some(ActionFlow(_, Some(_ : DoneActivity))) =>
+          case Some(ActionFlow(_, Some(Activity("Done")))) =>
             Right(DoneActivityFlow())
           case Some(af: ActionFlow) =>
             workflowList.find(_.activity == af.activity.getOrElse(None)) match {

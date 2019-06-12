@@ -45,7 +45,8 @@ object DataModel {
     flow: Pot[FlowJson] = Pot.empty,
     message: Pot[String] = Pot.empty,
     initData: Pot[FlowInitDataJs] = Pot.empty,
-    workflow: Pot[WorkflowTemplateJs] = Pot.empty
+    workflow: Pot[WorkflowTemplateJs] = Pot.empty,
+    workflowTemplate: Pot[WorkflowTemplateJs] = Pot.empty
 
   )
 

@@ -38,9 +38,9 @@ trait Api extends TicketApi{
 
   def getProcessInstance(id: String): Future[String]
 
-  def getFlow(id: String): Future[FlowJson]
+  def getFlow(id: UUID): Future[WorkflowTemplateJs]
 
-  def newFlow(name: String,  participants: List[String]): Future[String]
+  def newFlow(workflow: WorkflowTemplateJs): Future[String]
 
   def getFlowInitData(): Future[FlowInitDataJs]
 

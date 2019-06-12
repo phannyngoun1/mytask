@@ -55,7 +55,7 @@ object WorkflowFormComp {
           )
         ),
         <.div(
-          <.button("New", ^.onClick --> Callback.when(s.name.isDefined && !s.participants.isEmpty)(p.proxy.dispatchCB(NewFlowAction(s.name, Some(s.participants)))))
+          <.button("New")
         )
       )
     }

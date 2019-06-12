@@ -43,7 +43,8 @@ trait BaseActivity {
 
 trait BaseActivityFlow {
   def activity: BaseActivity
-  def contributeTypeList: List[ContributeType]
+  def contributeTypeList: List[String]
+  def contribution: List[Contribution]
   def participants: List[UUID]
   def actionFlows: List[ActionFlow]
 }
@@ -65,7 +66,7 @@ case class ActionFlow(action: BaseAction, activity: Option[BaseActivity])
 case class ActivityFlow(
   activity: BaseActivity,
   participants: List[UUID] = List.empty ,
-  contributeTypeList: List[ContributeType] = List.empty , // Direct assign - DirectAssign. Sharable, Assignable, Pickup,  Empty = any types.
+  contributeTypeList: List[String] = List.empty , // Direct assign - DirectAssign. Sharable, Assignable, Pickup,  Empty = any types.
   contribution: List[Contribution] = List.empty,
   actionFlows: List[ActionFlow]
 ) extends BaseActivityFlow
@@ -106,7 +107,8 @@ case class DoneActivity() extends BaseActivity {
 
 abstract class AbstractActivityFlow() extends BaseActivityFlow {
   override def participants: List[UUID] = List.empty
-  override def contributeTypeList: List[ContributeType] = List.empty
+  override def contributeTypeList: List[String] = List.empty
+  override def contribution: List[Contribution] = List.empty
   override def actionFlows: List[ActionFlow] = List.empty
 }
 
@@ -131,18 +133,12 @@ case class Contribution(
   participantId: UUID,
   policyList: List[UUID] = List.empty,
   payloadAuthCode: String = "*",
-  contributeTypeList: List[ContributeType] = List.empty,
+  contributeTypeList: List[String] = List.empty,
   accessibleActionList: List[BaseAction] = List.empty
 )
 
 
-object Contribution {
-  val directAssign = ContributeType("DirectAssign", "Direct assign")
-  val sharable = ContributeType("Sharable", "Can be shared")
-  val assignable = ContributeType("Assignable", "Can be assigned")
-  val pickup = ContributeType("Pickup", "Pickup")
-  val all = ContributeType("*", "*")
-}
+
 
 
 

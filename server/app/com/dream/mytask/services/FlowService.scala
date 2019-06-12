@@ -8,10 +8,13 @@ import com.dream.mytask.shared.data.WorkflowData
 import com.dream.mytask.shared.data.WorkflowData.{ActionFlowJs, ActionJs, ActivityFlowJs, ActivityJs, ContributeTypeJs, FlowInitDataJs, FlowJson, WorkflowTemplateJs}
 import com.dream.ticket.flow.TicketFlowTemplate
 import com.dream.workflow.usecase.WorkflowAggregateUseCase.Protocol.{CreateWorkflowCmdRequest, CreateWorkflowCmdSuccess, GetWorkflowCmdRequest, GetWorkflowCmdSuccess}
+import com.dream.mytask.converter.FlowConverter._
 
 import scala.concurrent.Future
 
 trait FlowService {  this: ApiService =>
+
+
 
   val  ticketWorkflowTemplate = TicketFlowTemplate.apply()
   val flowTemplateList = List(
@@ -22,7 +25,7 @@ trait FlowService {  this: ApiService =>
       activityFlowList = ticketWorkflowTemplate.activityFlowList.map(item =>
         ActivityFlowJs(
           ActivityJs(item.activity.name),
-          contributeTypes = item.contributeTypeList.map(ct => ContributeTypeJs(ct.code, ct.name)),
+          contributeTypes = item.contributeTypeList.map(ct => ContributeTypeJs.find(ct)),
           contribution = List.empty,
           actionFlow = item.actionFlows.map(actFlow =>
             ActionFlowJs(ActionJs( actFlow.action.name, actFlow.action.actionType), actFlow.activity.map(activity => ActivityJs(activity.name)))
@@ -42,7 +45,6 @@ trait FlowService {  this: ApiService =>
       FlowInitDataJs(
         item._1.map(flow => FlowJson(flow.id, flow.name)),
         flowTemplateList,
-        //List(ContributeTypeJs("DirectAssign","Direct assign"), ContributeTypeJs("Sharable","Can be shared"), ContributeTypeJs("Assignable","Can be Assigned"), ContributeTypeJs("Pickup","Pickup")),
         item._2.map(pcp => ParticipantJson(pcp.id, pcp.accountId, pcp.tasks) )
       )
     }
@@ -54,66 +56,35 @@ trait FlowService {  this: ApiService =>
     }
   }
 
-  override def getFlow(id: String): Future[WorkflowData.FlowJson] =
-    workflowAggregateUseCase.getWorkflow(GetWorkflowCmdRequest(UUID.fromString(id))) map {
-      case GetWorkflowCmdSuccess(flow) => FlowJson(flow.id.toString, flow.name)
-      case _ => FlowJson("", "")
+  override def getFlow(id: UUID): Future[WorkflowTemplateJs] =
+    workflowAggregateUseCase.getWorkflow(GetWorkflowCmdRequest(id)) map {
+      case GetWorkflowCmdSuccess(flow) =>
+        WorkflowTemplateJs(
+          id = flow.id,
+          name = flow.name,
+          startActivity = ActivityJs(flow.initialActivity.name),
+          activityFlowList = flow.workflowList.map(toActivityFlowJs)
+        )
+      case _ => throw new RuntimeException(s"Error: getFlow ${id}")
     }
 
-  override def newFlow(name: String, participants: List[String]): Future[String] = {
+  override def newFlow(workflow: WorkflowTemplateJs): Future[String] = {
 
-    val ticketActivity = Activity("Ticketing")
+    val startAct = Activity(workflow.startActivity.name)
+    val actList =  workflow.activityFlowList.map(item => ActivityFlow(
+      activity = Activity(item.activityJs.name),
+      participants = List.empty ,
+      contributeTypeList = List.empty,
+      contribution = item.contribution.map(toContribution),
+      actionFlows = item.actionFlow.map(toActionFlow)
+    ))
 
-    val startActionFlow = ActionFlow(
-      action = StartAction(),
-      activity = Some(ticketActivity)
-    )
-
-    val startActivityFlow = ActivityFlow(
-      activity = StartActivity(),
-      participants = List.empty,
-      actionFlows = List(startActionFlow)
-    )
-
-
-    val editTicketActionFlow = ActionFlow(
-      action = Action("Edit", "HANDLING"),
-      None
-    )
-
-    val closeTicketActionFlow = ActionFlow(
-      action = Action("Close", "COMPLETED"),
-      activity = Some(DoneActivity())
-    )
-
-    val assignTicketActionFlow = ActionFlow(
-      action = Action("Assign", "HANDLED"),
-      activity = None
-    )
-
-    val addCommentActionFlow = ActionFlow(
-      action = Action("Comment", "HANDLING"),
-      activity = None
-    )
-
-    val ticketActivityFlow = ActivityFlow(
-      activity = ticketActivity,
-      participants = participants.map(UUID.fromString),
-
-      actionFlows = List(
-        editTicketActionFlow,
-        closeTicketActionFlow,
-        assignTicketActionFlow,
-        addCommentActionFlow
-      )
-    )
-
-    val workflowList: Seq[BaseActivityFlow] = Seq(
-      startActivityFlow,
-      ticketActivityFlow
-    )
-
-    workflowAggregateUseCase.createWorkflow(CreateWorkflowCmdRequest(UUID.randomUUID(), name, StartActivity(), workflowList)).map {
+    workflowAggregateUseCase.createWorkflow(CreateWorkflowCmdRequest(
+      UUID.randomUUID(),
+      workflow.name,
+      startAct,
+      actList
+    )).map {
       case res: CreateWorkflowCmdSuccess => s"${res.id}"
       case _ => "Failed"
     }

@@ -4,7 +4,7 @@ import java.util.UUID
 
 import akka.actor.ActorSystem
 import com.dream.mytask.shared.Api
-import com.dream.mytask.shared.data.WorkflowData.{EditTicketPayloadJs, PayloadJs}
+import com.dream.mytask.shared.data.WorkflowData.{PayloadJs}
 import com.dream.mytask.shared.data._
 import com.dream.workflow.adaptor.aggregate._
 import com.dream.workflow.adaptor.dao.account.AccountReadModelFlowImpl
@@ -15,13 +15,12 @@ import com.dream.workflow.adaptor.dao.participant.ParticipantReadModelFlowImpl
 import com.dream.workflow.adaptor.dao.processinstance.PInstanceReadModelFlowImpl
 import com.dream.workflow.adaptor.journal.JournalReaderImpl
 import com.dream.workflow.usecase.AccountAggregateUseCase.Protocol.{GetAccountCmdReq, GetAccountCmdSuccess, _}
-import com.dream.workflow.usecase.ProcessInstanceAggregateUseCase.Protocol.{ActionCompleted, TakeActionCmdRequest}
+import com.dream.workflow.usecase.ProcessInstanceAggregateUseCase.Protocol.{TakeActionCmdRequest}
 import com.dream.workflow.usecase._
 import com.typesafe.config.ConfigFactory
 import slick.basic.DatabaseConfig
 import slick.jdbc.JdbcProfile
 import TicketPayloadConverter._
-import com.dream.common.NonePayload
 
 import scala.concurrent.{ExecutionContext, Future}
 

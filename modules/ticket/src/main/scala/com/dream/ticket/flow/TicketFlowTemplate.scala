@@ -43,14 +43,13 @@ object TicketFlowTemplate{
 
     activity = ticketActivity,
     participants = List.empty, // to be replaced with participants
-    contributeTypeList = List(Contribution.directAssign, Contribution.assignable, Contribution.sharable, Contribution.pickup, Contribution.all ),
+    contributeTypeList = List( "DirectAssign", "Sharable", "Assignable", "Pickup" , "*" ),
     actionFlows = List(
       editTicketActionFlow,
       closeTicketActionFlow,
       assignTicketActionFlow,
       addCommentActionFlow
     )
-
   )
 
   val activityFlowList: Seq[BaseActivityFlow] = Seq(

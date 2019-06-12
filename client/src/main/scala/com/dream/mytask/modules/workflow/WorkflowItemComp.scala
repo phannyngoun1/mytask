@@ -4,8 +4,9 @@ package com.dream.mytask.modules.workflow
 import java.util.UUID
 
 import com.dream.mytask.AppClient.Loc
+import com.dream.mytask.modules.workflow.WorkflowHandler.NewFlowAction
 import com.dream.mytask.services.DataModel.FlowModel
-import com.dream.mytask.shared.data.WorkflowData.{ActivityFlowJs, ContributionJs, FlowInitDataJs, WorkflowTemplateJs}
+import com.dream.mytask.shared.data.WorkflowData.{ActivityFlowJs, ContributionJs, WorkflowTemplateJs}
 import diode.react._
 import japgolly.scalajs.react.extra.router.RouterCtl
 import japgolly.scalajs.react.vdom.html_<^._
@@ -14,9 +15,9 @@ import japgolly.scalajs.react.{BackendScope, _}
 import scala.util.Random
 
 object WorkflowItemComp {
-  case class Props(proxy: ModelProxy[FlowModel], c: RouterCtl[Loc],init: FlowInitDataJs, data: WorkflowTemplateJs)
-  case class State( data: WorkflowTemplateJs, name: String , editingAct: Option[ActivityFlowJs] = None, contribute: Option[ContributionJs] = None
-  )
+
+  case class Props(proxy: ModelProxy[FlowModel], c: RouterCtl[Loc], data: WorkflowTemplateJs)
+  case class State( data: WorkflowTemplateJs, name: String , editingAct: Option[ActivityFlowJs] = None, contribute: Option[ContributionJs] = None)
 
   class Backend($: BackendScope[Props, State]) {
 
@@ -47,7 +48,7 @@ object WorkflowItemComp {
     private def editForm(act: ActivityFlowJs, state: State) = {
       <.div(
         <.div( ^.className := "topnav", act.activityJs.name , "-----", <.a(
-          ^.href := "#", "Commit",
+          ^.href := "#", "==> Commit",
           ^.onClick ==> { e: ReactEventFromInput =>
             e.preventDefault()
             Callback.when(state.editingAct.isDefined)(
@@ -119,9 +120,11 @@ object WorkflowItemComp {
                         .getOrElse($.modState(_.copy(contribute = None)))
                     },
                     <.option(^.default := true),
-                    p.init.pcpList
-                      .filter(pcp => !state.editingAct.map ( _.contribution.exists( _.participantId.toString.equals(pcp.id) )).getOrElse(false) )
-                      .toTagMod(item =>  <.option(^.value := item.id ,s"${item.id}-${item.accountId}"))
+                    p.data.flowInitDataJs
+                      .map(_.pcpList.filter(pcp => !state.editingAct.map ( _.contribution.exists( _.participantId.toString.equals(pcp.id) )).getOrElse(false) )
+                        .toTagMod(item =>  <.option(^.value := item.id ,s"${item.id}-${item.accountId}"))
+                      ).getOrElse(VdomArray.empty())
+
                   )
                 ),
                 <.td(s"${state.contribute.map(_.participantId.toString).getOrElse("")}")
@@ -234,8 +237,11 @@ object WorkflowItemComp {
                   $.modState(_.copy(name = value))
                 }),
 
-                <.a("Commit", ^.href := "#", ^.onClick ==> {  e: ReactEventFromInput =>
+                <.a("==> Commit", ^.href := "#", ^.onClick ==> {  e: ReactEventFromInput =>
                   e.preventDefault()
+
+                  p.proxy.dispatchCB(NewFlowAction(Some(s.data.copy(name = s.name))))
+
                   Callback(println(" ------- Hello ------- "))
                 })
               )
@@ -265,6 +271,6 @@ object WorkflowItemComp {
     .renderBackend[Backend]
     .build
 
-  def apply(proxy: ModelProxy[FlowModel], c: RouterCtl[Loc], init: FlowInitDataJs, data: WorkflowTemplateJs)
-  = component(Props(proxy, c, init, data))
+  def apply(proxy: ModelProxy[FlowModel], c: RouterCtl[Loc], data: WorkflowTemplateJs)
+  = component(Props(proxy, c,  data))
 }

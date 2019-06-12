@@ -8,7 +8,7 @@ import com.dream.mytask.modules.item.ItemComp
 import com.dream.mytask.modules.processinst.{ProcessInstComp, ViewProcessInstComp}
 import com.dream.mytask.modules.task.TaskListComp
 import com.dream.mytask.modules.ticketform.AssignFormComp
-import com.dream.mytask.modules.workflow.{WorkflowComp, WorkflowCreationComp}
+import com.dream.mytask.modules.workflow.{WorkflowComp, WorkflowCreationComp, WorkflowViewComp}
 import com.dream.mytask.modules.{Dashboard, Main}
 import com.dream.mytask.services.AppCircuit
 import japgolly.scalajs.react.extra.router._
@@ -40,6 +40,15 @@ object AppClient {
       AppCircuit.wrap(_.flowModel) (proxy => WorkflowCreationComp(proxy, c, id))
     })
 
+
+    val viewWorkflowRoute = dynamicRouteCT( ("#view-workflow" / uuid ).caseClass[ViewWorkflowLoc]  ) ~> dynRenderR( (p, c)=>{
+      val id = p match {
+        case ViewWorkflowLoc(id) => Some(id)
+        case _ => None
+      }
+      AppCircuit.wrap(_.flowModel) (proxy => WorkflowViewComp(proxy, c, id))
+    })
+
     val takeAction = staticRoute("#task", PerformTaskLoc) ~> renderR( c => AppCircuit.wrap(_.formModel)(proxy => FormComp(proxy, c)))
 
     val viewPInstRoute = dynamicRouteCT( ("#view-instance" / uuid ).caseClass[ViewPInstLoc]  ) ~> dynRenderR( (p, c)=>{
@@ -52,15 +61,16 @@ object AppClient {
 
     (
       staticRoute(root, DashboardLoc) ~> renderR(c => AppCircuit.wrap(_.message)(proxy => Dashboard(proxy, c)))
-      | taskListRoute
-      | processInstRoute
-      | itemRoute
-      | accRoute
-      | flowRoute
-      | fetchTaskRoute
-      | workflowRoute
-      | takeAction
-      | viewPInstRoute
+        | taskListRoute
+        | processInstRoute
+        | itemRoute
+        | accRoute
+        | flowRoute
+        | fetchTaskRoute
+        | workflowRoute
+        | viewWorkflowRoute
+        | takeAction
+        | viewPInstRoute
       ).notFound(redirectToPage(DashboardLoc)(Redirect.Replace))
 
   }.renderWith(layout)
@@ -96,6 +106,8 @@ object AppClient {
   case object PerformTaskLoc extends Loc
 
   case class WorkflowLoc(id: UUID) extends Loc
+
+  case class ViewWorkflowLoc(id: UUID) extends Loc
 
   case class ViewPInstLoc(pInstId: UUID) extends Loc
 
