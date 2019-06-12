@@ -114,7 +114,7 @@ class AccountAggregateUseCase(
         case res : GetAssignedTaskCmdSuccess => res
         case _ => GetAssignedTaskCmdSuccess(UUID.randomUUID(), List[AssignedTask]())
       })
-      .flatMapConcat(f=>   Source(f.assignedTasks.map(GetTaskCmdReq(f.id, _))))
+      .flatMapConcat(f=> Source(f.assignedTasks.map(GetTaskCmdReq(f.id, _))))
       .via(pInstFlow.getTask)
       .map ( _ match {
         case GetTaskCmdSuccess(task) => task

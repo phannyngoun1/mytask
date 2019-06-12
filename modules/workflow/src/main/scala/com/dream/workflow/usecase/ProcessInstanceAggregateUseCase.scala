@@ -400,7 +400,8 @@ class ProcessInstanceAggregateUseCase(
           param.newTaskId.get,
           newActivity.activity,
           newActivity.actionFlows.map(_.action),
-          newActivity.directAssigned.map(TaskDestination(_))),
+          newActivity.directAssigned.map(TaskDestination(_))
+        ),
         param.action.participantId
       )
     }
