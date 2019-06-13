@@ -7,7 +7,7 @@ import akka.stream.scaladsl.{Keep, Sink, Source, SourceQueueWithComplete}
 import akka.stream._
 import com.dream.common._
 import com.dream.common.domain.ResponseError
-import com.dream.workflow.domain.{ Flow, FlowDto}
+import com.dream.workflow.domain.{Flow, FlowDto, TaskDto}
 import com.dream.workflow.usecase.port.{FlowReadModelFlow, WorkflowAggregateFlows}
 
 import scala.concurrent.{ExecutionContext, Future, Promise}
@@ -43,6 +43,14 @@ object WorkflowAggregateUseCase {
     case class GetWorkflowCmdSuccess(flow: Flow) extends GetWorkflowCmdResponse
 
     case class GetWorkflowCmdFailed(error: ResponseError) extends GetWorkflowCmdResponse
+
+    case class GetTaskActionCmdReq(task: TaskDto) extends WorkflowCmdRequest
+
+    trait GetTaskActionCmdRes extends  GetWorkflowCmdResponse
+
+    case class GetTaskActionCmdSuccess(task: TaskDto) extends GetTaskActionCmdRes
+
+    case class GetTaskActionCmdFailed(responseError: ResponseError) extends GetTaskActionCmdRes
 
   }
 

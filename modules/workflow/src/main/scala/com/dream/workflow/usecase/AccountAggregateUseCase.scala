@@ -4,13 +4,14 @@ import java.util.UUID
 
 import akka.NotUsed
 import akka.actor.ActorSystem
-import com.dream.common.Activity
+import com.dream.common.{Activity, BaseAction}
 import com.dream.common.domain.ResponseError
 import com.dream.workflow.domain.Account.AccountDto
 import com.dream.workflow.domain.{AssignedTask, Task, TaskDto}
 import com.dream.workflow.usecase.ParticipantAggregateUseCase.Protocol.{GetAssignedTaskCmdReq, GetAssignedTaskCmdSuccess}
 import com.dream.workflow.usecase.ProcessInstanceAggregateUseCase.Protocol.{GetTaskCmdReq, GetTaskCmdSuccess}
-import com.dream.workflow.usecase.port.{AccountAggregateFlows, AccountReadModelFlow, ParticipantAggregateFlows, ProcessInstanceAggregateFlows}
+import com.dream.workflow.usecase.WorkflowAggregateUseCase.Protocol.{GetTaskActionCmdReq, GetTaskActionCmdSuccess}
+import com.dream.workflow.usecase.port.{AccountAggregateFlows, AccountReadModelFlow, ParticipantAggregateFlows, ProcessInstanceAggregateFlows, WorkflowAggregateFlows}
 
 import scala.concurrent.{ExecutionContext, Future, Promise}
 
@@ -81,11 +82,12 @@ object AccountAggregateUseCase {
 }
 
 class AccountAggregateUseCase(
-  flow: AccountAggregateFlows,
+  accFlow: AccountAggregateFlows,
   partFlow: ParticipantAggregateFlows,
   pInstFlow: ProcessInstanceAggregateFlows,
-  accReadModelFlow: AccountReadModelFlow)
-  (implicit system: ActorSystem) extends UseCaseSupport {
+  accReadModelFlow: AccountReadModelFlow,
+  workflow: WorkflowAggregateFlows
+)(implicit system: ActorSystem) extends UseCaseSupport {
 
   import AccountAggregateUseCase.Protocol._
   import UseCaseSupport._
@@ -106,7 +108,7 @@ class AccountAggregateUseCase(
   private val getTaskFlow: Flow[GetTaskLisCmdReq, TaskDto, NotUsed] =
     Flow[GetTaskLisCmdReq]
       .map(req => GetParticipantCmdReq(req.id))
-      .via(flow.getParticipant.map {
+      .via(accFlow.getParticipant.map {
         case GetParticipantCmdSuccess(partIds) => partIds
       })
       .flatMapConcat(parts => Source(parts.map(GetAssignedTaskCmdReq(_))))
@@ -118,8 +120,16 @@ class AccountAggregateUseCase(
       .via(pInstFlow.getTask)
       .map ( _ match {
         case GetTaskCmdSuccess(task) => task
-        case _ => TaskDto(UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID() , Activity("test"), List.empty, false)
+        case _ => TaskDto(UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID() , Activity("test"), List.empty, false)
       })
+    .filter(_.active)
+    .map(GetTaskActionCmdReq)
+    .via(workflow.getTaskActions)
+    .map{
+      case GetTaskActionCmdSuccess(task) => task
+    }
+
+  // -----------------------------
 
   private val foldTasks = Sink.fold[List[TaskDto], TaskDto](List.empty[TaskDto])( (m ,e) => if(e.active && e.isOwner)  e :: m else m )
 
@@ -128,19 +138,19 @@ class AccountAggregateUseCase(
 
   private val createAccountQueue: SourceQueueWithComplete[(CreateAccountCmdReq, Promise[CreateAccountCmdRes])] =
     Source.queue[(CreateAccountCmdReq, Promise[CreateAccountCmdRes])](bufferSize, OverflowStrategy.dropNew)
-      .via(flow.create.zipPromise)
+      .via(accFlow.create.zipPromise)
       .toMat(completePromiseSink)(Keep.left)
       .run()
 
   private val getAccountQueue: SourceQueueWithComplete[(GetAccountCmdReq, Promise[GetAccountCmdRes])] =
     Source.queue[(GetAccountCmdReq, Promise[GetAccountCmdRes])](bufferSize, OverflowStrategy.dropNew)
-      .via(flow.get.zipPromise)
+      .via(accFlow.get.zipPromise)
       .toMat(completePromiseSink)(Keep.left)
       .run()
 
   private val assignParticipantQueue: SourceQueueWithComplete[(AssignParticipantCmdReq, Promise[AssignParticipantCmdRes])] =
     Source.queue[(AssignParticipantCmdReq, Promise[AssignParticipantCmdRes])](bufferSize, OverflowStrategy.dropNew)
-      .via(flow.assignParticipant.zipPromise)
+      .via(accFlow.assignParticipant.zipPromise)
       .toMat(completePromiseSink)(Keep.left)
       .run()
 

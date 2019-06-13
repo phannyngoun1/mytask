@@ -55,7 +55,7 @@ class ApiService(login: UUID)(implicit val ec: ExecutionContext, implicit val  s
   val itemAggregateUseCase = new ItemAggregateUseCase(itemFlow,readSideFlow )
   val workflowAggregateUseCase = new WorkflowAggregateUseCase(workFlow, flowReadModelFlow)
   val processInstance = new ProcessInstanceAggregateUseCase(pInstFlow, workFlow, itemFlow, participantFlow, pInstanceReadModelFlows)
-  val accountUseCase = new AccountAggregateUseCase(accountFlow,participantFlow, pInstFlow, accountReadModelFlow )
+  val accountUseCase = new AccountAggregateUseCase(accountFlow,participantFlow, pInstFlow, accountReadModelFlow, workFlow )
   val participantUseCase = new ParticipantAggregateUseCase(participantFlow, accountFlow , participantReadModelFlows)
 
   val ex = new ReadModelUseCase(
@@ -92,7 +92,6 @@ class ApiService(login: UUID)(implicit val ec: ExecutionContext, implicit val  s
     val uuId = UUID.fromString(accId)
 
     accountUseCase.getTasks(GetTaskLisCmdReq(uuId)) map (_.map { f =>
-      println(f)
       TaskItemJson(f.id.toString, f.pInstId.toString, f.participantId.toString, f.activity.name, f.actions.map(a => ActionItemJson(a.name)))
     })
   }

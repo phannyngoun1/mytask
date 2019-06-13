@@ -9,6 +9,7 @@ import com.dream.common.Protocol.CmdResponseFailed
 import com.dream.common.domain.ResponseError
 import com.dream.workflow.entity.workflow.WorkflowProtocol._
 import com.dream.workflow.usecase.WorkflowAggregateUseCase.Protocol
+import com.dream.workflow.usecase.WorkflowAggregateUseCase.Protocol.GetTaskActionCmdRes
 import com.dream.workflow.usecase.port.WorkflowAggregateFlows
 
 import scala.concurrent.duration._
@@ -46,4 +47,22 @@ class WorkflowAggregateFlowsImpl(aggregateRef: ActorRef) extends WorkflowAggrega
         }
       }
 
+  override def getTaskActions: Flow[Protocol.GetTaskActionCmdReq, Protocol.GetTaskActionCmdRes, NotUsed] =
+    Flow[Protocol.GetTaskActionCmdReq]
+      .map(req => GetTaskActionCmdReq(req.task.flowId, req.task))
+      .mapAsync(1)(aggregateRef ? _)
+      .map {
+        case res: GetTaskActionCmdSuccess => {
+          println(s"Workflow fetched ${res}")
+          Protocol.GetTaskActionCmdSuccess(res.task)
+        }
+        case CmdResponseFailed(message) => {
+          println("Failed to get TaskActions")
+          Protocol.GetTaskActionCmdFailed(ResponseError(message))
+        }
+        case _ => {
+          println("unhandled getTaskActions")
+          throw  new RuntimeException("unhandled getTaskActions")
+        }
+      }
 }

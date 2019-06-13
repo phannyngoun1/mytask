@@ -91,7 +91,7 @@ class ProcessInstanceEntity extends PersistentActor
         println(s"tasks ${state.tasks}, task id ${taskId}")
         state.tasks.find(_.id.equals(taskId)) match {
           case Some(task) =>  {
-            sender() ! GetTaskCmdRes( id, participantId , task)
+            sender() ! GetTaskCmdRes( id, participantId, state.flowId , task)
           }
           case None => sender() ! CmdResponseFailed(ResponseError(Some(id), s"Task id: ${taskId} not found"))
         }

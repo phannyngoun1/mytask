@@ -9,6 +9,7 @@ case class TaskDto(
   id: UUID,
   pInstId: UUID,
   participantId: UUID,
+  flowId: UUID,
   activity: BaseActivity,
   //TODO: Actions should be taken from flow
   actions: List[BaseAction],

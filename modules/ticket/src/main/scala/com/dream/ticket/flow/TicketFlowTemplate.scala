@@ -2,7 +2,6 @@ package com.dream.ticket.flow
 
 import com.dream.common._
 
-
 object TicketFlowTemplate{
 
   val ticketActivity = Activity("Ticketing")
