@@ -61,13 +61,13 @@ trait PInstanceService { this: ApiService =>
             TaskInfoJs(
               id =  task.id,
               activity = task.activity.name,
-              actions = task.actions.map(action => ActionItemJson(action.name)),
+//              actions = task.actions.map(action => ActionItemJson(action.name)),
               destinations = task.destinations.map(dest => TaskDestinationJs(dest.participantId, dest.isActive)),
               actionPerformed = task.actionPerformed.map { action =>
                 ActionInfoJs(
                   id = action.id,
                   participantId = action.participantId,
-                  action =  ActionItemJson(action.action.name),
+                  action =  ActionItemJson(action.action.name, None),
                   actionDate = action.actionDate.toEpochMilli,
                   comment = action.comment
                 )

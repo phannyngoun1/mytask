@@ -28,7 +28,7 @@ trait FlowService {  this: ApiService =>
           contributeTypes = item.contributeTypeList.map(ct => ContributeTypeJs.find(ct)),
           contribution = List.empty,
           actionFlow = item.actionFlows.map(actFlow =>
-            ActionFlowJs(ActionJs( actFlow.action.name, actFlow.action.actionType), actFlow.activity.map(activity => ActivityJs(activity.name)))
+            ActionFlowJs(ActionJs( actFlow.action.name, actFlow.action.actionType), actFlow.payloadCode, actFlow.activity.map(activity => ActivityJs(activity.name)))
           )
         )
       )

@@ -120,7 +120,7 @@ class AccountAggregateUseCase(
       .via(pInstFlow.getTask)
       .map ( _ match {
         case GetTaskCmdSuccess(task) => task
-        case _ => TaskDto(UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID() , Activity("test"), List.empty, false)
+        case _ => TaskDto(UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID() , Activity("test"), Map.empty, false)
       })
     .filter(_.active)
     .map(GetTaskActionCmdReq)

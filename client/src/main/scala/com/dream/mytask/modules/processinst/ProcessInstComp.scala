@@ -61,7 +61,24 @@ object ProcessInstComp {
                       ),
                       <.div(
                         <.h4("Create process instance"),
-
+                        <.div(
+                          <.label("Participant Id: "),
+                          <.br(),
+                          <.select(
+                            ^.value := s.participantId.getOrElse(""),
+                            ^.onChange ==> { e: ReactEventFromInput =>
+                              val value = if (e.target.value.trim.isEmpty) None else Some(e.target.value)
+                              $.modState(_.copy(participantId = value))
+                            },
+                            <.option(^.default := true),
+                            m.pcpList.toTagMod { item =>
+                              <.option(
+                                ^.value := item.id,
+                                item.id
+                              )
+                            },
+                          )
+                        ),
                         <.div(
                           <.label("item id: "),
                           <.br(),
@@ -80,28 +97,8 @@ object ProcessInstComp {
                               )
                             }
                           )
-                        ),
-
-                        <.div(
-                          <.label("Participant Id: "),
-                          <.br(),
-                          <.select(
-                            ^.value := s.participantId.getOrElse(""),
-                            ^.onChange ==> { e: ReactEventFromInput =>
-                              val value = if (e.target.value.trim.isEmpty) None else Some(e.target.value)
-                              $.modState(_.copy(participantId = value))
-                            },
-                            <.option(^.default := true),
-                            m.pcpList.toTagMod { item =>
-                              <.option(
-                                ^.value := item.id,
-                                item.id
-                              )
-                            },
-                          )
                         )
                       )
-
                     )
                   )
                 )

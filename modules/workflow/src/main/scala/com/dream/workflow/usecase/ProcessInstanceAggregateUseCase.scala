@@ -180,7 +180,6 @@ class ProcessInstanceAggregateUseCase(
           task = Task(
             id = UUID.randomUUID(),
             activity = nextFlow.activity,
-            actions = nextFlow.actionFlows.map(_.action),
             nextFlow.directAssigned.map(TaskDestination(_)),
             actionPerformed = List(ActionPerformed(pInstId, req.by, startAction, Instant.now(), None))
           ),
@@ -399,7 +398,6 @@ class ProcessInstanceAggregateUseCase(
         Task(
           param.newTaskId.get,
           newActivity.activity,
-          newActivity.actionFlows.map(_.action),
           newActivity.directAssigned.map(TaskDestination(_))
         ),
         param.action.participantId

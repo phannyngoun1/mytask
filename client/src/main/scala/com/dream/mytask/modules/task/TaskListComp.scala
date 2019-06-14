@@ -69,7 +69,7 @@ object TaskListComp {
                   m toTagMod { item =>
                     <.li( s"task Id: ${item.id}, P inst: ${item.pInstId},  participantId: ${item.participantId}, activity: ${item.activityName}",
                       <.div(" Actions: ",
-                        renderItem(item, ActionItemJson("View"), s.accountId.get),
+                        renderItem(item, ActionItemJson("View", None), s.accountId.get),
                         item.actions toTagMod(action => renderItem(item, action, s.accountId.get))
                       )
                     )

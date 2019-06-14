@@ -43,15 +43,6 @@ case class DoAction(
   params: Option[Params] = None
 )
 
-
-//object DoAction {
-//  implicit val format: Format[DoAction] = Json.format
-//}
-
-//object WorkFlow {
-//  implicit val format: Format[Flow] = Json.format
-//}
-
 case class FlowDto(
   id: UUID,
   name: String,
@@ -93,16 +84,14 @@ case class Flow(
       }
     }
 
-
-
   private def nextActivity(participantAccess: ParticipantAccess, action: BaseAction)(currActivityFlow: BaseActivityFlow): Either[WorkflowError, BaseActivityFlow] = {
     currActivityFlow match {
       case act: ActivityFlow =>
         act.actionFlows.find(_.action.name.equalsIgnoreCase(action.name)) match {
 
-          case Some(ActionFlow(_, None)) =>
+          case Some(ActionFlow(_, _, None)) =>
             Right(NaActivityFlow())
-          case Some(ActionFlow(_, Some(Activity("Done")))) =>
+          case Some(ActionFlow(_,_, Some(Activity("Done")))) =>
             Right(DoneActivityFlow())
           case Some(af: ActionFlow) =>
             workflowList.find(_.activity == af.activity.getOrElse(None)) match {

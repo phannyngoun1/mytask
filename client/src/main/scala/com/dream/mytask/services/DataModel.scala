@@ -37,7 +37,6 @@ object DataModel {
 
   )
 
-
   case class ActionJson()
 
   case class FlowModel(
@@ -74,7 +73,6 @@ object DataModel {
     assignFormInitData: Pot[AssignFormInitDataJs] = Pot.empty,
     pInstDataInfo: Pot[PInstInitDataInfoJs] = Pot.empty
   )
-
 
   case class ProcessInstanceModel(
     criteria: Option[ProcessInstanceCriteria] = None,

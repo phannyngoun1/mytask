@@ -11,8 +11,7 @@ case class TaskDto(
   participantId: UUID,
   flowId: UUID,
   activity: BaseActivity,
-  //TODO: Actions should be taken from flow
-  actions: List[BaseAction],
+  actions: Map[BaseAction, Option[String]],
   active: Boolean,
   isOwner: Boolean = true
 )
@@ -20,8 +19,6 @@ case class TaskDto(
 case class Task(
   id: UUID,
   activity: BaseActivity,
-  //TODO: Should be removed
-  actions: List[BaseAction],
   destinations: List[TaskDestination],
   actionPerformed: List[ActionPerformed] = List.empty,
   dateCreated: Instant = Instant.now(),

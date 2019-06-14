@@ -1,6 +1,6 @@
 package com.dream.mytask.converter
 
-import com.dream.common.{Action, ActionFlow, Activity, ActivityFlow, BaseActivity, BaseActivityFlow, Contribution}
+import com.dream.common.{Action, ActionFlow, Activity, ActivityFlow, BaseActivityFlow, Contribution}
 import com.dream.mytask.shared.data.WorkflowData.{ActionFlowJs, ActionJs, ActivityFlowJs, ActivityJs, ContributeTypeJs, ContributionJs}
 
 import scala.language.implicitConversions
@@ -29,19 +29,20 @@ object FlowConverter {
   implicit def toActionFlow(ori: ActionFlowJs) =
     ActionFlow(
       action = Action(ori.action.name, ori.action.actionType),
+      payloadCode = ori.payloadCode,
       activity = ori.activity.map(act => Activity(act.name))
     )
 
   implicit def toActionFlowJs(ori: ActionFlow) =
     ActionFlowJs(
       action = ActionJs(ori.action.name, ori.action.actionType),
+      payloadCode = ori.payloadCode,
       activity = ori.activity.map(act =>  ActivityJs(act.name) )
     )
 
   implicit def toActivityFlow(ori: ActivityFlowJs) =
     ActivityFlow(
       activity = Activity(ori.activityJs.name),
-      participants = List.empty,
       contributeTypeList = ori.contributeTypes.map(_.code),
       contribution = ori.contribution.map(toContribution),
       actionFlows = ori.actionFlow.map(toActionFlow)

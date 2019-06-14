@@ -48,6 +48,12 @@ trait BaseActivityFlow {
   def actionFlows: List[ActionFlow]
 
   def directAssigned: List[UUID] = contribution.filter(_.contributeTypeList.exists( item =>  item.equalsIgnoreCase("DirectAssign") || item.equalsIgnoreCase("*")  )).map(_.participantId)
+
+  def actionPayload(participantId: UUID) : Map[BaseAction, Option[String]]=
+    contribution
+      .find(_.participantId.equals(participantId))
+      .map(_.accessibleActionList.map(act => act-> actionFlows.find(_.action.equals(act)).map(_.payloadCode).getOrElse(None))).getOrElse(List.empty).toMap
+
 }
 
 case class Activity(name: String) extends BaseActivity
@@ -62,11 +68,11 @@ object Action {
   implicit val format: Format[Action] = Json.format
 }
 
-case class ActionFlow(action: BaseAction, activity: Option[BaseActivity])
+case class ActionFlow(action: BaseAction, payloadCode: Option[String], activity: Option[BaseActivity])
 
 case class ActivityFlow(
   activity: BaseActivity,
-  contributeTypeList: List[String] = List.empty , // Direct assign - DirectAssign. Sharable, Assignable, Pickup,  Empty = any types.
+  contributeTypeList: List[String] = List.empty, // Direct assign - DirectAssign. Sharable, Assignable, Pickup,  Empty = any types.
   contribution: List[Contribution] = List.empty,
   actionFlows: List[ActionFlow]
 ) extends BaseActivityFlow
@@ -106,7 +112,6 @@ case class DoneActivity() extends BaseActivity {
 
 
 abstract class AbstractActivityFlow() extends BaseActivityFlow {
-//  override def participants: List[UUID] = List.empty
   override def contributeTypeList: List[String] = List.empty
   override def contribution: List[Contribution] = List.empty
   override def actionFlows: List[ActionFlow] = List.empty

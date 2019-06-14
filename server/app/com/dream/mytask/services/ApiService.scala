@@ -92,7 +92,7 @@ class ApiService(login: UUID)(implicit val ec: ExecutionContext, implicit val  s
     val uuId = UUID.fromString(accId)
 
     accountUseCase.getTasks(GetTaskLisCmdReq(uuId)) map (_.map { f =>
-      TaskItemJson(f.id.toString, f.pInstId.toString, f.participantId.toString, f.activity.name, f.actions.map(a => ActionItemJson(a.name)))
+      TaskItemJson(f.id.toString, f.pInstId.toString, f.participantId.toString, f.activity.name, List.empty ++ f.actions.map(a => ActionItemJson(a._1.name, a._2) ))
     })
   }
 

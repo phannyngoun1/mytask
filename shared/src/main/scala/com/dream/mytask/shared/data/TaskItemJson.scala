@@ -14,7 +14,7 @@ case class TaskItemJson(
 case class TaskInfoJs(
   id: UUID,
   activity: String,
-  actions: List[ActionItemJson],
+//  actions: List[ActionItemJson],
   destinations: List[TaskDestinationJs],
   actionPerformed: List[ActionInfoJs] = List.empty,
   dateCreated: Long ,
@@ -35,7 +35,8 @@ case class TaskDestinationJs(
 
 
 case class ActionItemJson(
-  name: String
+  name: String,
+  payloadCode: Option[String]
 )
 
 case class ActionInfoJson(

@@ -68,7 +68,7 @@ class WorkflowEntity extends PersistentActor with ActorLogging with EntityState[
   }
 
   override def receiveCommand: Receive = {
-    case cmd: CreateWorkflowCmdRequest => persist(FlowCreated(cmd.id, cmd.name, cmd.initialActivity, cmd.flowList)) { event =>
+    case cmd: CreateWorkflowCmdRequest => persist(FlowCreated(cmd.id, cmd.name, cmd.initialActivity,  cmd.flowList)) { event =>
       state = applyState(event).toSomeOrThrow
       sender() ! CreateWorkflowCmdSuccess(event.id)
     }
@@ -82,8 +82,7 @@ class WorkflowEntity extends PersistentActor with ActorLogging with EntityState[
       foreachState{ state =>
         val actions = state.workflowList
           .find(_.activity == cmd.task.activity)
-          .map(_.contribution.find(_.participantId.equals(cmd.task.participantId)).map(_.accessibleActionList).getOrElse(List.empty))
-          .getOrElse(List.empty)
+          .map(_.actionPayload(cmd.task.participantId)).get
         sender() ! GetTaskActionCmdSuccess(cmd.task.copy(actions = actions))
       }
 

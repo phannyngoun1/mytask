@@ -8,6 +8,7 @@ object TicketFlowTemplate{
 
   val startActionFlow = ActionFlow(
     action = StartAction(),
+    payloadCode = Some("ticket-payload"),
     activity = Some(ticketActivity)
   )
 
@@ -19,21 +20,25 @@ object TicketFlowTemplate{
 
   val editTicketActionFlow = ActionFlow(
     action = Action("Edit", "HANDLING"),
+    payloadCode = Some("ticket-payload"),
     None
   )
 
   val closeTicketActionFlow = ActionFlow(
     action = Action("Close", "COMPLETED"),
+    payloadCode = Some("ticket-close-payload"),
     activity = Some(DoneActivity())
   )
 
   val assignTicketActionFlow = ActionFlow(
     action = Action("Assign", "HANDLED"),
+    payloadCode = Some("assign-payload"),
     activity = None
   )
 
   val addCommentActionFlow = ActionFlow(
     action = Action("Comment", "HANDLING"),
+    payloadCode = None,
     activity = None
   )
 

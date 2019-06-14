@@ -30,7 +30,7 @@ object WorkflowData {
 
   case class ActionJs(name: String, actionType: String)
   case class ActivityJs(name: String)
-  case class ActionFlowJs(action: ActionJs, activity: Option[ActivityJs])
+  case class ActionFlowJs(action: ActionJs, payloadCode: Option[String] , activity: Option[ActivityJs])
 
   case class ContributeTypeJs(code: String, name: String)
 
