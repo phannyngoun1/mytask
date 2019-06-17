@@ -6,7 +6,10 @@ object ItemData {
 
   case class ItemJson (
     id: String,
-    name: String
+    name: String,
+    desc: Option[String],
+    initPayloadCode: Option[String]
+
   )
 
   case class ItemInitDataJs(

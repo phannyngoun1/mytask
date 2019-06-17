@@ -4,7 +4,7 @@ import java.util.UUID
 
 import com.dream.common._
 import com.dream.common.Protocol.{CmdRequest, CmdResponse}
-import com.dream.workflow.domain.{Flow, TaskDto}
+import com.dream.workflow.domain.{Flow, Item, TaskDto}
 
 object WorkflowProtocol {
 
@@ -36,6 +36,10 @@ object WorkflowProtocol {
   case class GetTaskActionCmdReq(id: UUID, task: TaskDto) extends WorkFlowCmdRequest
 
   case class GetTaskActionCmdSuccess(task: TaskDto) extends WorkFlowCmdResponse
+
+  case class GetWorkflowPayloadCmdRequest(id: UUID, item: Item) extends WorkFlowCmdRequest
+
+  case class GetWorkflowPayloadCmdSuccess(item: Item) extends WorkFlowCmdResponse
 
 
 }

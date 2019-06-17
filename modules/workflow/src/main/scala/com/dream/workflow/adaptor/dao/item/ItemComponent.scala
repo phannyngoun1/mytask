@@ -9,6 +9,8 @@ trait ItemComponent extends ComponentSupport  with ItemComponentSupport {
   case class ItemRecord(
     id: String,
     name: String,
+    desc: Option[String],
+    workflowId: String,
     sequenceNr: Long,
     createdAt: java.time.ZonedDateTime,
     updatedAt: java.time.ZonedDateTime
@@ -18,11 +20,12 @@ trait ItemComponent extends ComponentSupport  with ItemComponentSupport {
     // def id = column[Long]("id", O.PrimaryKey)
     def name       = column[String]("name")
     def description           = column[String]("description")
+    def workflowId           = column[String]("workflow_id")
     def sequenceNr = column[Long]("sequence_nr")
     def createdAt  = column[java.time.ZonedDateTime]("created_at")
     def updatedAt  = column[java.time.ZonedDateTime]("updated_at")
     override def * =
-      (id, name, sequenceNr, createdAt, updatedAt) <> (ItemRecord.tupled, ItemRecord.unapply)
+      (id, name, description.? , workflowId, sequenceNr, createdAt, updatedAt) <> (ItemRecord.tupled, ItemRecord.unapply)
   }
 
   object ItemDao

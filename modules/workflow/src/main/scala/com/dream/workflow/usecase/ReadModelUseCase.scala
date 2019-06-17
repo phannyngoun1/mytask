@@ -25,8 +25,7 @@ class ReadModelUseCase(
   flagReadModelFlows: FlagReadModelFlows,
   journalReader: JournalReader)(implicit val system: ActorSystem)
   extends UseCaseSupport {
-
-
+  
   private implicit val mat: ActorMaterializer = ActorMaterializer()
   private implicit val ec: ExecutionContextExecutor = system.dispatcher
 
@@ -34,7 +33,7 @@ class ReadModelUseCase(
     Flow[(ItemEvent, Long)].flatMapConcat {
       case (event: ItemCreated, sequenceNr: Long) =>
         Source
-          .single((event.id, event.name, sequenceNr, event.createdAt))
+          .single((event.id, event.name, event.desc, event.workflowId, sequenceNr, event.createdAt))
           .via(readModelFlow.newItemFlow)
       case _ => Source.single("").via(Flow[String].mapAsync(1) {
         case _ => Future.successful(0)
@@ -107,7 +106,7 @@ class ReadModelUseCase(
               .via(flowReadModelFlow.newItemFlow).map(_ => event.sequenceNr)
           case ev: ItemCreated =>
             Source
-              .single((ev.id, ev.name, 1L, ev.createdAt))
+              .single((ev.id, ev.name, ev.desc, ev.workflowId, 1L, ev.createdAt))
               .via(readModelFlow.newItemFlow).map(_ => event.sequenceNr)
           case _ =>
             println(s"event no handler ${event} ")

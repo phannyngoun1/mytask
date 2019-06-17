@@ -29,6 +29,8 @@ object DataModel {
 
   case class FormModel(
 
+
+
     message: Pot[String] = Pot.empty,
 
     ticketModel: TicketModel = TicketModel(),

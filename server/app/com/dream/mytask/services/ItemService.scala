@@ -19,7 +19,7 @@ trait ItemService { this: ApiService =>
 
     data.map { item =>
       ItemInitDataJs(
-        item._1.map(it => ItemJson(it.id, it.name)),
+        item._1.map(it => ItemJson(it.id, it.name, it.desc, it.initPayloadCode)),
         item._2.map(flow => FlowJson(flow.id, flow.name))
       )
     }
@@ -29,12 +29,12 @@ trait ItemService { this: ApiService =>
 
    itemAggregateUseCase.getItem(GetItemCmdRequest(UUID.fromString(id))).map {
 
-     case res: GetItemCmdSuccess => ItemJson(res.id.toString, res.name)
-     case _ => ItemJson("", "")
+     case res: GetItemCmdSuccess => ItemJson(res.id.toString, res.name, res.desc, None)
+     case _ => ItemJson("", "", None, None)
    }
   }
 
-  override def newItem(name: String, flowId: String, desc: String): Future[String] = {
+  override def newItem(name: String, flowId: String, desc: Option[String]): Future[String] = {
 
     itemAggregateUseCase.createItem(CreateItemCmdRequest(
       id = UUID.randomUUID(),
@@ -48,7 +48,7 @@ trait ItemService { this: ApiService =>
   }
 
   override def getItemList(): Future[List[ItemJson]] = {
-    itemAggregateUseCase.list.map(_.map(item => ItemJson(item.id.toString, item.name)))
+    itemAggregateUseCase.list.map(_.map(item => ItemJson(item.id.toString, item.name, item.desc, item.initPayload)))
   }
 
 }

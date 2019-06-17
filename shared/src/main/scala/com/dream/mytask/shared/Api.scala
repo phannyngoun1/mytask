@@ -18,7 +18,7 @@ trait Api extends TicketApi{
 
   def getItemInitData(): Future[ItemInitDataJs]
 
-  def newItem(name: String, flowId: String, desc: String): Future[String]
+  def newItem(name: String, flowId: String, desc: Option[String]): Future[String]
 
   def getItem(id: String) : Future[ItemJson]
 

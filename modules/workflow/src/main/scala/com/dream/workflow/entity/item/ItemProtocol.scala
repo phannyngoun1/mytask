@@ -15,7 +15,7 @@ object ItemProtocol {
   case class NewItemCmdRequest(
     val id: UUID,
     name: String,
-    desc: String,
+    desc: Option[String],
     workflowId: UUID
 
   ) extends ItemCmdRequest
@@ -33,7 +33,7 @@ object ItemProtocol {
   case class GetItemCmdSuccess(
     id: UUID,
     name: String,
-    desc: String,
+    desc: Option[String],
     workflowId: UUID
   ) extends ItemCmdRequest
 

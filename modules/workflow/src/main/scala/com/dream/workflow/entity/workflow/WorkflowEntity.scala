@@ -86,6 +86,12 @@ class WorkflowEntity extends PersistentActor with ActorLogging with EntityState[
         sender() ! GetTaskActionCmdSuccess(cmd.task.copy(actions = actions))
       }
 
+    case cmd: GetWorkflowPayloadCmdRequest =>
+      foreachState { state =>
+        sender() ! GetWorkflowPayloadCmdSuccess(cmd.item.copy(initPayload = state.getInitPayload))
+      }
+
+
     case SaveSnapshotSuccess(metadata) =>
       log.debug(s"receiveCommand: SaveSnapshotSuccess succeeded: $metadata")
   }

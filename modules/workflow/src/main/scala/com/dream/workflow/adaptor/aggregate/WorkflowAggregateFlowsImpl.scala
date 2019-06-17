@@ -64,4 +64,23 @@ class WorkflowAggregateFlowsImpl(aggregateRef: ActorRef) extends WorkflowAggrega
           throw  new RuntimeException("unhandled getTaskActions")
         }
       }
+
+  override def getWorkflowPayloadFlow: Flow[Protocol.GetWorkflowPayloadCmdRequest, Protocol.GetWorkflowPayloadCmdResponse, NotUsed] =
+    Flow[Protocol.GetWorkflowPayloadCmdRequest]
+      .map(req => GetWorkflowPayloadCmdRequest(req.item.workflowId, req.item))
+      .mapAsync(1)(aggregateRef ? _)
+      .map {
+        case res: GetWorkflowPayloadCmdSuccess => {
+          println(s"Workflow payload fetched ${res}")
+          Protocol.GetWorkflowPayloadCmdSuccess(res.item)
+        }
+        case CmdResponseFailed(message) => {
+          println("Failed to get Workflow payload")
+          Protocol.GetWorkflowPayloadCmdFailed(ResponseError(message))
+        }
+        case _ => {
+          println("unhandled Workflow payload ")
+          throw new RuntimeException("unhandled getTaskActions")
+        }
+      }
 }

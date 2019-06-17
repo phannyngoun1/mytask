@@ -4,7 +4,9 @@ import java.util.UUID
 
 import com.dream.mytask.AppClient.{DashboardLoc, Loc, ViewPInstLoc}
 import com.dream.mytask.modules.processinst.ProcessInstActionHandler._
+import com.dream.mytask.modules.ticketform.{TicketFormComp, TicketMainFormComp}
 import com.dream.mytask.services.DataModel.ProcessInstanceModel
+import com.dream.mytask.shared.data.ActionInfoJson
 import diode.react.ReactPot._
 import diode.react._
 import japgolly.scalajs.react.{BackendScope, _}
@@ -97,6 +99,13 @@ object ProcessInstComp {
                               )
                             }
                           )
+                        ),
+                        <.h3("Entry Form"),
+                        <.div(
+                          m.itemList.find(_.id.equalsIgnoreCase(s.itemId.getOrElse(""))).map(item => item.initPayloadCode match {
+                            case Some("ticket-payload") => <.div( TicketFormComp(p.proxy, p.c, p.data))
+                            case _ => VdomArray.empty()
+                          }).get
                         )
                       )
                     )

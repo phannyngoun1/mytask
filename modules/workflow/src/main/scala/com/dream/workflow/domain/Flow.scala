@@ -61,6 +61,11 @@ case class Flow(
 ) {
 
 
+  def getInitPayload: Option[String] =
+    workflowList
+      .find(_.activity.name.equalsIgnoreCase(initialActivity.name))
+      .map(_.actionFlows.find(_.action.name.equalsIgnoreCase("Start")).map(_.payloadCode).getOrElse(None)).getOrElse(None)
+
   /**based one current activity + action + authorized participant => Next Activity flow
     */
   //TODO: check for authorized participant

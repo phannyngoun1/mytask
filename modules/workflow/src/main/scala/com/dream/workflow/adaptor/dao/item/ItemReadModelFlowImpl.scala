@@ -1,6 +1,5 @@
 package com.dream.workflow.adaptor.dao.item
 
-import java.time.Instant
 import java.util.UUID
 
 import akka.NotUsed
@@ -25,15 +24,17 @@ class ItemReadModelFlowImpl(val profile: JdbcProfile, val db: JdbcProfile#Backen
     }
 
 
-  override def newItemFlow(implicit ec: ExecutionContext): Flow[(UUID, String,  Long, TimePoint), Int, NotUsed] = {
-    Flow[(UUID, String, Long, TimePoint)].mapAsync(1) {
-      case (id, name, seq, createdAt) =>
+  override def newItemFlow(implicit ec: ExecutionContext): Flow[(UUID, String, Option[String], UUID,  Long, TimePoint), Int, NotUsed] = {
+    Flow[(UUID, String , Option[String], UUID, Long, TimePoint)].mapAsync(1) {
+      case (id, name, desc, workflowId , seq, createdAt) =>
 
         db.run(
           ItemDao.forceInsert(
             ItemRecord(
               id.toString,
               name,
+              desc,
+              workflowId.toString,
               seq,
               createdAt.asJavaZonedDateTime(),
               createdAt.asJavaZonedDateTime()
@@ -43,7 +44,7 @@ class ItemReadModelFlowImpl(val profile: JdbcProfile, val db: JdbcProfile#Backen
     }
   }
 
-  def list =
-    db.stream(ItemDao.sortBy(_.createdAt).result).mapResult(item => Item(UUID.fromString(item.id), item.name, "", UUID.randomUUID()))
+  def list(implicit ec: ExecutionContext) =
+    db.stream(ItemDao.sortBy(_.createdAt).result).mapResult(item => Item(UUID.fromString(item.id), item.name,item.desc, UUID.fromString(item.workflowId)))
 
 }

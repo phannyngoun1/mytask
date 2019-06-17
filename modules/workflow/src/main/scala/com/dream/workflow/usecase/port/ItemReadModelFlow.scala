@@ -14,8 +14,8 @@ trait ItemReadModelFlow {
 
   def resolveLastSeqNrSource(implicit ec: ExecutionContext): Source[Long, NotUsed]
 
-  def newItemFlow(implicit ec: ExecutionContext): Flow[(UUID, String, Long, TimePoint), Int, NotUsed]
+  def newItemFlow(implicit ec: ExecutionContext): Flow[(UUID, String, Option[String], UUID, Long, TimePoint), Int, NotUsed]
 
-  def list: DatabasePublisher[Item]
+  def list(implicit ec: ExecutionContext): DatabasePublisher[Item]
 
 }

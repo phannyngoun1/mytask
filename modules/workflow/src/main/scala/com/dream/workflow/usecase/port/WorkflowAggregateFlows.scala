@@ -12,4 +12,6 @@ trait WorkflowAggregateFlows {
 
   def getTaskActions: Flow[GetTaskActionCmdReq, GetTaskActionCmdRes, NotUsed]
 
+  def getWorkflowPayloadFlow : Flow[GetWorkflowPayloadCmdRequest, GetWorkflowPayloadCmdResponse, NotUsed]
+
 }

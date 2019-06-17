@@ -84,7 +84,7 @@ class ItemActionHandler[M](modelRW: ModelRW[M, Pot[String]]) extends ActionHandl
 
   override protected def handle = {
     case action: NewItemAction =>
-      val updateF = action.effect(AjaxClient[Api].newItem(action.name.get, action.flowId.get, action.desc.get).call())(identity _ )
+      val updateF = action.effect(AjaxClient[Api].newItem(action.name.get, action.flowId.get, action.desc).call())(identity _ )
       action.handleWith(this, updateF)(PotAction.handler())
   }
 }

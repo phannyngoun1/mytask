@@ -14,7 +14,7 @@ import com.dream.workflow.adaptor.dao.item.ItemReadModelFlowImpl
 import com.dream.workflow.adaptor.dao.participant.ParticipantReadModelFlowImpl
 import com.dream.workflow.adaptor.dao.processinstance.PInstanceReadModelFlowImpl
 import com.dream.workflow.adaptor.journal.JournalReaderImpl
-import com.dream.workflow.usecase.AccountAggregateUseCase.Protocol.{GetAccountCmdReq, GetAccountCmdSuccess, _}
+import com.dream.workflow.usecase.AccountAggregateUseCase.Protocol.{GetAccountCmdReq, GetAccountCmdSuccess, _ }
 import com.dream.workflow.usecase.ProcessInstanceAggregateUseCase.Protocol.{TakeActionCmdRequest}
 import com.dream.workflow.usecase._
 import com.typesafe.config.ConfigFactory
@@ -52,7 +52,7 @@ class ApiService(login: UUID)(implicit val ec: ExecutionContext, implicit val  s
   val pInstFlow = new ProcessInstanceAggregateFlowsImpl(localEntityAggregates)
   val accountFlow = new AccountAggregateFlowsImpl(localEntityAggregates)
   val participantFlow = new ParticipantAggregateFlowsImpl(localEntityAggregates)
-  val itemAggregateUseCase = new ItemAggregateUseCase(itemFlow,readSideFlow )
+  val itemAggregateUseCase = new ItemAggregateUseCase(itemFlow, workFlow,readSideFlow )
   val workflowAggregateUseCase = new WorkflowAggregateUseCase(workFlow, flowReadModelFlow)
   val processInstance = new ProcessInstanceAggregateUseCase(pInstFlow, workFlow, itemFlow, participantFlow, pInstanceReadModelFlows)
   val accountUseCase = new AccountAggregateUseCase(accountFlow,participantFlow, pInstFlow, accountReadModelFlow, workFlow )
@@ -92,7 +92,7 @@ class ApiService(login: UUID)(implicit val ec: ExecutionContext, implicit val  s
     val uuId = UUID.fromString(accId)
 
     accountUseCase.getTasks(GetTaskLisCmdReq(uuId)) map (_.map { f =>
-      TaskItemJson(f.id.toString, f.pInstId.toString, f.participantId.toString, f.activity.name, List.empty ++ f.actions.map(a => ActionItemJson(a._1.name, a._2) ))
+      TaskItemJson(f.id.toString, f.pInstId.toString, f.participantId.toString, f.activity.name, List.empty ++ f.actions.map(a => ActionItemJson(a._1.name, a._2)))
     })
   }
 

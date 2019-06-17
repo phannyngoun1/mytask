@@ -20,8 +20,9 @@ object Item {
 case class Item(
   id: UUID,
   name: String,
-  desc: String,
+  desc: Option[String],
   workflowId: UUID,
+  initPayload: Option[String] =  None,
   isActive: Boolean = true
 )
 
@@ -30,7 +31,7 @@ sealed trait ItemEvent
 case class ItemCreated(
   id: UUID,
   name: String,
-  desc: String,
+  desc: Option[String],
   workflowId: UUID,
   createdAt: TimePoint = TimePoint.from(Instant.now())
 ) extends ItemEvent

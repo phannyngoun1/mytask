@@ -7,9 +7,10 @@ import akka.stream.scaladsl.{Keep, Sink, Source, SourceQueueWithComplete}
 import akka.stream._
 import com.dream.common.domain.ResponseError
 import com.dream.workflow.domain.Item
-import com.dream.workflow.usecase.port.{ItemAggregateFlows, ItemReadModelFlow}
+import com.dream.workflow.usecase.WorkflowAggregateUseCase.Protocol.{GetWorkflowPayloadCmdRequest, GetWorkflowPayloadCmdSuccess}
+import com.dream.workflow.usecase.port.{ItemAggregateFlows, ItemReadModelFlow, WorkflowAggregateFlows}
 
-import scala.concurrent.{ExecutionContext, ExecutionContextExecutor, Future, Promise}
+import scala.concurrent.{ExecutionContext, Future, Promise}
 
 object ItemAggregateUseCase {
 
@@ -22,7 +23,7 @@ object ItemAggregateUseCase {
     case class CreateItemCmdRequest(
       id: UUID,
       name: String,
-      desc: String,
+      desc: Option[String],
       workflowId: UUID
     ) extends ItemCmdRequest
 
@@ -41,7 +42,7 @@ object ItemAggregateUseCase {
     case class GetItemCmdSuccess(
       id: UUID,
       name: String,
-      desc: String,
+      desc: Option[String],
       workflowId: UUID
     ) extends GetItemCmdResponse
 
@@ -54,13 +55,14 @@ object ItemAggregateUseCase {
     case class GetWorkflowIdCmdSuccess(workflowId: UUID) extends GetWorkflowIdCmdResponse
 
     case class GetWorkflowIdCmdFailed(error: ResponseError) extends GetWorkflowIdCmdResponse
-
   }
-
 }
 
-
-class ItemAggregateUseCase(itemAggregateFlows: ItemAggregateFlows,itemReadModelFlow: ItemReadModelFlow)(implicit system: ActorSystem) extends UseCaseSupport {
+class ItemAggregateUseCase(
+  itemAggregateFlows: ItemAggregateFlows,
+  workflowAggregateFlows: WorkflowAggregateFlows,
+  itemReadModelFlow: ItemReadModelFlow
+)(implicit system: ActorSystem) extends UseCaseSupport {
 
   import ItemAggregateUseCase.Protocol._
   import UseCaseSupport._
@@ -73,7 +75,7 @@ class ItemAggregateUseCase(itemAggregateFlows: ItemAggregateFlows,itemReadModelF
     ActorMaterializerSettings(system)
       .withSupervisionStrategy(decider)
   )
-  private implicit val ec: ExecutionContextExecutor = system.dispatcher
+  //private implicit val ec: ExecutionContextExecutor = system.dispatcher
 
   private val bufferSize: Int = 10
 
@@ -86,11 +88,18 @@ class ItemAggregateUseCase(itemAggregateFlows: ItemAggregateFlows,itemReadModelF
   }
 
 
-  def list: Future[List[Item]] = {
+  def list(implicit ec: ExecutionContext): Future[List[Item]] = {
 
     val sumSink =  Sink.fold[List[Item], Item](List.empty[Item])( (m ,e) =>  e :: m )
-    Source.fromPublisher(itemReadModelFlow.list).toMat(sumSink)(Keep.right).run()
-
+    Source.fromPublisher(itemReadModelFlow.list)
+      .map(GetWorkflowPayloadCmdRequest)
+      .via(workflowAggregateFlows.getWorkflowPayloadFlow.map {
+        case GetWorkflowPayloadCmdSuccess(item) => {
+          println(s"getWorkflowPayloadFlow ${item}")
+          item
+        }
+      })
+      .toMat(sumSink)(Keep.right).run()
   }
 
   private val createItemQueue: SourceQueueWithComplete[(CreateItemCmdRequest, Promise[CreateItemCmdResponse])] =
