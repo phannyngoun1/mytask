@@ -99,13 +99,6 @@ object ProcessInstComp {
                               )
                             }
                           )
-                        ),
-                        <.h3("Entry Form"),
-                        <.div(
-                          m.itemList.find(_.id.equalsIgnoreCase(s.itemId.getOrElse(""))).map(item => item.initPayloadCode match {
-                            case Some("ticket-payload") => <.div( TicketFormComp(p.proxy, p.c, p.data))
-                            case _ => VdomArray.empty()
-                          }).get
                         )
                       )
                     )
