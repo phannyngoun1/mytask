@@ -26,7 +26,12 @@ object TaskListComp {
       implicit  def renderItem(task: TaskItemJson, action: ActionItemJson, accId: String) = {
 
         val info = PerformTaskAction(
-          task.activityName, action.name , UUID.fromString(task.id), UUID.fromString(task.pInstId), p.id.get, UUID.fromString(task.participantId)
+          action.payloadCode,
+          task.activityName,
+          action.name ,
+          UUID.fromString(task.id),
+          UUID.fromString(task.pInstId), p.id.get,
+          UUID.fromString(task.participantId)
         )
 
         <.button(action.name ,  ^.onClick --> (p.proxy.dispatchCB(info) >> p.c.set(PerformTaskLoc)) )
@@ -69,7 +74,7 @@ object TaskListComp {
                   m toTagMod { item =>
                     <.li( s"task Id: ${item.id}, P inst: ${item.pInstId},  participantId: ${item.participantId}, activity: ${item.activityName}",
                       <.div(" Actions: ",
-                        renderItem(item, ActionItemJson("View", None), s.accountId.get),
+                        renderItem(item, ActionItemJson("View", Some("ticket-payload-view")), s.accountId.get),
                         item.actions toTagMod(action => renderItem(item, action, s.accountId.get))
                       )
                     )

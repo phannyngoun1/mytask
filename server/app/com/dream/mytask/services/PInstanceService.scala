@@ -10,11 +10,11 @@ import scala.concurrent.Future
 
 trait PInstanceService { this: ApiService =>
 
-  override def createProcessInstance(itemId: String, submitter: String): Future[String] = {
+  override def createProcessInstance(itemId: UUID, submitter: UUID): Future[String] = {
 
     processInstance.createPInst(CreatePInstCmdRequest(
-      itemID = UUID.fromString(itemId),
-      by = UUID.fromString(submitter)
+      itemID = itemId,
+      by = submitter
     )) map {
       case res: CreatePInstCmdSuccess => s"Process instance ${res.folio} created"
       case _ => "Failed"

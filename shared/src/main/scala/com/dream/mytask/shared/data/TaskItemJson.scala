@@ -39,7 +39,21 @@ case class ActionItemJson(
   payloadCode: Option[String]
 )
 
+trait BaseActionInfoJson {
+  def payloadCode: Option[String]
+  def accountId: UUID
+  def participantId: UUID
+}
+
+case class ActionStartInfoJson(
+  payloadCode: Option[String],
+  itemId: UUID,
+  accountId: UUID,
+  participantId: UUID
+) extends BaseActionInfoJson
+
 case class ActionInfoJson(
+  payloadCode: Option[String],
   activity: String,
   action: String,
   taskId: UUID,
@@ -47,4 +61,4 @@ case class ActionInfoJson(
   accountId: UUID,
   participantId: UUID
 
-)
+) extends  BaseActionInfoJson

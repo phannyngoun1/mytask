@@ -3,7 +3,7 @@ package com.dream.mytask.services
 import com.dream.mytask.shared.data.AccountData.{AccountJson, ParticipantJson}
 import com.dream.mytask.shared.data.ItemData.{ItemInitDataJs, ItemJson}
 import com.dream.mytask.shared.data.ProcessInstanceData.{PInstInitDataInfoJs, PInstInitDataJson, ProcessInstanceJson}
-import com.dream.mytask.shared.data.{ActionInfoJson, AssignFormInitDataJs, TaskItemJson}
+import com.dream.mytask.shared.data.{ActionInfoJson, AssignFormInitDataJs, BaseActionInfoJson, TaskItemJson}
 import com.dream.mytask.shared.data.WorkflowData.{FlowInitDataJs, FlowJson, WorkflowTemplateJs}
 import diode.data.Pot
 
@@ -35,7 +35,7 @@ object DataModel {
 
     ticketModel: TicketModel = TicketModel(),
 
-    actionInfo: Option[ActionInfoJson] = None
+    actionInfo: Option[BaseActionInfoJson] = None
 
   )
 

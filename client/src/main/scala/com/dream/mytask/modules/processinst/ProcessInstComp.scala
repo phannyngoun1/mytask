@@ -2,11 +2,10 @@ package com.dream.mytask.modules.processinst
 
 import java.util.UUID
 
-import com.dream.mytask.AppClient.{DashboardLoc, Loc, ViewPInstLoc}
+import com.dream.mytask.AppClient.{DashboardLoc, Loc, PerformTaskLoc, ViewPInstLoc}
+import com.dream.mytask.modules.form.FormActionHandler.{PerformTaskAction, StartInstAction}
 import com.dream.mytask.modules.processinst.ProcessInstActionHandler._
-import com.dream.mytask.modules.ticketform.{TicketFormComp, TicketMainFormComp}
 import com.dream.mytask.services.DataModel.ProcessInstanceModel
-import com.dream.mytask.shared.data.ActionInfoJson
 import diode.react.ReactPot._
 import diode.react._
 import japgolly.scalajs.react.{BackendScope, _}
@@ -94,11 +93,28 @@ object ProcessInstComp {
                             <.option(^.default := true),
                             m.itemList.toTagMod { item =>
                               <.option(
-                                ^.value := item.id,
+                                ^.value := item.id.toString,
                                 item.name
                               )
                             }
                           )
+                        ),
+
+                        <.div(
+                          <.button("Create" , ^.onClick --> {
+                            val participant = m.pcpList.find(_.id.equalsIgnoreCase(s.participantId.getOrElse("")))
+
+                              val item = m.itemList
+                                .find(_.id.equals(s.itemId.map(UUID.fromString).get))
+                                .map(item => StartInstAction(
+                                  item.initPayloadCode ,
+                                  item.id,
+                                  participant.map(p=> UUID.fromString(p.accountId)).get ,
+                                  participant.map(p=> UUID.fromString(p.id)).get ))
+
+                              (Callback(println(s"state: ${s.itemId}, ${s.participantId}")) >>
+                                Callback.when(item.isDefined && s.participantId.isDefined)(p.proxy.dispatchCB(item.get) >> p.c.set(PerformTaskLoc)))
+                          })
                         )
                       )
                     )
@@ -106,15 +122,17 @@ object ProcessInstComp {
                 )
               )
             })
-          ),
-          <.div(
-            <.button(^.onClick -->  (Callback(println(s"state: ${s.itemId}, ${s.participantId}")) >>
-              Callback.when(s.itemId.isDefined && s.participantId.isDefined)(p.proxy.dispatchCB(CreateProcessInstAction(s.itemId, s.participantId)) >> p.proxy.dispatchCB(InitPInstAction()))), "Create")
           )
-
         )
       )
     }
+
+//
+//    val info = PerformTaskAction(
+//      task.activityName, action.name , UUID.fromString(task.id), UUID.fromString(task.pInstId), p.id.get, UUID.fromString(task.participantId)
+//    )
+//
+//    <.button(action.name ,  ^.onClick --> (p.proxy.dispatchCB(info) >> p.c.set(PerformTaskLoc)) )
 
     def setValue(e: ReactEventFromInput) = {
       val id = if (e.target.value.trim.isEmpty) None else Some(e.target.value)

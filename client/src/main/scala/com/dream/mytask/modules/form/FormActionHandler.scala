@@ -7,11 +7,11 @@ import diode.data.{Empty, Pot, PotAction}
 import diode.util.RunAfterJS
 import boopickle.Default._
 import autowire._
-import com.dream.mytask.modules.form.FormActionHandler.{FetchPInstDataInfoAction, FormAction, PerformTaskAction}
+import com.dream.mytask.modules.form.FormActionHandler.{FetchPInstDataInfoAction, FormAction, PerformTaskAction, StartInstAction}
 import com.dream.mytask.services.AjaxClient
 import com.dream.mytask.services.DataModel.{FormModel, RootModel}
 import com.dream.mytask.shared.Api
-import com.dream.mytask.shared.data.ActionInfoJson
+import com.dream.mytask.shared.data.{ActionInfoJson, ActionStartInfoJson}
 import com.dream.mytask.shared.data.ProcessInstanceData.PInstInitDataInfoJs
 import com.dream.mytask.shared.data.WorkflowData.PayloadJs
 
@@ -31,14 +31,29 @@ object FormActionHandler {
 
   }
 
+  trait BasePerformTaskAction {
+    def payloadCode:  Option[String]
+    def accountId: UUID
+    def participantId: UUID
+
+  }
+
+  case class StartInstAction(
+    payloadCode: Option[String],
+    itemId: UUID,
+    accountId: UUID,
+    participantId: UUID
+  ) extends Action with BasePerformTaskAction
+
   case class PerformTaskAction(
+    payloadCode:  Option[String],
     activity: String,
     action: String,
     taskId: UUID,
     pInstId: UUID,
     accountId: UUID,
     participantId: UUID
-  ) extends Action
+  ) extends Action with BasePerformTaskAction
 
   case class FormAction(
     pInstId: Option[String],
@@ -63,10 +78,16 @@ class FromActionHandler[M](modelRW: ModelRW[M, FormModel]) extends ActionHandler
   implicit val runner = new RunAfterJS
 
   override protected def handle: PartialFunction[Any, ActionResult[M]] = {
-    case PerformTaskAction(activity, action, taskId, pInstId, accountId, participantId) =>
+    case PerformTaskAction(payloadCode,activity, action, taskId, pInstId, accountId, participantId) =>
       updated(value.copy(
         message = Pot.empty,
-        actionInfo = Some(ActionInfoJson(activity, action, taskId, pInstId, accountId, participantId))
+        actionInfo = Some(ActionInfoJson(payloadCode, activity, action, taskId, pInstId, accountId, participantId))
+      ))
+
+    case StartInstAction(payloadCode, itemId, accountId, participantId) =>
+      updated(value.copy(
+        message = Pot.empty,
+        actionInfo = Some(ActionStartInfoJson(payloadCode, itemId,accountId, participantId))
       ))
   }
 }

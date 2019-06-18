@@ -1,5 +1,7 @@
 package com.dream.mytask.modules.processinst
 
+import java.util.UUID
+
 import autowire._
 import com.dream.mytask.services.AjaxClient
 import com.dream.mytask.services.DataModel.{ProcessInstanceCriteria, ProcessInstanceModel, ProcessInstanceResult, RootModel}
@@ -14,7 +16,7 @@ import diode._
 object ProcessInstActionHandler {
 
 
-  case class CreateProcessInstAction(itemId: Option[String], participantId: Option[String], potResult: Pot[String] = Empty) extends PotAction[String, CreateProcessInstAction] {
+  case class CreateProcessInstAction(itemId: Option[UUID], participantId: Option[UUID], potResult: Pot[String] = Empty) extends PotAction[String, CreateProcessInstAction] {
     override def next(newResult: Pot[String]): CreateProcessInstAction = CreateProcessInstAction(None, None, newResult)
   }
 

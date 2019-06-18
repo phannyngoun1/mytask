@@ -2,8 +2,9 @@ package com.dream.mytask.modules.ticketform
 
 import com.dream.mytask.AppClient.{FetchTaskLoc, Loc}
 import com.dream.mytask.modules.form.FormActionHandler.FormAction
+import com.dream.mytask.modules.processinst.ProcessInstActionHandler.{CreateProcessInstAction, InitPInstAction}
 import com.dream.mytask.services.DataModel.FormModel
-import com.dream.mytask.shared.data.ActionInfoJson
+import com.dream.mytask.shared.data.{ActionInfoJson, ActionStartInfoJson, BaseActionInfoJson}
 import com.dream.mytask.shared.data.WorkflowData.{CommentPayloadJs, EditTicketPayloadJs}
 import diode.react._
 import diode.react.ReactPot._
@@ -12,7 +13,7 @@ import japgolly.scalajs.react.vdom.html_<^._
 import japgolly.scalajs.react._
 
 object TicketFormComp {
-  case class Props(proxy: ModelProxy[FormModel], c: RouterCtl[Loc], data: ActionInfoJson)
+  case class Props(proxy: ModelProxy[FormModel], c: RouterCtl[Loc], data: BaseActionInfoJson)
 
   case class State(test: String = "",comment: Option[String] = None)
 
@@ -55,14 +56,27 @@ object TicketFormComp {
         ),
         <.div(
           <.button("Submit",
-            ^.onClick --> p.proxy.dispatchCB(FormAction(
-              pInstId       = Some(p.data.pInstId.toString),
-              taskId        = Some(p.data.taskId.toString),
-              accId         = Some(p.data.accountId.toString),
-              participantId = Some(p.data.participantId.toString),
-              action        = Some(p.data.action),
-              payLoad       = Some(EditTicketPayloadJs(s.test,s.comment))
-            ))
+            ^.onClick --> {
+
+              p.data match {
+                case actionInfo: ActionInfoJson =>
+                  p.proxy.dispatchCB(FormAction(
+                    pInstId       = Some(actionInfo.pInstId.toString),
+                    taskId        = Some(actionInfo.taskId.toString),
+                    accId         = Some(actionInfo.accountId.toString),
+                    participantId = Some(actionInfo.participantId.toString),
+                    action        = Some(actionInfo.action),
+                    payLoad       = Some(EditTicketPayloadJs(s.test,s.comment))
+                  ))
+
+                case actionInfo: ActionStartInfoJson =>
+                  Callback.when(!s.test.isEmpty)(p.proxy.dispatchCB(CreateProcessInstAction(Some(actionInfo.itemId), Some(actionInfo.participantId))))
+                case _ =>
+                  Callback.empty
+              }
+
+
+            }
           ),
           <.button("Cancel")
         )
@@ -75,5 +89,5 @@ object TicketFormComp {
     .renderBackend[Backend]
     .build
 
-  def apply(proxy: ModelProxy[FormModel], c: RouterCtl[Loc], data: ActionInfoJson) = component(Props(proxy, c, data))
+  def apply(proxy: ModelProxy[FormModel], c: RouterCtl[Loc], data: BaseActionInfoJson) = component(Props(proxy, c, data))
 }

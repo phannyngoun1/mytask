@@ -29,8 +29,8 @@ trait ItemService { this: ApiService =>
 
    itemAggregateUseCase.getItem(GetItemCmdRequest(UUID.fromString(id))).map {
 
-     case res: GetItemCmdSuccess => ItemJson(res.id.toString, res.name, res.desc, None)
-     case _ => ItemJson("", "", None, None)
+     case res: GetItemCmdSuccess => ItemJson(res.id, res.name, res.desc, None)
+     case _ => ItemJson(UUID.randomUUID(), "", None, None)
    }
   }
 
@@ -48,7 +48,7 @@ trait ItemService { this: ApiService =>
   }
 
   override def getItemList(): Future[List[ItemJson]] = {
-    itemAggregateUseCase.list.map(_.map(item => ItemJson(item.id.toString, item.name, item.desc, item.initPayload)))
+    itemAggregateUseCase.list.map(_.map(item => ItemJson(item.id, item.name, item.desc, item.initPayload)))
   }
 
 }

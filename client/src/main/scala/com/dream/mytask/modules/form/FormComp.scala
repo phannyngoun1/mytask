@@ -1,15 +1,13 @@
 package com.dream.mytask.modules.form
 
-import java.util.UUID
-
 import com.dream.mytask.AppClient.{FetchTaskLoc, Loc}
-import com.dream.mytask.modules.ticketform.TicketMainFormComp
-import com.dream.mytask.services.DataModel.{AccountModel, FormModel}
+import com.dream.mytask.modules.ticketform.{AssignFormComp, CommentComp, TicketMainFormComp}
+import com.dream.mytask.services.DataModel.FormModel
+import com.dream.mytask.shared.data.ActionInfoJson
 import diode.react._
-import diode.react.ReactPot._
+import japgolly.scalajs.react._
 import japgolly.scalajs.react.extra.router.RouterCtl
 import japgolly.scalajs.react.vdom.html_<^._
-import japgolly.scalajs.react._
 
 object FormComp {
 
@@ -31,11 +29,20 @@ object FormComp {
             )
           ),
 
-          data.activity match {
-            case "Ticketing" =>
-              TicketMainFormComp(p.proxy, p.c, data)
-            case _ => <.div("No form available.")
+          data.payloadCode match {
+            case Some(v) =>
+              if (v.contains("ticket-payload"))
+                TicketMainFormComp(p.proxy, p.c, data)
+
+              //Common forms
+              else if (v.contains("assign-payload"))
+                AssignFormComp(p.proxy, p.c, data.asInstanceOf[ActionInfoJson])
+              else if (v.contains("comment-payload"))
+                CommentComp(p.proxy, p.c, data.asInstanceOf[ActionInfoJson])
+              else <.div("No form available.")
+            case None => <.div("No Payload.")
           }
+
         )
       }
     }
