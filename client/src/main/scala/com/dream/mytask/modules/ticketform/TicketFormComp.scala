@@ -1,11 +1,11 @@
 package com.dream.mytask.modules.ticketform
 
-import com.dream.mytask.AppClient.{FetchTaskLoc, Loc}
+import com.dream.mytask.AppClient.{Loc}
 import com.dream.mytask.modules.form.FormActionHandler.FormAction
 import com.dream.mytask.modules.processinst.ProcessInstActionHandler.{CreateProcessInstAction, InitPInstAction}
 import com.dream.mytask.services.DataModel.FormModel
 import com.dream.mytask.shared.data.{ActionInfoJson, ActionStartInfoJson, BaseActionInfoJson}
-import com.dream.mytask.shared.data.WorkflowData.{CommentPayloadJs, EditTicketPayloadJs}
+import com.dream.mytask.shared.data.WorkflowData.{EditTicketPayloadJs}
 import diode.react._
 import diode.react.ReactPot._
 import japgolly.scalajs.react.extra.router.RouterCtl
@@ -13,6 +13,7 @@ import japgolly.scalajs.react.vdom.html_<^._
 import japgolly.scalajs.react._
 
 object TicketFormComp {
+
   case class Props(proxy: ModelProxy[FormModel], c: RouterCtl[Loc], data: BaseActionInfoJson)
 
   case class State(test: String = "",comment: Option[String] = None)
@@ -74,8 +75,6 @@ object TicketFormComp {
                 case _ =>
                   Callback.empty
               }
-
-
             }
           ),
           <.button("Cancel")

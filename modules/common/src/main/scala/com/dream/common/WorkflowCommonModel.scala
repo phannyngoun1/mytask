@@ -15,16 +15,22 @@ trait BaseAction {
   def actionType: String = "COMPLETED"
 }
 
-trait Payload
+trait Payload {
+  def payloadCode: Option[String]
+}
 
 
-case class NonePayload() extends Payload
+case class NonePayload(
+  payloadCode: Option[String] = None
+
+) extends Payload
 
 trait ReRoutePayload {
   def participantId: UUID
 }
 
 case class DefaultPayLoad(
+  payloadCode: Option[String] = None ,
   value: String
 ) extends Payload
 
@@ -33,6 +39,7 @@ trait Params
 case class DefaultFlowParams(value: String) extends Params
 
 trait BaseActivity {
+
   def name: String
 
   override def equals(obj: Any): Boolean = obj match {
@@ -141,10 +148,6 @@ case class Contribution(
   contributeTypeList: List[String] = List.empty,
   accessibleActionList: List[BaseAction] = List.empty
 )
-
-
-
-
 
 
 //Direct assign - DirectAssign. Sharable, Assignable, Pickup,  * = any types.

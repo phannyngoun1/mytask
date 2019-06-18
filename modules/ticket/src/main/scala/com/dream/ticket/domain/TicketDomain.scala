@@ -8,8 +8,13 @@ object TicketDomain {
 
   trait TicketPayLoad extends Payload
 
-  case class EditTicketPayload() extends TicketPayLoad
+  case class EditTicketPayload(
+    payloadCode: Option[String]
+  ) extends TicketPayLoad
 
-  case class AssignTicketPayload(participantId: UUID) extends TicketPayLoad with ReRoutePayload
+  case class AssignTicketPayload(
+    payloadCode: Option[String],
+    participantId: UUID
+  ) extends TicketPayLoad with ReRoutePayload
 
 }

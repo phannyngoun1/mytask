@@ -32,9 +32,7 @@ object TicketHandler {
 class TicketHandler extends Actor with ActorLogging {
   override def receive: Receive = {
     case req: PerformTicketCmdRequest => {
-
       println(s"--do perform task ${req}")
-
       sender() ! DefaultTaskPerformCmdResponse(UUID.randomUUID())
     }
   }

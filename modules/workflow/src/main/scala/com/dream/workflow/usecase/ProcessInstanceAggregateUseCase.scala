@@ -276,8 +276,6 @@ class ProcessInstanceAggregateUseCase(
       }
     }
 
-    // val workflowResult = Flow[WFlow].map(flow => ActionParams(flow = flow) )
-
     val mapZipFlowToActionParam = Flow[(ActionParams, WFlow)].map(f =>
       f._1.copy(
         flow = Some(f._2),

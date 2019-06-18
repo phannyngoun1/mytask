@@ -5,6 +5,8 @@ import com.dream.common.Payload
 
 object TicketDto {
 
-  case class EditTicketPayload() extends Payload
+  case class EditTicketPayload(
+    payloadCode: Option[String] = Some("ticket-payload")
+  ) extends Payload
 
 }

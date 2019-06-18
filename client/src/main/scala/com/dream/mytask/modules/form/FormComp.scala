@@ -42,7 +42,6 @@ object FormComp {
               else <.div("No form available.")
             case None => <.div("No Payload.")
           }
-
         )
       }
     }

@@ -3,7 +3,7 @@ package com.dream.mytask.modules.processinst
 import java.util.UUID
 
 import com.dream.mytask.AppClient.{DashboardLoc, Loc, PerformTaskLoc, ViewPInstLoc}
-import com.dream.mytask.modules.form.FormActionHandler.{PerformTaskAction, StartInstAction}
+import com.dream.mytask.modules.form.FormActionHandler.{StartInstAction}
 import com.dream.mytask.modules.processinst.ProcessInstActionHandler._
 import com.dream.mytask.services.DataModel.ProcessInstanceModel
 import diode.react.ReactPot._
@@ -126,13 +126,6 @@ object ProcessInstComp {
         )
       )
     }
-
-//
-//    val info = PerformTaskAction(
-//      task.activityName, action.name , UUID.fromString(task.id), UUID.fromString(task.pInstId), p.id.get, UUID.fromString(task.participantId)
-//    )
-//
-//    <.button(action.name ,  ^.onClick --> (p.proxy.dispatchCB(info) >> p.c.set(PerformTaskLoc)) )
 
     def setValue(e: ReactEventFromInput) = {
       val id = if (e.target.value.trim.isEmpty) None else Some(e.target.value)
