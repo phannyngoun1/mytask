@@ -23,7 +23,8 @@ object Dashboard {
           <.li(<.a("item", ^.href  := "#", p.c.setOnClick(ItemLoc))),
           <.li(<.a("flow", ^.href  := "#", p.c.setOnClick(FlowLoc))),
           <.li(<.a("instance", ^.href := "#",  p.c.setOnClick(ProcessInstLoc)))
-        )
+        ),
+        <.i(^.className := "fe fe-heart")
       )
     }
   }

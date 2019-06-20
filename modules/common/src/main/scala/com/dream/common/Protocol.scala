@@ -17,6 +17,12 @@ object Protocol {
     def payLoad: Payload
   }
 
+  case class DefaultTaskPerformCmdRequest(
+    taskId: UUID,
+    action: BaseAction,
+    activity: BaseActivity,
+    payLoad: Payload
+  ) extends TaskPerformCmdRequest
 
   trait TaskPerformCmdResponse {
     def activityId: UUID

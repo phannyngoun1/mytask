@@ -14,21 +14,13 @@ object DefaultHandler {
 
   def prop = Props(new TicketHandler)
 
-  sealed trait TicketCmdResponse
 
-  sealed trait TicketCmdRequest extends TaskPerformCmdRequest
-
-  case class PerformDefaultCmdRequest(
-    val taskId: UUID,
-    val action: BaseAction,
-    val activity: BaseActivity,
-    val payLoad: Payload
-  ) extends TicketCmdRequest
 }
 
 class DefaultHandler extends Actor with ActorLogging {
   override def receive: Receive = {
-    case cmd: PerformDefaultCmdRequest =>
+    case cmd: TaskPerformCmdRequest =>
       sender() ! DefaultTaskPerformCmdResponse(UUID.randomUUID())
+    case _  => sender() ! DefaultTaskPerformCmdResponse(UUID.randomUUID())
   }
 }

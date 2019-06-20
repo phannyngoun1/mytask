@@ -7,7 +7,7 @@ import akka.actor.ActorRef
 import akka.pattern.ask
 import akka.stream.scaladsl.Flow
 import akka.util.Timeout
-import com.dream.common.Protocol.{CmdResponseFailed, DefaultTaskPerformCmdResponse}
+import com.dream.common.Protocol.{CmdResponseFailed, DefaultTaskPerformCmdResponse, TaskPerformCmdResponse}
 import com.dream.common.domain.ResponseError
 import com.dream.workflow.domain.TaskDto
 import com.dream.workflow.entity.processinstance.ProcessInstanceProtocol._
@@ -33,7 +33,7 @@ class ProcessInstanceAggregateFlowsImpl(aggregateRef: ActorRef) extends ProcessI
     Flow[Protocol.PerformTaskCmdReq]
       .mapAsync(1)(aggregateRef ? _)
       .map {
-        case DefaultTaskPerformCmdResponse(activityId) => Protocol.PerformTaskSuccess(activityId)
+        case res: TaskPerformCmdResponse => Protocol.PerformTaskSuccess(res.activityId)
         case CmdResponseFailed(message) => Protocol.PerformTaskFailed(ResponseError(message))
       }
 

@@ -1,10 +1,8 @@
 package com.dream.workflow.adaptor.aggregate
 
 import akka.actor.{Actor, ActorContext}
-import com.dream.common.Protocol.{TaskPerformCmdRequest}
+import com.dream.common.Protocol.{DefaultTaskPerformCmdRequest, TaskPerformCmdRequest}
 import com.dream.ticket.TicketHandler
-import com.dream.ticket.TicketHandler.Protocol.PerformTicketCmdRequest
-import com.dream.workflow.adaptor.aggregate.DefaultHandler.PerformDefaultCmdRequest
 import com.dream.workflow.entity.account.AccountEntity
 import com.dream.workflow.entity.account.AccountProtocol.AccountCmdRequest
 import com.dream.workflow.entity.item.ItemEntity
@@ -67,7 +65,7 @@ trait AggregatesLookup {
     cmd.payLoad.payloadCode match {
       case Some(payloadCode) =>
         if(payloadCode.contains("ticket-payload")) {
-          val ticketCmd = PerformTicketCmdRequest(cmd.taskId, cmd.action, cmd.activity, cmd.payLoad)
+          val ticketCmd = DefaultTaskPerformCmdRequest(cmd.taskId, cmd.action, cmd.activity, cmd.payLoad)
           context
             .child(TicketHandler.serviceName)
             .fold(
@@ -75,9 +73,9 @@ trait AggregatesLookup {
             )(_ forward ticketCmd)
         }
 
-      case None =>
+      case _ =>
 
-        val defaultCmd = PerformDefaultCmdRequest(cmd.taskId, cmd.action, cmd.activity, cmd.payLoad)
+        val defaultCmd = DefaultTaskPerformCmdRequest(cmd.taskId, cmd.action, cmd.activity, cmd.payLoad)
         context
           .child(DefaultHandler.serviceName)
           .fold(
