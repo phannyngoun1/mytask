@@ -1,11 +1,7 @@
 package com.dream.workflow.adaptor.aggregate
 
-import java.util.UUID
-
 import akka.actor.{Actor, ActorContext}
-import com.dream.common.Activity
-import com.dream.common.Protocol.{CmdResponseFailed, DefaultTaskPerformCmdResponse, TaskPerformCmdRequest}
-import com.dream.common.domain.ResponseError
+import com.dream.common.Protocol.{TaskPerformCmdRequest}
 import com.dream.ticket.TicketHandler
 import com.dream.ticket.TicketHandler.Protocol.PerformTicketCmdRequest
 import com.dream.workflow.adaptor.aggregate.DefaultHandler.PerformDefaultCmdRequest

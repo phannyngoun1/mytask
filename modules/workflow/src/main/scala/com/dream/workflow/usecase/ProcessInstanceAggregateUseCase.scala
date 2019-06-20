@@ -113,9 +113,11 @@ object ProcessInstanceAggregateUseCase {
     case class CommitActionCmdFailed(error: ResponseError) extends CommitActionCmdRes
 
     case class ReRouteCmdReq(id: UUID, taskId: UUID,newParticipantId: UUID) extends ProcessInstanceCmdRequest
+
     sealed trait ReRouteCmdRes extends ProcessInstanceCmdResponse
 
     case class ReRouteCmdSuccess(id: UUID, taskId: UUID, participantId: UUID) extends ReRouteCmdRes
+
     case class ReRouteCmdFailed(error: ResponseError) extends ReRouteCmdRes
 
     case class ActionCompleted()
@@ -360,10 +362,10 @@ class ProcessInstanceAggregateUseCase(
       CommitActionCmdReq(f.action.pInstId, f.actionPerformedId, f.action.taskId, f.action.participantId, f.curAction.get, f.actionDate, f.action.comment)
     }
 
-    val fi = Flow[(PerformTaskCmdRes, CommitActionCmdRes)].map {
-      case (a: PerformTaskSuccess, b: CommitActionCmdSuccess) =>
-        ActionCompleted()
-    }
+//    val fi = Flow[(PerformTaskCmdRes, CommitActionCmdRes)].map {
+//      case (a: PerformTaskSuccess, b: CommitActionCmdSuccess) =>
+//        ActionCompleted()
+//    }
 
     val newTaskFilter  = Flow[ActionParams].filter(item => item.nexActivity match {
       case Some(_: DoneActivityFlow) =>

@@ -1,13 +1,9 @@
 package com.dream.mytask.modules.ticketform
 
-import java.util.UUID
-
-import com.dream.mytask.AppClient.{FetchTaskLoc, Loc}
-import com.dream.mytask.modules.form.FormActionHandler.FormAction
+import com.dream.mytask.AppClient.{ Loc}
 import com.dream.mytask.modules.ticketform.TicketActionHandler.InitAssignFormAction
 import com.dream.mytask.services.DataModel.FormModel
 import com.dream.mytask.shared.data.ActionInfoJson
-import com.dream.mytask.shared.data.WorkflowData.{AssignTicketPayloadJs, CommentPayloadJs}
 import diode.react._
 import diode.react.ReactPot._
 import japgolly.scalajs.react.extra.router.RouterCtl

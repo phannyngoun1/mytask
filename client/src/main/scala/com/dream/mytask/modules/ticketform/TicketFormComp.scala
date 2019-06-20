@@ -2,7 +2,7 @@ package com.dream.mytask.modules.ticketform
 
 import com.dream.mytask.AppClient.{Loc}
 import com.dream.mytask.modules.form.FormActionHandler.FormAction
-import com.dream.mytask.modules.processinst.ProcessInstActionHandler.{CreateProcessInstAction, InitPInstAction}
+import com.dream.mytask.modules.processinst.ProcessInstActionHandler.{CreateProcessInstAction}
 import com.dream.mytask.services.DataModel.FormModel
 import com.dream.mytask.shared.data.{ActionInfoJson, ActionStartInfoJson, BaseActionInfoJson}
 import com.dream.mytask.shared.data.WorkflowData.{EditTicketPayloadJs}
@@ -67,7 +67,7 @@ object TicketFormComp {
                     accId         = Some(actionInfo.accountId.toString),
                     participantId = Some(actionInfo.participantId.toString),
                     action        = Some(actionInfo.action),
-                    payLoad       = Some(EditTicketPayloadJs(s.test,s.comment))
+                    payLoad       = Some(EditTicketPayloadJs(actionInfo.payloadCode, s.test,s.comment))
                   ))
 
                 case actionInfo: ActionStartInfoJson =>

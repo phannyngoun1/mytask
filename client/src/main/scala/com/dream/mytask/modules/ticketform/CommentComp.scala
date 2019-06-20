@@ -1,10 +1,10 @@
 package com.dream.mytask.modules.ticketform
 
-import com.dream.mytask.AppClient.{FetchTaskLoc, Loc}
+import com.dream.mytask.AppClient.{Loc}
 import com.dream.mytask.modules.form.FormActionHandler.FormAction
 import com.dream.mytask.services.DataModel.FormModel
 import com.dream.mytask.shared.data.ActionInfoJson
-import com.dream.mytask.shared.data.WorkflowData.{TicketStatusPayloadJs, CommentPayloadJs}
+import com.dream.mytask.shared.data.WorkflowData.{ CommentPayloadJs}
 import diode.react._
 import diode.react.ReactPot._
 import japgolly.scalajs.react.extra.router.RouterCtl
@@ -49,7 +49,7 @@ object CommentComp {
               accId         = Some(p.data.accountId.toString),
               participantId = Some(p.data.participantId.toString),
               action        = Some(p.data.action),
-              payLoad       = Some(CommentPayloadJs(s.comment))
+              payLoad       = Some(CommentPayloadJs(p.data.payloadCode, s.comment))
             )))
           ),
           <.button("Cancel")

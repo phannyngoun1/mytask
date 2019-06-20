@@ -1,11 +1,10 @@
 package com.dream.mytask.modules.ticketform
 
-import com.dream.mytask.AppClient.{FetchTaskLoc, Loc}
+import com.dream.mytask.AppClient.{Loc}
 import com.dream.mytask.modules.form.FormActionHandler.FormAction
-import com.dream.mytask.modules.task.TaskActionListHandler.TaskListActions.TakeAction
 import com.dream.mytask.services.DataModel.FormModel
 import com.dream.mytask.shared.data.ActionInfoJson
-import com.dream.mytask.shared.data.WorkflowData.{TicketStatusPayloadJs, EditTicketPayloadJs}
+import com.dream.mytask.shared.data.WorkflowData.{TicketStatusPayloadJs}
 import diode.react._
 import diode.react.ReactPot._
 import japgolly.scalajs.react.extra.router.RouterCtl
@@ -62,7 +61,7 @@ object CloseFormComp {
                 accId         = Some(p.data.accountId.toString),
                 participantId = Some(p.data.participantId.toString),
                 action        = Some(p.data.action),
-                payLoad       = Some(TicketStatusPayloadJs(s.status.get, s.comment))
+                payLoad       = Some(TicketStatusPayloadJs(p.data.payloadCode, s.status.get, s.comment))
               ))),
             <.button("Cancel")
           )

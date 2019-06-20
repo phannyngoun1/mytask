@@ -6,7 +6,7 @@ import com.dream.mytask.shared.data.AccountData.{AccountJson, ParticipantJson}
 import com.dream.mytask.shared.data.ItemData.{ItemInitDataJs, ItemJson}
 import com.dream.mytask.shared.data.ProcessInstanceData.{PInstInitDataInfoJs, PInstInitDataJson, ProcessInstanceJson}
 import com.dream.mytask.shared.data.TaskItemJson
-import com.dream.mytask.shared.data.WorkflowData.{EditTicketPayloadJs, FlowInitDataJs, FlowJson, PayloadJs, WorkflowTemplateJs}
+import com.dream.mytask.shared.data.WorkflowData.{FlowInitDataJs, FlowJson, PayloadJs, WorkflowTemplateJs}
 
 import scala.concurrent.Future
 

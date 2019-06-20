@@ -9,7 +9,6 @@ import com.dream.mytask.services.DataModel.FormModel
 import com.dream.mytask.shared.data.{ActionInfoJson, AssignFormInitDataJs}
 import com.dream.mytask.shared.data.WorkflowData.{AssignTicketPayloadJs}
 import diode.react._
-import diode.react.ReactPot._
 import japgolly.scalajs.react.extra.router.RouterCtl
 import japgolly.scalajs.react.vdom.html_<^._
 import japgolly.scalajs.react._
@@ -65,7 +64,7 @@ object AssignFormDataComp {
               accId         = Some(p.data.accountId.toString),
               participantId = Some(p.data.participantId.toString),
               action        = Some(p.data.action),
-              payLoad       = Some(AssignTicketPayloadJs(s.participantId.get,s.comment))
+              payLoad       = Some(AssignTicketPayloadJs(p.data.payloadCode, s.participantId.get,s.comment))
             )))
           ),
           <.button("Cancel")

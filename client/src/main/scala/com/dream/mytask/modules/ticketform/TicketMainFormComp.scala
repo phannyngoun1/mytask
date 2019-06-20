@@ -1,10 +1,9 @@
 package com.dream.mytask.modules.ticketform
 
-import com.dream.mytask.AppClient.{FetchTaskLoc, Loc}
+import com.dream.mytask.AppClient.{Loc}
 import com.dream.mytask.services.DataModel.FormModel
 import com.dream.mytask.shared.data.{ActionInfoJson, BaseActionInfoJson}
 import diode.react._
-import diode.react.ReactPot._
 import japgolly.scalajs.react.extra.router.RouterCtl
 import japgolly.scalajs.react.vdom.html_<^._
 import japgolly.scalajs.react._

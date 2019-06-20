@@ -10,7 +10,7 @@ import TaskActionListHandler.TaskListActions.{FetchTaskListAction, _}
 import com.dream.mytask.services.AjaxClient
 import com.dream.mytask.services.DataModel.RootModel
 import com.dream.mytask.shared.Api
-import com.dream.mytask.shared.data.WorkflowData.{EditTicketPayloadJs, PayloadJs}
+import com.dream.mytask.shared.data.WorkflowData.{PayloadJs}
 
 import scala.util.{Failure, Try}
 

@@ -30,8 +30,8 @@ trait ReRoutePayload {
 }
 
 case class DefaultPayLoad(
-  payloadCode: Option[String] = None ,
-  value: String
+  value: String,
+  payloadCode: Option[String] = None
 ) extends Payload
 
 trait Params

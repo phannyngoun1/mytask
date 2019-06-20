@@ -8,7 +8,7 @@ object TicketPayloadConverter {
 
   def convertEditTicketPayload(payload: PayloadJs): Payload =
     payload match {
-      case AssignTicketPayloadJs(participantId, _ ) => AssignTicketPayload(participantId)
+      case AssignTicketPayloadJs(payloadCode ,participantId, _ ) => AssignTicketPayload(payloadCode = payloadCode ,participantId)
       case _ => NonePayload()
     }
 
