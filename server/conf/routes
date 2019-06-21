@@ -13,3 +13,9 @@ GET        /versionedAssets/*file        controllers.Assets.versioned(path="/pub
 # Autowire calls
 + nocsrf
 POST    /api/*path                       com.dream.mytask.controllers.Application.autoWireApi(path: String)
+
+
+# Login Page
+GET     /api/secure/signin                          com.dream.mytask.controllers.SecurityController.index
+#POST    /api/secure/signin                          com.dream.mytask.controllers.SecurityController.signIn
+#GET     /api/secure/signout                         com.dream.mytask.controllers.SecurityController.singOut

@@ -46,7 +46,16 @@ object Common {
 
       "de.heikoseeberger" %% "akka-log4j" % "1.6.1",
 
-      "org.slf4j" % "slf4j-api" % "1.7.25"
+      "org.slf4j" % "slf4j-api" % "1.7.25",
+
+      "com.mohiva" %% "play-silhouette" % "5.0.1",
+      "com.mohiva" %% "play-silhouette-password-bcrypt" % "5.0.1",
+      "com.mohiva" %% "play-silhouette-crypto-jca" % "5.0.1",
+      "com.mohiva" %% "play-silhouette-persistence" % "5.0.1",
+      "com.mohiva" %% "play-silhouette-testkit" % "5.0.1" % "test",
+      "com.unboundid" % "unboundid-ldapsdk" % "2.3.8" ,
+      "net.codingwell" %% "scala-guice" % "4.1.1",
+      "com.iheart" %% "ficus" % "1.4.2",
 
 
 

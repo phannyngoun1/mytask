@@ -1,7 +1,7 @@
 package utils.auth
 
 import com.dream.mytask.models.User
-import com.dream.mytask.services.{UserService, UserServiceImpl}
+import com.dream.mytask.services.{SysAuthInfoRepository, UserService, UserServiceImpl}
 import com.google.inject.name.Named
 import com.google.inject.{AbstractModule, Provides}
 import com.mohiva.play.silhouette.api.actions.{SecuredErrorHandler, UnsecuredErrorHandler}
@@ -42,8 +42,8 @@ class SilhouetteModule extends ScalaModule with AkkaGuiceSupport {
   override def configure(): Unit = {
     bind[UserService].to[UserServiceImpl]
     bind[EventBus].toInstance(EventBus())
-    bind[UnsecuredErrorHandler].to[CustomUnsecuredErrorHandler]
-    bind[SecuredErrorHandler].to[CustomSecuredErrorHandler]
+//    bind[UnsecuredErrorHandler].to[CustomUnsecuredErrorHandler]
+//    bind[SecuredErrorHandler].to[CustomSecuredErrorHandler]
     bind[IDGenerator].toInstance(new SecureRandomIDGenerator())
     bind[PasswordHasher].toInstance(new BCryptPasswordHasher)
     bind[FingerprintGenerator].toInstance(new DefaultFingerprintGenerator(false))
@@ -52,7 +52,7 @@ class SilhouetteModule extends ScalaModule with AkkaGuiceSupport {
     bind[java.time.Clock].toInstance(java.time.Clock.systemUTC())
     bind[Silhouette[DefaultEnv]].to[SilhouetteProvider[DefaultEnv]]
     bind[Silhouette[AuthEnv]].to[SilhouetteProvider[AuthEnv]]
-    bind[LdapUtil].to[LdapUtilImpl]
+//    bind[LdapUtil].to[LdapUtilImpl]
     bind[DelegableAuthInfoDAO[PasswordInfo]].to[SysAuthInfoRepository]
   }
 
@@ -103,17 +103,17 @@ class SilhouetteModule extends ScalaModule with AkkaGuiceSupport {
     new CookieAuthenticatorService(config, None, signer, cookieHeaderEncoding, authenticatorEncoder, fingerprintGenerator, idGenerator, clock)
   }
 
-  @Provides
-  def provideJWTAuthenticatorAuthenticatorService(
-                                   @Named("authenticator-crypter") crypter: Crypter,
-                                   idGenerator: IDGenerator,
-                                   configuration: Configuration,
-                                   clock: Clock): AuthenticatorService[JWTAuthenticator] = {
-    val config = configuration.underlying.as[JWTAuthenticatorSettings]("silhouette.JwtAuthenticator")
-    val encoder = new CrypterAuthenticatorEncoder(crypter)
-
-    new JWTAuthenticatorService(config, None, encoder, idGenerator, clock)
-  }
+//  @Provides
+//  def provideJWTAuthenticatorAuthenticatorService(
+//                                   @Named("authenticator-crypter") crypter: Crypter,
+//                                   idGenerator: IDGenerator,
+//                                   configuration: Configuration,
+//                                   clock: Clock): AuthenticatorService[JWTAuthenticator] = {
+//    val config = configuration.underlying.as[JWTAuthenticatorSettings]("silhouette.JwtAuthenticator")
+//    val encoder = new CrypterAuthenticatorEncoder(crypter)
+//
+//    new JWTAuthenticatorService(config, None, encoder, idGenerator, clock)
+//  }
 
   @Provides @Named("authenticator-signer")
   def provideAuthenticatorSigner(configuration: Configuration): Signer = {
@@ -143,14 +143,14 @@ class SilhouetteModule extends ScalaModule with AkkaGuiceSupport {
     PasswordHasherRegistry(new BCryptSha256PasswordHasher(), Seq(new BCryptPasswordHasher()))
   }
 
-  @Provides
-  def provideLdapCredentialsProvider(
-                                  authInfoRepository: AuthInfoRepository,
-                                  passwordHasherRegistry: PasswordHasherRegistry,
-                                  ldapUtil: LdapUtil
-                                ): LdapCredentialsProvider = {
-    new LdapCredentialsProvider(authInfoRepository, passwordHasherRegistry, ldapUtil)
-  }
+//  @Provides
+//  def provideLdapCredentialsProvider(
+//                                  authInfoRepository: AuthInfoRepository,
+//                                  passwordHasherRegistry: PasswordHasherRegistry,
+//                                  ldapUtil: LdapUtil
+//                                ): LdapCredentialsProvider = {
+//    new LdapCredentialsProvider(authInfoRepository, passwordHasherRegistry, ldapUtil)
+//  }
 
   @Provides
   def provideCredentialsProvider(

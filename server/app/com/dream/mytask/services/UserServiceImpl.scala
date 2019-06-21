@@ -7,13 +7,11 @@ import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class UserServiceImpl @Inject()(
-                        implicit ex: ExecutionContext,
-                        //TODO:: Fixed
-                        //userRepository: UserRepository,
+                        implicit ex: ExecutionContext//,
+//                        userRepository: UserRepository,
                       ) extends UserService{
 
   override def retrieve(loginInfo: LoginInfo): Future[Option[User]] = {
-    //TODO:: Fixed - return real user
     Future(None)
   }
 }

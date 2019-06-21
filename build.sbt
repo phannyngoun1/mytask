@@ -44,6 +44,7 @@ lazy val workflow =  (project in file("modules/workflow"))
       "com.github.dnvriend" %% "akka-persistence-jdbc" % "3.4.0",
       "org.iq80.leveldb" % "leveldb" % "0.7",
       "mysql" % "mysql-connector-java" % "5.1.42",
+      "mysql" % "mysql-connector-java" % "5.1.42",
       "org.fusesource.leveldbjni" % "leveldbjni-all" % "1.8"
     )
   )
@@ -60,15 +61,20 @@ lazy val server = (project in file("server"))
     compile in Compile := ((compile in Compile) dependsOn scalaJSPipeline).value,
     libraryDependencies ++= Seq(
       "com.vmunier" %% "scalajs-scripts" % "1.1.2",
+      "net.codingwell" %% "scala-guice" % "4.1.1",
+      "com.iheart" %% "ficus" % "1.4.2",
+
       "com.mohiva" %% "play-silhouette" % "5.0.1",
       "com.mohiva" %% "play-silhouette-password-bcrypt" % "5.0.1",
+
       "com.mohiva" %% "play-silhouette-crypto-jca" % "5.0.1",
       "com.mohiva" %% "play-silhouette-persistence" % "5.0.1",
       "com.mohiva" %% "play-silhouette-testkit" % "5.0.1" % "test",
-      "com.unboundid" % "unboundid-ldapsdk" % "2.3.8" ,
-      "net.codingwell" %% "scala-guice" % "4.1.1",
-      "com.iheart" %% "ficus" % "1.4.2",
+
+      "com.norbitltd" %% "spoiwo" % "1.3.0",
+
       guice,
+      ehcache,
       specs2 % Test
     ),
 
