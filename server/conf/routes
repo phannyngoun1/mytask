@@ -17,5 +17,5 @@ POST    /api/*path                       com.dream.mytask.controllers.Applicatio
 
 # Login Page
 GET     /api/secure/signin                          com.dream.mytask.controllers.SecurityController.index
-#POST    /api/secure/signin                          com.dream.mytask.controllers.SecurityController.signIn
-#GET     /api/secure/signout                         com.dream.mytask.controllers.SecurityController.singOut
+POST    /api/secure/signin                          com.dream.mytask.controllers.SecurityController.signIn
+GET     /api/secure/signout                         com.dream.mytask.controllers.SecurityController.singOut

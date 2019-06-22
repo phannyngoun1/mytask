@@ -1,6 +1,14 @@
-@(message: String)
+@import play.api.mvc.RequestHeader
+@import play.twirl.api.Html
+@import controllers.AssetsFinder
+@import com.dream.mytask.forms.SigninForm.Data
+@import play.api.data.Form
+@import play.api.mvc._
+@import helper._
 
-@main("Sign Ib") {
+@(signinnForm: Form[Data])(implicit request: RequestHeader, flash: Flash,  messages: Messages,  assets: AssetsFinder)
+
+@main("Sign In") {
 
 <div style="margin: auto;margin-top: 150px;width: 350px;height: 262px;text-align: left;">
     <div class="form-signin">
@@ -9,8 +17,8 @@
             <img align="middle" style="background-color: #dfbb71;padding:5px;"/>
         </div>
         <h4 class="form-signin-heading"
-            align="center">VIP CRM</h4>
-        <h6 style="color:#FB942D;text-align:center;margin: 0px 0 20px 0;">Production</h6>
+            align="center">My Tasks</h4>
+        <h6 style="color:#FB942D;text-align:center;margin: 0px 0 20px 0;">Dev</h6>
 
         <div id="sectionSelectorPlaceholder">
             <label for="inputUser" class="sr-only">User Name</label>
@@ -23,7 +31,7 @@
             <button style="margin-top: 10px" class="btn btn-lg btn-primary btn-block" type="submit">Sign in</button>
         </div>
     </div>
-    <div align="center" style="font-size: 12px; margin-top: 20px">&#169; 2019 by <b>Dream team</b>, IT-Group. All rights reserved (Version: 0.0.1)</div>
+    <div align="center" style="font-size: 12px; margin-top: 20px">&#169; 2019 by <b>Dream team</b>, All rights reserved (Version: 0.0.1)</div>
 </div>
 
 }
