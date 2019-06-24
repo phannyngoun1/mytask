@@ -10,6 +10,9 @@
 
 @main("Sign In") {
 
+@helper.form(action = com.dream.mytask.controllers.routes.SecurityController.signIn() ) {
+@helper.CSRF.formField
+
 <div style="margin: auto;margin-top: 150px;width: 350px;height: 262px;text-align: left;">
     <div class="form-signin">
 
@@ -29,9 +32,11 @@
             <input name="password" type="password" id="inputPassword" class="form-control" placeholder="Password" required>
 
             <button style="margin-top: 10px" class="btn btn-lg btn-primary btn-block" type="submit">Sign in</button>
+            <span style="color:red">@flash.get("error").getOrElse("")</span>
+
         </div>
     </div>
     <div align="center" style="font-size: 12px; margin-top: 20px">&#169; 2019 by <b>Dream team</b>, All rights reserved (Version: 0.0.1)</div>
 </div>
 
-}
+}}

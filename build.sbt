@@ -8,7 +8,8 @@ lazy val common =  (project in file("modules/common"))
   .settings(
     libraryDependencies ++= Seq(
       "com.typesafe.akka" %% "akka-actor" % Common.akkaVersion,
-      "com.typesafe.akka" %% "akka-stream" % Common.akkaVersion
+      "com.typesafe.akka" %% "akka-stream" % Common.akkaVersion,
+      "com.github.dnvriend" %% "akka-persistence-jdbc" % "3.4.0",
     )
   )
 
@@ -43,7 +44,6 @@ lazy val workflow =  (project in file("modules/workflow"))
       "ch.qos.logback" % "logback-classic" % "1.2.3",
       "com.github.dnvriend" %% "akka-persistence-jdbc" % "3.4.0",
       "org.iq80.leveldb" % "leveldb" % "0.7",
-      "mysql" % "mysql-connector-java" % "5.1.42",
       "mysql" % "mysql-connector-java" % "5.1.42",
       "org.fusesource.leveldbjni" % "leveldbjni-all" % "1.8"
     )
