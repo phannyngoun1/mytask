@@ -1,6 +1,6 @@
 package com.dream.workflow.adaptor.dao.processinstance
 
-import com.dream.workflow.adaptor.dao.ComponentSupport
+import com.dream.common.dao.ComponentSupport
 
 trait PInstanceComponent  extends ComponentSupport with PInstanceComponentSupport {
 

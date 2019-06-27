@@ -4,7 +4,7 @@ import java.util.UUID
 
 import akka.actor.ActorSystem
 import com.dream.mytask.shared.Api
-import com.dream.mytask.shared.data.WorkflowData.{PayloadJs}
+import com.dream.mytask.shared.data.WorkflowData.PayloadJs
 import com.dream.mytask.shared.data._
 import com.dream.workflow.adaptor.aggregate._
 import com.dream.workflow.adaptor.dao.account.AccountReadModelFlowImpl
@@ -14,18 +14,20 @@ import com.dream.workflow.adaptor.dao.item.ItemReadModelFlowImpl
 import com.dream.workflow.adaptor.dao.participant.ParticipantReadModelFlowImpl
 import com.dream.workflow.adaptor.dao.processinstance.PInstanceReadModelFlowImpl
 import com.dream.workflow.adaptor.journal.JournalReaderImpl
-import com.dream.workflow.usecase.AccountAggregateUseCase.Protocol.{GetAccountCmdReq, GetAccountCmdSuccess, _ }
-import com.dream.workflow.usecase.ProcessInstanceAggregateUseCase.Protocol.{TakeActionCmdRequest}
+import com.dream.workflow.usecase.AccountAggregateUseCase.Protocol.{GetAccountCmdReq, GetAccountCmdSuccess, _}
+import com.dream.workflow.usecase.ProcessInstanceAggregateUseCase.Protocol.TakeActionCmdRequest
 import com.dream.workflow.usecase._
 import com.typesafe.config.ConfigFactory
 import slick.basic.DatabaseConfig
 import slick.jdbc.JdbcProfile
 import TicketPayloadConverter._
+import javax.inject.Inject
+import play.api.db.slick.DatabaseConfigProvider
 
 import scala.concurrent.{ExecutionContext, Future}
 
 
-class ApiService(login: UUID)(implicit val ec: ExecutionContext, implicit val  system: ActorSystem)
+class ApiService  @Inject()(dbConfigProvider: DatabaseConfigProvider)(implicit val ec: ExecutionContext, implicit val  system: ActorSystem)
   extends Api
     with PayloadConverter
     with ItemService
@@ -34,8 +36,9 @@ class ApiService(login: UUID)(implicit val ec: ExecutionContext, implicit val  s
     with PInstanceService
     with TicketService {
 
-  val rootConfig = ConfigFactory.load()
-  val dbConfig = DatabaseConfig.forConfig[JdbcProfile](path = "slickR", rootConfig)
+  private val dbConfig = dbConfigProvider.get[JdbcProfile]
+//  val rootConfig = ConfigFactory.load()
+//  val dbConfig = DatabaseConfig.forConfig[JdbcProfile](path = "slickR", rootConfig)
   val db = dbConfig.db
   val readSideFlow = new ItemReadModelFlowImpl(dbConfig.profile, db)
   val flowReadModelFlow = new FlowReadModelFlowImpl(dbConfig.profile, db)

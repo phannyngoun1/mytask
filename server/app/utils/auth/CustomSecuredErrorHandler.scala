@@ -31,7 +31,7 @@ class CustomSecuredErrorHandler @Inject() (val messagesApi: MessagesApi) extends
       if(request.uri.contains("api/com/naga/crm/shared"))
         Forbidden("Failed to authenticate")
       else
-        Redirect(routes.SecurityController.index())
+        Redirect(routes.Application.login())
 
     )
   }
@@ -46,6 +46,6 @@ class CustomSecuredErrorHandler @Inject() (val messagesApi: MessagesApi) extends
    */
   override def onNotAuthorized(implicit request: RequestHeader) = {
 
-    Future.successful(Redirect(routes.SecurityController.index()).flashing("error" -> "Invalid Credential"))
+    Future.successful(Redirect(routes.Application.login()).flashing("error" -> "Invalid Credential"))
   }
 }

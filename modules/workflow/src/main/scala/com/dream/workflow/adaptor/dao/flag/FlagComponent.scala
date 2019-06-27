@@ -1,6 +1,6 @@
 package com.dream.workflow.adaptor.dao.flag
 
-import com.dream.workflow.adaptor.dao.ComponentSupport
+import com.dream.common.dao.ComponentSupport
 
 trait FlagComponent  extends ComponentSupport with FlagComponentSupport {
 

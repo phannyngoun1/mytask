@@ -9,8 +9,21 @@ import com.dream.mytask.services.ApiService
 import com.dream.mytask.shared.Api
 import javax.inject._
 import play.api.mvc._
+import com.dream.mytask.forms.SigninForm
+import com.dream.mytask.models.User
+import com.dream.mytask.services.UserService
+import com.mohiva.play.silhouette.api._
+import com.mohiva.play.silhouette.api.util.Credentials
+import com.mohiva.play.silhouette.impl.exceptions.IdentityNotFoundException
+import com.mohiva.play.silhouette.impl.providers.CredentialsProvider
+import controllers.AssetsFinder
+import javax.inject._
+import play.api.Configuration
+import play.api.i18n.I18nSupport
+import play.api.mvc._
+import utils.auth.DefaultEnv
 
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 
 object Router extends autowire.Server[ByteBuffer, Pickler, Pickler] {
   override def read[R: Pickler](p: ByteBuffer) = Unpickle[R].fromBytes(p)
@@ -21,15 +34,74 @@ object Router extends autowire.Server[ByteBuffer, Pickler, Pickler] {
 
 @Singleton
 class Application @Inject()(
-
+  credentialsProvider: CredentialsProvider,
+  configuration: Configuration,
+  userService: UserService,
+  silhouette: Silhouette[DefaultEnv],
+  apiService: ApiService,
   cc: ControllerComponents
 
-)(implicit ec: ExecutionContext) extends AbstractController(cc) {
+)(implicit
+  assets: AssetsFinder,
+  ec: ExecutionContext
+) extends AbstractController(cc) with I18nSupport {
 
   implicit val system: ActorSystem = ActorSystem("ticket-system")
 
   val id = UUID.fromString("8dbd6bf8-2f60-4e6e-8e3f-b374e060a940")
-  val apiService = new ApiService(id)
+
+  def login = silhouette.UnsecuredAction.async { implicit request =>
+    Future.successful({
+      Ok(views.html.signin(SigninForm.form))
+    })
+  }
+
+
+
+  def signIn = silhouette.UnsecuredAction.async { implicit request: Request[AnyContent] =>
+
+    SigninForm.form.bindFromRequest.fold(
+      form => Future.successful(BadRequest(views.html.signin(form))),
+      data => {
+        val credentials = Credentials(data.userName, data.password)
+        credentialsProvider.authenticate(credentials).flatMap(loginInfo =>
+          userService.retrieve(loginInfo).flatMap {
+            case Some(user) => handleActiveUser(user, loginInfo)
+            case None => Future.failed(new IdentityNotFoundException("Couldn't find user"))
+          }
+        ).recover {
+          case _ =>
+            Redirect(routes.Application.signIn()).flashing("error" -> "Invalid credential")
+        }
+      }
+    )
+  }
+
+
+  def singOut = silhouette.SecuredAction.async { implicit request =>
+
+    silhouette.env.eventBus.publish(LogoutEvent(request.identity, request))
+    silhouette.env.authenticatorService.discard(request.authenticator,
+      Redirect(routes.Application.login())
+    )
+  }
+
+  private def handleActiveUser(
+    user: User,
+    loginInfo: LoginInfo
+  )(implicit request: RequestHeader): Future[Result] = {
+    val result = Redirect(routes.Application.index())
+    silhouette.env.authenticatorService.create(loginInfo)
+      .flatMap { authenticator =>
+        silhouette.env.eventBus.publish(LoginEvent(user, request))
+        silhouette.env.authenticatorService.init(authenticator).flatMap { cookie => {
+          silhouette.env.authenticatorService.embed (
+            cookie,
+            result
+          )
+        }}
+      }
+  }
 
   def index = Action {
     Ok(views.html.index(""))

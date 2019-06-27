@@ -10,9 +10,9 @@ GET        /assets/*file                 controllers.Assets.at(file)
 GET        /versionedAssets/*file        controllers.Assets.versioned(path="/public", file: Asset)
 
 # Login Page
-GET     /api/secure/signin                          com.dream.mytask.controllers.SecurityController.index
-POST    /api/secure/signin                          com.dream.mytask.controllers.SecurityController.signIn
-GET     /api/secure/signout                         com.dream.mytask.controllers.SecurityController.singOut
+GET     /api/secure/signin                          com.dream.mytask.controllers.Application.login
+POST    /api/secure/signin                          com.dream.mytask.controllers.Application.signIn
+GET     /api/secure/signout                         com.dream.mytask.controllers.Application.singOut
 
 # Autowire calls
 + nocsrf

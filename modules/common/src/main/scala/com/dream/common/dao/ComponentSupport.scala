@@ -2,7 +2,6 @@ package com.dream.common.dao
 
 import java.time.{Instant, ZoneId, ZonedDateTime}
 
-
 trait ComponentSupport {
 
   val profile: slick.jdbc.JdbcProfile

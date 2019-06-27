@@ -46,7 +46,9 @@ object Common {
 
       "de.heikoseeberger" %% "akka-log4j" % "1.6.1",
 
-      "org.slf4j" % "slf4j-api" % "1.7.25"
+      "org.slf4j" % "slf4j-api" % "1.7.25",
+//
+//      "com.typesafe.play" %% "play-slick" % "4.0.2"
 
 //      "com.mohiva" %% "play-silhouette" % "5.0.1",
 //      "com.mohiva" %% "play-silhouette-password-bcrypt" % "5.0.1",

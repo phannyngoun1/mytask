@@ -73,6 +73,7 @@ lazy val server = (project in file("server"))
 
       "com.norbitltd" %% "spoiwo" % "1.3.0",
 
+      "com.typesafe.play" %% "play-slick" % "3.0.0",
       guice,
       ehcache,
       specs2 % Test

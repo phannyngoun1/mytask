@@ -1,6 +1,6 @@
 package com.dream.workflow.adaptor.dao.item
 
-import com.dream.workflow.adaptor.dao.ComponentSupport
+import com.dream.common.dao.ComponentSupport
 
 trait ItemComponent extends ComponentSupport  with ItemComponentSupport {
 
