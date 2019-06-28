@@ -52,7 +52,7 @@ class SilhouetteModule extends ScalaModule with AkkaGuiceSupport {
     bind[java.time.Clock].toInstance(java.time.Clock.systemUTC())
     bind[Silhouette[DefaultEnv]].to[SilhouetteProvider[DefaultEnv]]
 //    bind[Silhouette[AuthEnv]].to[SilhouetteProvider[AuthEnv]]
-    //    bind[LdapUtil].to[LdapUtilImpl]
+    //bind[LdapUtil].to[LdapUtilImpl]
     bind[DelegableAuthInfoDAO[PasswordInfo]].to[SysAuthInfoRepository]
   }
 

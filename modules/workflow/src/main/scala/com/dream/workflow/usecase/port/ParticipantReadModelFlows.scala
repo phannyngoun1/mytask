@@ -8,7 +8,7 @@ import akka.stream.scaladsl.{Flow, Source}
 import org.sisioh.baseunits.scala.time.TimePoint
 import slick.basic.DatabasePublisher
 
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 
 trait ParticipantReadModelFlows {
 
@@ -17,5 +17,7 @@ trait ParticipantReadModelFlows {
   def newItemFlow(implicit ec: ExecutionContext): Flow[(UUID, UUID, UUID, UUID, UUID, Long, TimePoint), Int, NotUsed]
 
   def list: DatabasePublisher[ParticipantDto]
+
+  def getParticipantByUser(id: UUID)(implicit ec: ExecutionContext): Future[Seq[ParticipantDto]]
 
 }

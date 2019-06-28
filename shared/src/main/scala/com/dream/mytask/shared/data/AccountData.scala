@@ -1,6 +1,19 @@
 package com.dream.mytask.shared.data
 
+import java.util.UUID
+
 object AccountData {
+
+
+  case class UserJs(
+    id: UUID,
+    participants: Seq[UUID]
+  )
+
+  case class UserBasicInfoJs(
+    name: String,
+    email: Option[String]
+  )
 
   case class AccountJson(
     id: String,

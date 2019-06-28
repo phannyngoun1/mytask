@@ -5,13 +5,10 @@ import java.util.UUID
 
 import akka.actor.ActorSystem
 import boopickle.Default._
-import com.dream.mytask.services.ApiService
+import com.dream.mytask.services.{ApiService, UserService}
 import com.dream.mytask.shared.Api
-import javax.inject._
-import play.api.mvc._
 import com.dream.mytask.forms.SigninForm
 import com.dream.mytask.models.User
-import com.dream.mytask.services.UserService
 import com.mohiva.play.silhouette.api._
 import com.mohiva.play.silhouette.api.util.Credentials
 import com.mohiva.play.silhouette.impl.exceptions.IdentityNotFoundException
@@ -26,6 +23,7 @@ import utils.auth.DefaultEnv
 import scala.concurrent.{ExecutionContext, Future}
 
 object Router extends autowire.Server[ByteBuffer, Pickler, Pickler] {
+
   override def read[R: Pickler](p: ByteBuffer) = Unpickle[R].fromBytes(p)
 
   override def write[R: Pickler](r: R) = Pickle.intoBytes(r)
@@ -44,7 +42,7 @@ class Application @Inject()(
 )(implicit
   assets: AssetsFinder,
   ec: ExecutionContext
-) extends AbstractController(cc) with I18nSupport {
+) extends AbstractController(cc) with I18nSupport  {
 
   implicit val system: ActorSystem = ActorSystem("ticket-system")
 
@@ -64,12 +62,16 @@ class Application @Inject()(
       form => Future.successful(BadRequest(views.html.signin(form))),
       data => {
         val credentials = Credentials(data.userName, data.password)
-        credentialsProvider.authenticate(credentials).flatMap(loginInfo =>
+        println(s"credentials  ${credentials}")
+        credentialsProvider.authenticate(credentials).flatMap(loginInfo => {
+
+          println(s"loginInfo: ${loginInfo}")
+
           userService.retrieve(loginInfo).flatMap {
             case Some(user) => handleActiveUser(user, loginInfo)
             case None => Future.failed(new IdentityNotFoundException("Couldn't find user"))
           }
-        ).recover {
+        }).recover {
           case _ =>
             Redirect(routes.Application.signIn()).flashing("error" -> "Invalid credential")
         }
@@ -107,12 +109,12 @@ class Application @Inject()(
     Ok(views.html.index(""))
   }
 
-  def autoWireApi(path: String) = Action.async(parse.raw) {
+  def autoWireApi(path: String) = silhouette.SecuredAction.async(parse.raw) {
     implicit request =>
 
       // get the request body as ByteString
       val b = request.body.asBytes(parse.UNLIMITED).get
-
+      apiService.fetchUser(request.identity)
       // call Autowire route
       Router.route[Api](apiService)(
         autowire.Core.Request(path.split("/"), Unpickle[Map[String, ByteBuffer]].fromBytes(b.asByteBuffer))

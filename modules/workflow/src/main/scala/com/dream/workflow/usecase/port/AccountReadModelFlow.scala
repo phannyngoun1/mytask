@@ -8,7 +8,7 @@ import com.dream.workflow.domain.Account.AccountDto
 import org.sisioh.baseunits.scala.time.TimePoint
 import slick.basic.DatabasePublisher
 
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 
 trait AccountReadModelFlow {
 
@@ -16,7 +16,8 @@ trait AccountReadModelFlow {
 
   def newAccountFlow(implicit ec: ExecutionContext): Flow[(UUID, String, String, Long, TimePoint), Int, NotUsed]
 
-
   def list: DatabasePublisher[AccountDto]
+
+  def getAccount(name: String)(implicit ec: ExecutionContext): Future[Option[AccountDto]]
 
 }

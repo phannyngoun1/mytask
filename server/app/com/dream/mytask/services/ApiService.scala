@@ -21,6 +21,7 @@ import com.typesafe.config.ConfigFactory
 import slick.basic.DatabaseConfig
 import slick.jdbc.JdbcProfile
 import TicketPayloadConverter._
+import com.dream.mytask.models.User
 import javax.inject.Inject
 import play.api.db.slick.DatabaseConfigProvider
 
@@ -34,11 +35,11 @@ class ApiService  @Inject()(dbConfigProvider: DatabaseConfigProvider)(implicit v
     with FlowService
     with AccountService
     with PInstanceService
-    with TicketService {
+    with TicketService
+{
+
 
   private val dbConfig = dbConfigProvider.get[JdbcProfile]
-//  val rootConfig = ConfigFactory.load()
-//  val dbConfig = DatabaseConfig.forConfig[JdbcProfile](path = "slickR", rootConfig)
   val db = dbConfig.db
   val readSideFlow = new ItemReadModelFlowImpl(dbConfig.profile, db)
   val flowReadModelFlow = new FlowReadModelFlowImpl(dbConfig.profile, db)
@@ -79,6 +80,13 @@ class ApiService  @Inject()(dbConfigProvider: DatabaseConfigProvider)(implicit v
     system.terminate()
   }
 
+  var curUser: Option[User] = None
+
+  def fetchUser( user: User  ) = {
+    curUser = Some(user)
+  }
+
+
   override def welcomeMessage(smg: String): Future[String] = {
     Future.successful(s"welcome $smg - ${UUID.randomUUID()}")
   }
@@ -93,6 +101,7 @@ class ApiService  @Inject()(dbConfigProvider: DatabaseConfigProvider)(implicit v
   override def getTasks(accId: String): Future[List[TaskItemJson]] = {
 
     val uuId = UUID.fromString(accId)
+
 
     accountUseCase.getTasks(GetTaskLisCmdReq(uuId)) map (_.map { f =>
       TaskItemJson(f.id.toString, f.pInstId.toString, f.participantId.toString, f.activity.name, List.empty ++ f.actions.map(a => ActionItemJson(a._1.name, a._2)))

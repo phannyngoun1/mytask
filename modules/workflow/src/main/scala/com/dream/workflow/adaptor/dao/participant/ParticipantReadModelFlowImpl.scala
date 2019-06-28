@@ -7,9 +7,10 @@ import akka.stream.scaladsl.{Flow, Source}
 import com.dream.workflow.domain.ParticipantDto
 import com.dream.workflow.usecase.port.ParticipantReadModelFlows
 import org.sisioh.baseunits.scala.time.TimePoint
+import slick.basic.DatabasePublisher
 import slick.jdbc.JdbcProfile
 
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 
 class ParticipantReadModelFlowImpl(val profile: JdbcProfile, val db: JdbcProfile#Backend#Database)
   extends ParticipantComponent with ParticipantReadModelFlows{
@@ -43,4 +44,14 @@ class ParticipantReadModelFlowImpl(val profile: JdbcProfile, val db: JdbcProfile
 
   override def list =
     db.stream(ParticipantDao.sortBy(_.createdAt).result).mapResult(item => ParticipantDto(UUID.fromString(item.id), UUID.fromString(item.accountId)))
+
+  def getParticipantByUser(id: UUID)(implicit ec: ExecutionContext) =
+    db.run(
+      ParticipantDao.filter(_.accountId === id.toString)
+        .map(item => (item.id, item.accountId, item.active))
+        .result.map(_.map(item => ParticipantDto(UUID.fromString(item._1), UUID.fromString(item._2))))
+    )
+
+
+
 }

@@ -9,7 +9,7 @@ import com.dream.workflow.usecase.port.AccountReadModelFlow
 import org.sisioh.baseunits.scala.time.TimePoint
 import slick.jdbc.JdbcProfile
 
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 
 class AccountReadModelFlowImpl(val profile: JdbcProfile, val db: JdbcProfile#Backend#Database)
   extends AccountComponent with AccountReadModelFlow {
@@ -33,4 +33,12 @@ class AccountReadModelFlowImpl(val profile: JdbcProfile, val db: JdbcProfile#Bac
 
   override def list =
     db.stream(AccountDao.sortBy(_.createdAt).result).mapResult(item => AccountDto(UUID.fromString(item.id), item.name, item.fullName))
+
+  def getAccount(name: String)(implicit ec: ExecutionContext): Future[Option[AccountDto]] = {
+    db.run(
+      AccountDao.filter(_.name === name)
+        .map(item=> (item.id, item.name, item.fullName))
+        .result.headOption.map( _.map(item => AccountDto(UUID.fromString(item._1), item._2, item._3)))
+    )
+  }
 }
