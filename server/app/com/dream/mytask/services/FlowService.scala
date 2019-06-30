@@ -14,8 +14,6 @@ import scala.concurrent.Future
 
 trait FlowService {  this: ApiService =>
 
-
-
   val  ticketWorkflowTemplate = TicketFlowTemplate.apply()
   val flowTemplateList = List(
     WorkflowTemplateJs(

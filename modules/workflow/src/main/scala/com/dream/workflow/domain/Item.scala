@@ -15,6 +15,15 @@ object Item {
   case class InvalidItemStateError(override val id: Option[UUID] = None) extends ItemError {
     override val message: String = s"Invalid state${id.fold("")(id => s":id = ${id.toString}")}"
   }
+
+  case class ItemDto(
+
+    id: UUID,
+    name: String,
+    desc: Option[String],
+    workflowId: UUID,
+
+  )
 }
 
 case class Item(

@@ -109,12 +109,12 @@ class Application @Inject()(
     Ok(views.html.index(""))
   }
 
-  def autoWireApi(path: String) = silhouette.SecuredAction.async(parse.raw) {
+  def autoWireApi(path: String) = silhouette.UnsecuredAction.async(parse.raw) {
     implicit request =>
 
       // get the request body as ByteString
       val b = request.body.asBytes(parse.UNLIMITED).get
-      apiService.fetchUser(request.identity)
+      //apiService.fetchUser(request.identity)
       // call Autowire route
       Router.route[Api](apiService)(
         autowire.Core.Request(path.split("/"), Unpickle[Map[String, ByteBuffer]].fromBytes(b.asByteBuffer))

@@ -2,9 +2,9 @@ package com.dream.workflow.usecase.port
 
 import java.util.UUID
 
-import com.dream.workflow.domain.ParticipantDto
 import akka.NotUsed
 import akka.stream.scaladsl.{Flow, Source}
+import com.dream.workflow.domain.Participant.ParticipantDto
 import org.sisioh.baseunits.scala.time.TimePoint
 import slick.basic.DatabasePublisher
 

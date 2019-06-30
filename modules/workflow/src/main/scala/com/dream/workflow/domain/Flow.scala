@@ -51,6 +51,11 @@ case class FlowDto(
   isActive: Boolean = true
 )
 
+
+case class FlowTemplateDto(
+
+)
+
 case class Flow(
   id: UUID,
   name: String,

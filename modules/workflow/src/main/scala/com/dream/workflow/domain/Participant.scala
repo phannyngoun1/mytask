@@ -67,10 +67,10 @@ object Participant {
     by: UUID,
     date: Instant
   )
+
+  case class ParticipantDto(id: UUID, accountId: UUID)
 }
 
-
-case class ParticipantDto(id: UUID, accountId: UUID)
 
 case class Participant(
   id: UUID,
