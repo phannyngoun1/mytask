@@ -23,7 +23,9 @@ import net.codingwell.scalaguice.ScalaModule
 import play.api.Configuration
 import play.api.libs.concurrent.AkkaGuiceSupport
 import play.api.libs.ws.WSClient
-import play.api.mvc.CookieHeaderEncoding
+import net.ceedubs.ficus.readers.ValueReader
+import play.api.mvc.{ Cookie, CookieHeaderEncoding }
+import com.typesafe.config.Config
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -38,6 +40,26 @@ trait AuthEnv extends Env {
 }
 
 class SilhouetteModule extends ScalaModule with AkkaGuiceSupport {
+
+
+  /**
+    * A very nested optional reader, to support these cases:
+    * Not set, set None, will use default ('Lax')
+    * Set to null, set Some(None), will use 'No Restriction'
+    * Set to a string value try to match, Some(Option(string))
+    */
+  implicit val sameSiteReader: ValueReader[Option[Option[Cookie.SameSite]]] =
+    (config: Config, path: String) => {
+      if (config.hasPathOrNull(path)) {
+        if (config.getIsNull(path))
+          Some(None)
+        else {
+          Some(Cookie.SameSite.parse(config.getString(path)))
+        }
+      } else {
+        None
+      }
+    }
 
   override def configure(): Unit = {
     bind[UserService].to[UserServiceImpl]
@@ -96,6 +118,7 @@ class SilhouetteModule extends ScalaModule with AkkaGuiceSupport {
     idGenerator: IDGenerator,
     configuration: Configuration,
     clock: Clock): AuthenticatorService[CookieAuthenticator] = {
+
 
     val config = configuration.underlying.as[CookieAuthenticatorSettings]("silhouette.CookieAuthenticator")
     val authenticatorEncoder = new CrypterAuthenticatorEncoder(crypter)

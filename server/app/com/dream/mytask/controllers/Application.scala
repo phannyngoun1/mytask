@@ -109,7 +109,7 @@ class Application @Inject()(
     Ok(views.html.index(""))
   }
 
-  def autoWireApi(path: String) = silhouette.UnsecuredAction.async(parse.raw) {
+  def autoWireApi(path: String) = silhouette.SecuredAction.async(parse.raw) {
     implicit request =>
 
       // get the request body as ByteString
