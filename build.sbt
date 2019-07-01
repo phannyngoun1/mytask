@@ -54,6 +54,7 @@ lazy val workflow =  (project in file("modules/workflow"))
 lazy val server = (project in file("server"))
   .settings(Common.commonSettings)
   .settings(
+    resolvers += "Atlassian Releases" at "https://maven.atlassian.com/public/",
     scalaJSProjects := Seq(client),
     pipelineStages in Assets := Seq(scalaJSPipeline),
     pipelineStages := Seq(digest, gzip),
@@ -64,12 +65,12 @@ lazy val server = (project in file("server"))
       "net.codingwell" %% "scala-guice" % "4.1.1",
       "com.iheart" %% "ficus" % "1.4.2",
 
-      "com.mohiva" %% "play-silhouette" % "5.0.1",
-      "com.mohiva" %% "play-silhouette-password-bcrypt" % "5.0.1",
+      "com.mohiva" %% "play-silhouette" % "6.0.0",
+      "com.mohiva" %% "play-silhouette-password-bcrypt" % "6.0.0",
 
-      "com.mohiva" %% "play-silhouette-crypto-jca" % "5.0.1",
-      "com.mohiva" %% "play-silhouette-persistence" % "5.0.1",
-      "com.mohiva" %% "play-silhouette-testkit" % "5.0.1" % "test",
+      "com.mohiva" %% "play-silhouette-crypto-jca" % "6.0.0",
+      "com.mohiva" %% "play-silhouette-persistence" % "6.0.0",
+      "com.mohiva" %% "play-silhouette-testkit" % "6.0.0" % "test",
 
       "com.norbitltd" %% "spoiwo" % "1.3.0",
 

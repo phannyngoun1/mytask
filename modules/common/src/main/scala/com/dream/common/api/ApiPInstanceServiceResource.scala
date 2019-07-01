@@ -10,5 +10,5 @@ trait ApiPInstanceServiceResource {
 
   def getProcessInstance(id: String): Future[String]
 
-  def getPInstanceList(): Future[List[ProcessInstanceDto]]
+//  def getPInstanceList(): Future[List[ProcessInstanceDto]]
 }
