@@ -1,7 +1,5 @@
 package com.dream.mytask.services
 
-import java.util.UUID
-
 import com.dream.mytask.models.{BasicInfo, User}
 import com.dream.workflow.adaptor.dao.account.AccountReadModelFlowImpl
 import com.dream.workflow.adaptor.dao.participant.ParticipantReadModelFlowImpl

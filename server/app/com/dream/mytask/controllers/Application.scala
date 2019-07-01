@@ -105,7 +105,7 @@ class Application @Inject()(
       }
   }
 
-  def index = Action {
+  def index = silhouette.SecuredAction  {
     Ok(views.html.index(""))
   }
 

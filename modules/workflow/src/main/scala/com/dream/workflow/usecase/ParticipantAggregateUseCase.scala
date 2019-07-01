@@ -8,8 +8,8 @@ import akka.stream.scaladsl._
 import com.dream.common.domain.ResponseError
 import com.dream.common.dto.workflow.Account.ParticipantDto
 import com.dream.workflow.domain.AssignedTask
-import com.dream.workflow.usecase.AccountAggregateUseCase.Protocol.{AssignParticipantCmdReq, AssignParticipantCmdRes, AssignParticipantCmdSuccess}
-import com.dream.workflow.usecase.port.{AccountAggregateFlows, ParticipantAggregateFlows, ParticipantReadModelFlows}
+import com.dream.workflow.usecase.AccountAggregateUseCase.Protocol._
+import com.dream.workflow.usecase.port._
 
 import scala.concurrent.{ExecutionContext, Future, Promise}
 
@@ -86,7 +86,6 @@ class ParticipantAggregateUseCase(
   import ParticipantAggregateUseCase.Protocol._
   import UseCaseSupport._
 
-  //  implicit val mat: Materializer = ActorMaterializer()
 
   val decider: Supervision.Decider = {
     case _ => Supervision.Restart
