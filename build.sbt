@@ -83,7 +83,8 @@ lazy val server = (project in file("server"))
     // Expose as sbt-web assets some files retrieved from the NPM packages of the `client` project
     npmAssets ++= NpmAssets.ofProject(client) { modules =>
       (modules / "bootstrap").allPaths +++
-        (modules / "font-awesome").allPaths
+        (modules / "font-awesome").allPaths +++
+        (modules / "office-ui-fabric-js").allPaths
     }.value,
 
     // Compile the project before generating Eclipse files, so that generated .scala or .class files for views and routes are present
@@ -114,7 +115,8 @@ lazy val client = (project in file("client"))
       "popper.js" -> "^1.14.7",
       "feather-icons" -> "4.22.1",
       "bootstrap" -> "4.3.1",
-      "font-awesome" -> "4.7.0"
+      "font-awesome" -> "4.7.0",
+      "office-ui-fabric-js" -> "1.5.0"
     )
 
   ).enablePlugins(ScalaJSPlugin, ScalaJSWeb, ScalaJSBundlerPlugin).
