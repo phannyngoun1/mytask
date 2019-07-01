@@ -1,5 +1,7 @@
 package com.dream.mytask.modules.account
 
+import java.util.UUID
+
 import diode._
 import diode.data.{Empty, Pot, PotAction}
 import diode.util.RunAfterJS
@@ -21,12 +23,12 @@ object AccountActionHandler {
     override def next(newResult: Pot[List[ParticipantJson]]): FetchParticipantListAction = FetchParticipantListAction(newResult)
   }
 
-  case class FetchAccAction( id: Option[String], potResult: Pot[AccountJson] = Empty) extends PotAction[AccountJson, FetchAccAction] {
-    override def next(newResult: Pot[AccountJson]): FetchAccAction = FetchAccAction(None, newResult)
+  case class FetchAccAction( id: Option[String], potResult: Pot[Option[AccountJson]] = Empty) extends PotAction[Option[AccountJson], FetchAccAction] {
+    override def next(newResult: Pot[Option[AccountJson]]): FetchAccAction = FetchAccAction(None, newResult)
   }
 
-  case class FetchParticipantAction( id: Option[String], potResult: Pot[ParticipantJson] = Empty) extends PotAction[ParticipantJson, FetchParticipantAction] {
-    override def next(newResult: Pot[ParticipantJson]): FetchParticipantAction = FetchParticipantAction(None, newResult)
+  case class FetchParticipantAction( id: Option[String], potResult: Pot[Option[ParticipantJson]] = Empty) extends PotAction[Option[ParticipantJson], FetchParticipantAction] {
+    override def next(newResult: Pot[Option[ParticipantJson]]): FetchParticipantAction = FetchParticipantAction(None, newResult)
   }
 
   case class NewAccAction(name: Option[String], desc: Option[String], potResult: Pot[String] = Empty) extends PotAction[String, NewAccAction] {
@@ -47,7 +49,7 @@ object AccountActionHandler {
 
 }
 
-class FetchAccActionHandler[M](modelRW: ModelRW[M, Pot[AccountJson]]) extends ActionHandler(modelRW) {
+class FetchAccActionHandler[M](modelRW: ModelRW[M, Pot[Option[AccountJson]]]) extends ActionHandler(modelRW) {
 
   import AccountActionHandler._
   implicit val runner = new RunAfterJS
@@ -60,7 +62,7 @@ class FetchAccActionHandler[M](modelRW: ModelRW[M, Pot[AccountJson]]) extends Ac
   }
 }
 
-class FetchParticipantActionHandler[M](modelRW: ModelRW[M, Pot[ParticipantJson]]) extends ActionHandler(modelRW) {
+class FetchParticipantActionHandler[M](modelRW: ModelRW[M, Pot[Option[ParticipantJson]]]) extends ActionHandler(modelRW) {
 
   import AccountActionHandler._
   implicit val runner = new RunAfterJS
@@ -68,7 +70,7 @@ class FetchParticipantActionHandler[M](modelRW: ModelRW[M, Pot[ParticipantJson]]
 
   override protected def handle = {
     case action: FetchParticipantAction=>
-      val updateF = action.effect(AjaxClient[Api].getParticipant(action.id.getOrElse("None")).call())(identity _)
+      val updateF = action.effect(AjaxClient[Api].getParticipant(action.id.map(UUID.fromString).get).call())(identity _)
       action.handleWith(this, updateF)(PotAction.handler())
   }
 }
@@ -113,7 +115,7 @@ class NewAccActionHandler[M](modelRW: ModelRW[M, Pot[String]]) extends ActionHan
       action.handleWith(this, updateF)(PotAction.handler())
 
     case action: NewParticipantAction =>
-      val updateF = action.effect(AjaxClient[Api].newParticipant(action.accountId.get).call())(identity _)
+      val updateF = action.effect(AjaxClient[Api].newParticipant(action.accountId.map(UUID.fromString).get).call())(identity _)
       action.handleWith(this, updateF)(PotAction.handler())
 
   }

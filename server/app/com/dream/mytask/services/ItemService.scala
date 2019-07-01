@@ -9,7 +9,7 @@ import com.dream.workflow.usecase.ItemAggregateUseCase.Protocol._
 
 import scala.concurrent.Future
 
-trait ItemService { this: ApiService =>
+trait ItemService { this: ApiServiceGlobal =>
 
   override def getItemInitData(): Future[ItemInitDataJs] = {
     val data = for {
@@ -27,7 +27,7 @@ trait ItemService { this: ApiService =>
 
   override def getItem(id: String): Future[ItemJson] = {
 
-   itemAggregateUseCase.getItem(GetItemCmdRequest(UUID.fromString(id))).map {
+    getApiServiceResources.getItemAggregateUseCase.getItem(GetItemCmdRequest(UUID.fromString(id))).map {
 
      case res: GetItemCmdSuccess => ItemJson(res.id, res.name, res.desc, None)
      case _ => ItemJson(UUID.randomUUID(), "", None, None)
@@ -36,7 +36,7 @@ trait ItemService { this: ApiService =>
 
   override def newItem(name: String, flowId: String, desc: Option[String]): Future[String] = {
 
-    itemAggregateUseCase.createItem(CreateItemCmdRequest(
+    getApiServiceResources.getItemAggregateUseCase.createItem(CreateItemCmdRequest(
       id = UUID.randomUUID(),
       name = name,
       desc = desc,
@@ -48,7 +48,7 @@ trait ItemService { this: ApiService =>
   }
 
   override def getItemList(): Future[List[ItemJson]] = {
-    itemAggregateUseCase.list.map(_.map(item => ItemJson(item.id, item.name, item.desc, item.initPayload)))
+    getApiServiceResources.getItemAggregateUseCase.list.map(_.map(item => ItemJson(item.id, item.name, item.desc, item.initPayload)))
   }
 
 }

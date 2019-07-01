@@ -105,7 +105,7 @@ object AccountComp {
               <.div(
                 md().renderPending(_ > 500, _ => <.p("Loading...")),
                 md().renderFailed(ex => <.p("Failed to load")),
-                md().render(m => <.p(s"accId: ${m.id}, acc name: ${m.name}, participant: ${m.currParticipantId}"))
+                md().render(m => m.map(acc=> <.p(s"accId: ${acc.id}, acc name: ${acc.name}, participant: ${acc.currParticipantId}")).getOrElse(EmptyVdom))
               )
             })
 
@@ -115,8 +115,8 @@ object AccountComp {
             fetchPPWrapper(md => {
               <.div(
                 md().renderPending(_ > 500, _ => <.p("Loading...")),
-                md().renderFailed(ex => <.p("Failed to load")),
-                md().render(m => <.p(s"participant id: ${m.id}, acc id: ${m.accountId}, tasks: ${m.tasks.mkString(",")}"))
+                md().renderFailed(ex => <.p(s"Failed to load ${ex.getMessage}")),
+                md().render(_.map(m => <.p(s"participant id: ${m.id}, acc id: ${m.accountId}, tasks: ${m.tasks.mkString(",")}") ).getOrElse(EmptyVdom) )
               )
             })
           )

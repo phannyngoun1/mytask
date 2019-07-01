@@ -5,7 +5,7 @@ import java.util.UUID
 
 import akka.actor.ActorSystem
 import boopickle.Default._
-import com.dream.mytask.services.{ApiService, UserService}
+import com.dream.mytask.services.{ApiService, ServiceResources, UserService}
 import com.dream.mytask.shared.Api
 import com.dream.mytask.forms.SigninForm
 import com.dream.mytask.models.User
@@ -36,7 +36,7 @@ class Application @Inject()(
   configuration: Configuration,
   userService: UserService,
   silhouette: Silhouette[DefaultEnv],
-  apiService: ApiService,
+  serviceResources: ServiceResources ,
   cc: ControllerComponents
 
 )(implicit
@@ -114,8 +114,7 @@ class Application @Inject()(
 
       // get the request body as ByteString
       val b = request.body.asBytes(parse.UNLIMITED).get
-      //apiService.fetchUser(request.identity)
-      // call Autowire route
+      val apiService = new ApiService(serviceResources, request.identity )
       Router.route[Api](apiService)(
         autowire.Core.Request(path.split("/"), Unpickle[Map[String, ByteBuffer]].fromBytes(b.asByteBuffer))
       ).map(buffer => {

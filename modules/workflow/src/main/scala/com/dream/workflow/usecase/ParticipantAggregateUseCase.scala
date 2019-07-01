@@ -6,8 +6,8 @@ import akka.actor.ActorSystem
 import akka.stream._
 import akka.stream.scaladsl._
 import com.dream.common.domain.ResponseError
+import com.dream.common.dto.workflow.Account.ParticipantDto
 import com.dream.workflow.domain.AssignedTask
-import com.dream.workflow.domain.Participant.ParticipantDto
 import com.dream.workflow.usecase.AccountAggregateUseCase.Protocol.{AssignParticipantCmdReq, AssignParticipantCmdRes, AssignParticipantCmdSuccess}
 import com.dream.workflow.usecase.port.{AccountAggregateFlows, ParticipantAggregateFlows, ParticipantReadModelFlows}
 

@@ -2,8 +2,8 @@ package com.dream.mytask.models
 
 import java.util.UUID
 
+import com.dream.common.dto.workflow.Account.ParticipantDto
 import com.dream.mytask.shared.Common.Login
-import com.dream.workflow.domain.Participant.ParticipantDto
 import com.mohiva.play.silhouette.api._
 
 case class User(

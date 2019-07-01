@@ -48,15 +48,15 @@ trait Api extends TicketApi{
 
   def getFlowTemplate(id: UUID): Future[WorkflowTemplateJs]
 
-  def getAcc(id: String): Future[AccountJson]
+  def getAcc(id: String): Future[Option[AccountJson]]
 
   def newAccount(name: String, fullName: String, participantId: Option[UUID] = None ): Future[String]
 
   def getAccountList(): Future[List[AccountJson]]
 
-  def getParticipant(id: String): Future[ParticipantJson]
+  def getParticipant(id: UUID): Future[Option[ParticipantJson]]
 
-  def newParticipant(accId: String): Future[String]
+  def newParticipant(accId: UUID): Future[String]
 
   def getParticipantList(): Future[List[ParticipantJson]]
 

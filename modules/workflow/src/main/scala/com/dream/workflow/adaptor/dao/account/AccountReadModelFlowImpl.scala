@@ -4,7 +4,7 @@ import java.util.UUID
 
 import akka.NotUsed
 import akka.stream.scaladsl.{Flow, Source}
-import com.dream.workflow.domain.Account.AccountDto
+import com.dream.common.dto.workflow.Account.AccountDto
 import com.dream.workflow.usecase.port.AccountReadModelFlow
 import org.sisioh.baseunits.scala.time.TimePoint
 import slick.jdbc.JdbcProfile

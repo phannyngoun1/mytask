@@ -5,9 +5,9 @@ import java.util.UUID
 import com.dream.common._
 import com.dream.mytask.shared.data.AccountData.ParticipantJson
 import com.dream.mytask.shared.data.WorkflowData
-import com.dream.mytask.shared.data.WorkflowData.{ActionFlowJs, ActionJs, ActivityFlowJs, ActivityJs, ContributeTypeJs, FlowInitDataJs, FlowJson, WorkflowTemplateJs}
+import com.dream.mytask.shared.data.WorkflowData._
 import com.dream.ticket.flow.TicketFlowTemplate
-import com.dream.workflow.usecase.WorkflowAggregateUseCase.Protocol.{CreateWorkflowCmdRequest, CreateWorkflowCmdSuccess, GetWorkflowCmdRequest, GetWorkflowCmdSuccess}
+import com.dream.workflow.usecase.WorkflowAggregateUseCase.Protocol._
 import com.dream.mytask.converter.FlowConverter._
 
 import scala.concurrent.Future

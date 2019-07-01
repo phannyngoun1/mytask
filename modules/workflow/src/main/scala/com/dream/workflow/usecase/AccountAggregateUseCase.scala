@@ -6,7 +6,7 @@ import akka.NotUsed
 import akka.actor.ActorSystem
 import com.dream.common.{Activity, BaseAction}
 import com.dream.common.domain.ResponseError
-import com.dream.workflow.domain.Account.AccountDto
+import com.dream.common.dto.workflow.Account.AccountDto
 import com.dream.workflow.domain.{AssignedTask, Task, TaskDto}
 import com.dream.workflow.usecase.ParticipantAggregateUseCase.Protocol.{GetAssignedTaskCmdReq, GetAssignedTaskCmdSuccess}
 import com.dream.workflow.usecase.ProcessInstanceAggregateUseCase.Protocol.{GetTaskCmdReq, GetTaskCmdSuccess}

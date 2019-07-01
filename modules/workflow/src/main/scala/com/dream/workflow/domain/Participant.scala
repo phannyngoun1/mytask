@@ -1,11 +1,15 @@
 package com.dream.workflow.domain
 
 import java.time.Instant
+
 import java.util.UUID
 
 import com.dream.common.{BaseAction, BaseActivity}
+
 import com.dream.common.domain.ErrorMessage
-import com.dream.workflow.domain.Participant.{DefaultParticipantError, ParticipantError, ParticipantEvent, TaskAssigned}
+
+import com.dream.workflow.domain.Participant.{DefaultParticipantError, ParticipantError}
+
 import play.api.libs.json.{Format, Json}
 
 case class Team(name: String)
@@ -68,7 +72,6 @@ object Participant {
     date: Instant
   )
 
-  case class ParticipantDto(id: UUID, accountId: UUID)
 }
 
 

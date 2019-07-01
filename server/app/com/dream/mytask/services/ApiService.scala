@@ -3,70 +3,55 @@ package com.dream.mytask.services
 import java.util.UUID
 
 import akka.actor.ActorSystem
+import com.dream.mytask.models.User
+import com.dream.mytask.services.TicketPayloadConverter._
 import com.dream.mytask.shared.Api
 import com.dream.mytask.shared.data.WorkflowData.PayloadJs
 import com.dream.mytask.shared.data._
-import com.dream.workflow.adaptor.aggregate._
-import com.dream.workflow.adaptor.dao.account.AccountReadModelFlowImpl
-import com.dream.workflow.adaptor.dao.flag.FlagReadModelFlowImpl
-import com.dream.workflow.adaptor.dao.flow.FlowReadModelFlowImpl
-import com.dream.workflow.adaptor.dao.item.ItemReadModelFlowImpl
-import com.dream.workflow.adaptor.dao.participant.ParticipantReadModelFlowImpl
-import com.dream.workflow.adaptor.dao.processinstance.PInstanceReadModelFlowImpl
+
 import com.dream.workflow.adaptor.journal.JournalReaderImpl
 import com.dream.workflow.usecase.AccountAggregateUseCase.Protocol.{GetAccountCmdReq, GetAccountCmdSuccess, _}
 import com.dream.workflow.usecase.ProcessInstanceAggregateUseCase.Protocol.TakeActionCmdRequest
 import com.dream.workflow.usecase._
-import com.typesafe.config.ConfigFactory
-import slick.basic.DatabaseConfig
-import slick.jdbc.JdbcProfile
-import TicketPayloadConverter._
-import com.dream.mytask.models.User
-import javax.inject.Inject
-import play.api.db.slick.DatabaseConfigProvider
 
 import scala.concurrent.{ExecutionContext, Future}
 
 
-class ApiService  @Inject()(dbConfigProvider: DatabaseConfigProvider)(implicit val ec: ExecutionContext, implicit val  system: ActorSystem)
-  extends Api
+class ApiService(apiServiceResources: ApiServiceResources, user: User)(implicit val ec: ExecutionContext, implicit val system: ActorSystem)
+  extends ApiServiceGlobal
     with PayloadConverter
     with ItemService
     with FlowService
     with AccountService
     with PInstanceService
-    with TicketService
-{
+    with TicketService {
+
+  val readSideFlow = apiServiceResources.getItemReadModelFlow
+  val flowReadModelFlow = apiServiceResources.getFlowReadModelFlow
+  val accountReadModelFlow = apiServiceResources.getAccountReadModelFlow
+  val participantReadModelFlows = apiServiceResources.getParticipantReadModelFlows
+  val pInstanceReadModelFlows = apiServiceResources.getPInstanceReadModelFlows
+  val flagReadModelFlows = apiServiceResources.getFlagReadModelFlows
 
 
-  private val dbConfig = dbConfigProvider.get[JdbcProfile]
-  val db = dbConfig.db
-  val readSideFlow = new ItemReadModelFlowImpl(dbConfig.profile, db)
-  val flowReadModelFlow = new FlowReadModelFlowImpl(dbConfig.profile, db)
-  val accountReadModelFlow = new AccountReadModelFlowImpl(dbConfig.profile, db)
-  val participantReadModelFlows = new ParticipantReadModelFlowImpl(dbConfig.profile, db)
-  val pInstanceReadModelFlows = new PInstanceReadModelFlowImpl(dbConfig.profile, db)
-  val flagReadModelFlows = new FlagReadModelFlowImpl(dbConfig.profile, db)
+  val localEntityAggregates = apiServiceResources.getLocalEntityAggregates
 
-
-  val localEntityAggregates = system.actorOf(LocalEntityAggregates.props, LocalEntityAggregates.name)
-
-  val itemFlow = new ItemAggregateFlowsImpl(localEntityAggregates)
-  val workFlow = new WorkflowAggregateFlowsImpl(localEntityAggregates)
-  val pInstFlow = new ProcessInstanceAggregateFlowsImpl(localEntityAggregates)
-  val accountFlow = new AccountAggregateFlowsImpl(localEntityAggregates)
-  val participantFlow = new ParticipantAggregateFlowsImpl(localEntityAggregates)
-  val itemAggregateUseCase = new ItemAggregateUseCase(itemFlow, workFlow,readSideFlow )
-  val workflowAggregateUseCase = new WorkflowAggregateUseCase(workFlow, flowReadModelFlow)
-  val processInstance = new ProcessInstanceAggregateUseCase(pInstFlow, workFlow, itemFlow, participantFlow, pInstanceReadModelFlows)
-  val accountUseCase = new AccountAggregateUseCase(accountFlow,participantFlow, pInstFlow, accountReadModelFlow, workFlow )
-  val participantUseCase = new ParticipantAggregateUseCase(participantFlow, accountFlow , participantReadModelFlows)
+  val itemFlow = apiServiceResources.getItemAggregateFlows
+  val workFlow = apiServiceResources.getWorkflowAggregateFlows
+  val pInstFlow = apiServiceResources.getProcessInstanceAggregateFlows
+  val accountFlow = apiServiceResources.getAccountAggregateFlows
+  val participantFlow = apiServiceResources.getParticipantAggregateFlows
+  val itemAggregateUseCase = apiServiceResources.getItemAggregateUseCase
+  val workflowAggregateUseCase = apiServiceResources.getWorkflowAggregateUseCase
+  val processInstance = apiServiceResources.getProcessInstanceAggregateUseCase
+  val accountUseCase = apiServiceResources.getAccountAggregateUseCase
+  val participantUseCase = apiServiceResources.getParticipantAggregateUseCase
 
   val ex = new ReadModelUseCase(
     readSideFlow,
     flowReadModelFlow,
     accountReadModelFlow,
-    participantReadModelFlows ,
+    participantReadModelFlows,
     pInstanceReadModelFlows,
     flagReadModelFlows,
     new JournalReaderImpl(system)
@@ -74,15 +59,10 @@ class ApiService  @Inject()(dbConfigProvider: DatabaseConfigProvider)(implicit v
 
   ex.execute
 
-  sys.addShutdownHook {
-    db.close()
-    db.shutdown
-    system.terminate()
-  }
 
   var curUser: Option[User] = None
 
-  def fetchUser( user: User  ) = {
+  def fetchUser(user: User) = {
     curUser = Some(user)
   }
 
@@ -114,9 +94,10 @@ class ApiService  @Inject()(dbConfigProvider: DatabaseConfigProvider)(implicit v
     val taskIdUUID = UUID.fromString(taskId)
     val participantUUI = UUID.fromString(participantId)
 
-    processInstance.takeAction(TakeActionCmdRequest(pInstIdUUID, taskIdUUID, actionName, participantUUI, convertEditTicketPayload(payload), payload.comment )).map {
+    processInstance.takeAction(TakeActionCmdRequest(pInstIdUUID, taskIdUUID, actionName, participantUUI, convertEditTicketPayload(payload), payload.comment)).map {
       case _ => "Completed"
     }
   }
 
+  override def getApiServiceResources: ApiServiceResources = apiServiceResources
 }

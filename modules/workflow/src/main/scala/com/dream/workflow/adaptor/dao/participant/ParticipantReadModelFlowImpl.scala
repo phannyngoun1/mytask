@@ -4,13 +4,12 @@ import java.util.UUID
 
 import akka.NotUsed
 import akka.stream.scaladsl.{Flow, Source}
-import com.dream.workflow.domain.Participant.ParticipantDto
+import com.dream.common.dto.workflow.Account.ParticipantDto
 import com.dream.workflow.usecase.port.ParticipantReadModelFlows
 import org.sisioh.baseunits.scala.time.TimePoint
-import slick.basic.DatabasePublisher
 import slick.jdbc.JdbcProfile
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.{ExecutionContext}
 
 class ParticipantReadModelFlowImpl(val profile: JdbcProfile, val db: JdbcProfile#Backend#Database)
   extends ParticipantComponent with ParticipantReadModelFlows{
