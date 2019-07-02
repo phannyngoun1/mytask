@@ -91,7 +91,10 @@ object AccountComp {
               $.modState(_.copy(id = value))
             })
           ),
-          <.button("Fetch Account", ^.onClick --> Callback.when(s.id.isDefined)(p.proxy.dispatchCB(FetchAccAction(s.id)))),
+
+          <.button( ^.className := "ms-Button ms-Button--primary",
+            <.span(^.className := "ms-Button-label", "New Participant", ^.onClick --> Callback.when(s.id.isDefined)(p.proxy.dispatchCB(FetchAccAction(s.id))))
+          ),
           <.button("Fetch Participant", ^.onClick --> Callback.when(s.id.isDefined){
 
             println("Fetch Participant click")
@@ -149,8 +152,9 @@ object AccountComp {
             })
           ),
 
-          <.button("New Participant", ^.onClick --> Callback.when(s.accountId.isDefined)(
-            p.proxy.dispatchCB(NewParticipantAction(s.accountId)))
+          <.button( ^.className := "ms-Button ms-Button--primary",
+            <.span(^.className := "ms-Button-label", "New Participant", ^.onClick --> Callback.when(s.accountId.isDefined)(
+              p.proxy.dispatchCB(NewParticipantAction(s.accountId))))
           )
         )
       )

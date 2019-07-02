@@ -1,6 +1,7 @@
 package com.dream.mytask.modules
 
-import com.dream.mytask.AppClient.Loc
+import com.dream.mytask.AppClient.{AccLoc, FlowLoc, ItemLoc, Loc, ProcessInstLoc}
+import com.dream.mytask.modules.common.Components._
 import japgolly.scalajs.react.extra.router.{Resolution, RouterCtl}
 import japgolly.scalajs.react.ScalaComponent
 import japgolly.scalajs.react.component.Scala.BackendScope
@@ -32,7 +33,43 @@ object Main {
           <.div(^.className := "row",
             <.nav(^.className := "col-md-2 d-none d-md-block bg-light sidebar",
               <.div(^.className := "sidebar-sticky",
-                <.ul( ^.className := "nav flex-column" )
+                <.ul( ^.className := "nav flex-column",
+                  <.li( ^.className := "nav-item",
+                    <.a(^.className := "nav-link active", ^.href := "#",
+                      <.span( dataFeather := "home" ),
+                      "Dashboard",
+                      <.span(^.className := "sr-only", "(current)")
+                    )
+                  ),
+                  <.li( ^.className := "nav-item",
+                    <.a(^.className := "nav-link ", ^.href := "#",
+                      p.c.setOnClick(AccLoc),
+                      <.span( dataFeather := "users" ),
+                      "Account"
+                    )
+                  ),
+                  <.li( ^.className := "nav-item",
+                    <.a(^.className := "nav-link", ^.href := "#",
+                      p.c.setOnClick(ItemLoc),
+                      <.span( dataFeather := "list" ),
+                      "Item"
+                    )
+                  ),
+                  <.li( ^.className := "nav-item",
+                    <.a(^.className := "nav-link", ^.href := "#",
+                      p.c.setOnClick(FlowLoc),
+                      <.span( dataFeather := "link-2" ),
+                      "Flow"
+                    )
+                  ),
+                  <.li( ^.className := "nav-item",
+                    <.a(^.className := "nav-link", ^.href := "#",
+                      <.span( dataFeather := "list" ),
+                      p.c.setOnClick(ProcessInstLoc),
+                      "Instance"
+                    )
+                  )
+                )
               )
             ),
             <.main(^.role := "main", ^.className := "col-md-9 ml-sm-auto col-lg-10 px-4",

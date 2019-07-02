@@ -84,7 +84,8 @@ lazy val server = (project in file("server"))
     npmAssets ++= NpmAssets.ofProject(client) { modules =>
       (modules / "bootstrap").allPaths +++
         (modules / "font-awesome").allPaths +++
-        (modules / "office-ui-fabric-js").allPaths
+        (modules / "office-ui-fabric-js").allPaths +++
+        (modules / "feather-icons").allPaths
     }.value,
 
     // Compile the project before generating Eclipse files, so that generated .scala or .class files for views and routes are present
@@ -113,7 +114,7 @@ lazy val client = (project in file("client"))
       "react-dom" -> "16.7.0",
       "jquery" -> "1.9.1",
       "popper.js" -> "^1.14.7",
-      "feather-icons" -> "4.22.1",
+      "feather-icons" -> "4.10.0",
       "bootstrap" -> "4.3.1",
       "font-awesome" -> "4.7.0",
       "office-ui-fabric-js" -> "1.5.0"
